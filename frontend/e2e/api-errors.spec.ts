@@ -10,7 +10,7 @@ import { hitArea, usePersona } from './helpers'
 
 async function fillLogin(page: Page, login: string, password = 'secret-1') {
   await page.getByLabel('Телефон или e-mail').fill(login)
-  await page.getByLabel('Пароль').fill(password)
+  await page.getByLabel('Пароль', { exact: true }).fill(password)
 }
 
 const submit = (page: Page) => page.getByRole('button', { name: 'Войти' }).click()
@@ -24,7 +24,7 @@ test.describe('ошибки API на форме входа', () => {
 
   test('пустые поля: сервер вернул errors[] — текст под полями, красный контур, фокус на первом', async ({ page }) => {
     const login = page.getByLabel('Телефон или e-mail')
-    const password = page.getByLabel('Пароль')
+    const password = page.getByLabel('Пароль', { exact: true })
     await password.fill('secret-1')
     await password.fill('')
     await submit(page)

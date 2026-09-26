@@ -44,6 +44,7 @@ afterEach(() => {
   server.resetHandlers()
   cleanup()
   document.cookie = 'dentify_mock_user=; Max-Age=0; Path=/'
+  document.cookie = 'XSRF-TOKEN=; Max-Age=0; Path=/'
   sessionStorage.clear()
   focusManager.setFocused(undefined)
 })

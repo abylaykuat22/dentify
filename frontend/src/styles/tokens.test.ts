@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cn, THEME_SCALES } from '@/shared/lib/utils'
+import { cn } from '@/shared/lib/utils'
 
 // Текст самой темы: vite.config.ts открывает тестам только этот CSS-файл (как строку).
 import css from './index.css?raw'
@@ -62,6 +62,7 @@ const EXPECTED_RADII: Record<string, string> = {
   block: '20px',
   tile: '18px',
   item: '14px',
+  check: '8px',
 }
 
 const TSHIRT = /^(\d?x?s|sm|md|lg|\d?xl|full|none)$/
@@ -94,27 +95,26 @@ describe('токены «Кресла» в @theme', () => {
 })
 
 describe('cn знает размеры, радиусы и тени «Кресла»', () => {
-  for (const [namespace, known] of [
-    ['text', THEME_SCALES.text],
-    ['radius', THEME_SCALES.radius],
-    ['shadow', THEME_SCALES.shadow],
-  ] as const) {
-    it(`все --${namespace}-* из CSS перечислены в THEME_SCALES`, () => {
-      const custom = themeNames(css, namespace).filter((name) => !TSHIRT.test(name))
-      expect([...custom].sort()).toEqual([...known].sort())
-    })
-  }
+  // Имена берутся из самой темы: таблицы `cn` собираются из index.css (`cn build`, vite.config.ts), и
+  // тест ловит отставшие таблицы — новый токен в теме без пересборки (`pnpm build` или `pnpm dev`).
+  const scale = (namespace: string) => themeNames(css, namespace).filter((name) => !TSHIRT.test(name))
 
-  it.each(THEME_SCALES.text)('text-%s не спорит с цветом текста', (name) => {
+  it('в теме есть свои размеры, радиусы и тени', () => {
+    expect(scale('text')).toContain('body')
+    expect(scale('radius')).toContain('pill')
+    expect(scale('shadow')).toContain('popover')
+  })
+
+  it.each(scale('text'))('text-%s не спорит с цветом текста', (name) => {
     expect(cn(`text-${name}`, 'text-ink')).toBe(`text-${name} text-ink`)
     expect(cn('text-body-sm', `text-${name}`)).toBe(`text-${name}`)
   })
 
-  it.each(THEME_SCALES.radius)('rounded-%s вытесняет rounded-lg', (name) => {
+  it.each(scale('radius'))('rounded-%s вытесняет rounded-lg', (name) => {
     expect(cn('rounded-lg', `rounded-${name}`)).toBe(`rounded-${name}`)
   })
 
-  it.each(THEME_SCALES.shadow)('shadow-%s вытесняет shadow-md', (name) => {
+  it.each(scale('shadow'))('shadow-%s вытесняет shadow-md', (name) => {
     expect(cn('shadow-md', `shadow-${name}`)).toBe(`shadow-${name}`)
   })
 })

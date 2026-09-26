@@ -58,29 +58,33 @@ describe('контракт /api/v1/me (api/openapi.json)', () => {
     expect(screen.queryByText(t('common:states.error.title'))).not.toBeInTheDocument()
     // Прав в спеке ещё нет — меню не прячет разделы (закроет сервер ответом 403).
     expect(within(screen.getByRole('navigation', { name: t('shell:nav.label') })).getAllByRole('link')).toHaveLength(6)
-    expect(screen.getByRole('link', { name: t('shell:nav.profileOf', { name: 'Тестова Жанна' }) })).toHaveTextContent('ТЖ')
+    expect(screen.getByRole('button', { name: t('shell:nav.userMenu', { name: 'Тестова Жанна' }) })).toHaveTextContent('ТЖ')
     expect(screen.getByText(/Желтоксан, 1/)).toBeInTheDocument()
   })
 
-  it('клиника не выбрана (context = null) — выбор клиники, затем тот же адрес', async () => {
+  it('клиника не выбрана (context = null) — выбор клиники и филиала, затем тот же адрес', async () => {
     const { router } = renderApp('/patients?filter=children', 'multi')
 
-    await screen.findByRole('heading', { level: 1, name: t('auth:selectClinic.heading') })
+    const heading = await screen.findByRole('heading', { level: 1 })
+    expect(heading).toHaveTextContent(t('auth:selectClinic.heading'))
+    expect(heading).toHaveTextContent(t('auth:selectClinic.greeting', { name: 'Оспанова Мадина' }))
     expect(router.state.location.pathname).toBe('/select-clinic')
     expect(router.state.location.search).toEqual({ returnTo: '/patients?filter=children' })
-    // Отключённое членство выбрать нельзя — его нет среди карточек.
+    // Карточка — филиал активного членства (у «Ақ Тіс» их два); отключённое членство выбрать нельзя.
     const list = screen.getByRole('list', { name: t('auth:selectClinic.listLabel') })
-    expect(within(list).getAllByRole('button')).toHaveLength(2)
+    expect(within(list).getAllByRole('button')).toHaveLength(3)
 
     await userEvent.click(
-      screen.getByRole('button', { name: t('auth:selectClinic.choose', { clinic: 'Жас Тіс', city: 'Астана' }) }),
+      screen.getByRole('button', {
+        name: t('auth:selectClinic.choose', { branch: 'Сатпаева, 30', clinic: 'Ақ Тіс', city: 'Алматы' }),
+      }),
     )
 
     await screen.findByRole('heading', { level: 1, name: t('shell:nav.patients') })
     expect(router.state.location.pathname).toBe('/patients')
     expect(router.state.location.search).toEqual({ filter: 'children' })
-    // Единственный филиал клиники сервер выбрал сам — он в контексте шапки.
-    expect(screen.getByText(/Тұран, 24/)).toBeInTheDocument()
+    // Выбранный филиал — в контексте шапки.
+    expect(screen.getByText(/Сатпаева, 30/)).toBeInTheDocument()
   })
 
   it('на выборе клиники с уже выбранной клиникой — сразу на returnTo', async () => {
@@ -108,6 +112,97 @@ describe('контракт /api/v1/me (api/openapi.json)', () => {
     await screen.findByRole('heading', { level: 1, name: t('shell:nav.clinic') })
     expect(router.state.location.pathname).toBe('/clinic/prices')
     expect(sent).toEqual({ login: 'owner@example.kz', password: 'secret-1', rememberMe: true })
+  })
+})
+
+describe('вход и выход (T-IAM-03)', () => {
+  it('вход с CSRF: нет cookie — сначала GET /auth/csrf, токен — в заголовке; логин — как набран', async () => {
+    const seen: string[] = []
+    let token: string | null = null
+    let sent: Partial<LoginRequest> | undefined
+    server.events.on('request:start', ({ request }) => {
+      seen.push(`${request.method} ${new URL(request.url).pathname}`)
+    })
+    server.use(
+      http.post('/api/v1/auth/login', async ({ request }) => {
+        token = request.headers.get('X-XSRF-TOKEN')
+        sent = (await request.json()) as LoginRequest
+        return HttpResponse.json(owner)
+      }),
+    )
+    const { router } = renderApp('/login', 'none')
+
+    await userEvent.type(await screen.findByLabelText(t('auth:login.login')), '87071234567')
+    await userEvent.type(screen.getByLabelText(t('auth:login.password')), 'secret-1')
+    await userEvent.click(screen.getByRole('checkbox', { name: t('auth:login.remember') }))
+    await userEvent.click(screen.getByRole('button', { name: t('auth:login.submit') }))
+
+    await screen.findByRole('heading', { level: 1, name: t('shell:nav.schedule') })
+    server.events.removeAllListeners()
+    expect(router.state.location.pathname).toBe('/schedule')
+    expect(seen.indexOf('GET /api/v1/auth/csrf')).toBeGreaterThanOrEqual(0)
+    expect(seen.indexOf('GET /api/v1/auth/csrf')).toBeLessThan(seen.indexOf('POST /api/v1/auth/login'))
+    expect(token).toBe('mock-xsrf-token')
+    // Номер уходит, как его набрали (маска — только вид), «Запомнить» сняли.
+    expect(sent).toEqual({ login: '87071234567', password: 'secret-1', rememberMe: false })
+  })
+
+  it('несколько клиник — после входа сразу выбор клиники с тем же returnTo', async () => {
+    const { router } = renderApp('/login?returnTo=%2Finventory%2Fitems', 'none')
+
+    await userEvent.type(await screen.findByLabelText(t('auth:login.login')), 'multi@example.kz')
+    await userEvent.type(screen.getByLabelText(t('auth:login.password')), 'secret-1')
+    await userEvent.click(screen.getByRole('button', { name: t('auth:login.submit') }))
+
+    await screen.findByRole('list', { name: t('auth:selectClinic.listLabel') })
+    expect(router.state.location.pathname).toBe('/select-clinic')
+    expect(router.state.location.search).toEqual({ returnTo: '/inventory/items' })
+  })
+
+  it.each([
+    ['disabled@example.kz', 'errors:iam.login.access-disabled'],
+    ['offline@example.kz', 'errors:ui.network'],
+  ] as const)('%s — текст ошибки по коду: %s', async (login, key) => {
+    renderApp('/login', 'none')
+
+    await userEvent.type(await screen.findByLabelText(t('auth:login.login')), login)
+    await userEvent.type(screen.getByLabelText(t('auth:login.password')), 'secret-1')
+    await userEvent.click(screen.getByRole('button', { name: t('auth:login.submit') }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(t(key))
+  })
+
+  it('«Выйти» в меню пользователя сайдбара: POST /auth/logout, вход, кэш очищен', async () => {
+    let loggedOut = false
+    server.use(
+      http.post('/api/v1/auth/logout', () => {
+        loggedOut = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    const { router, queryClient } = renderApp('/patients', 'owner')
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: t('shell:nav.userMenu', { name: owner.account.fullName }) }),
+    )
+    await userEvent.click(await screen.findByRole('menuitem', { name: t('shell:more.logout') }))
+
+    await screen.findByRole('heading', { level: 1, name: t('auth:login.title') })
+    expect(loggedOut).toBe(true)
+    expect(router.state.location.pathname).toBe('/login')
+    expect(queryClient.getQueryCache().getAll()).toEqual([])
+  })
+
+  it('меню пользователя: «Мой профиль» ведёт в профиль', async () => {
+    const { router } = renderApp('/schedule', 'owner')
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: t('shell:nav.userMenu', { name: owner.account.fullName }) }),
+    )
+    await userEvent.click(await screen.findByRole('menuitem', { name: t('shell:nav.profile') }))
+
+    await screen.findByRole('heading', { level: 1, name: t('shell:nav.profile') })
+    expect(router.state.location.pathname).toBe('/profile')
   })
 })
 
@@ -196,6 +291,19 @@ describe('гарды', () => {
 
     await screen.findByRole('heading', { name: t('auth:login.title') })
     expect(router.state.location.search).toEqual({})
+  })
+
+  it('returnTo=/login отбрасывается: после входа — в кабинет, а не снова на форму входа', async () => {
+    const { router } = renderApp('/login?returnTo=%2Flogin%3FreturnTo%3D%252Fclinic', 'none')
+
+    await screen.findByRole('heading', { name: t('auth:login.title') })
+    expect(router.state.location.search).toEqual({})
+    await userEvent.type(screen.getByLabelText(t('auth:login.login')), 'owner@example.kz')
+    await userEvent.type(screen.getByLabelText(t('auth:login.password')), 'secret-1')
+    await userEvent.click(screen.getByRole('button', { name: t('auth:login.submit') }))
+
+    await screen.findByRole('heading', { level: 1, name: t('shell:nav.schedule') })
+    expect(router.state.location.pathname).toBe('/schedule')
   })
 
   it('ассистент не видит «Клиника» и «Доступы», владелец видит все 6', async () => {

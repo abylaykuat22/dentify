@@ -126,6 +126,9 @@
   --text-logo: 1.5rem; /* 24 — логотип «dentify.» в сайдбаре и шапке (все макеты) */
   --text-logo--line-height: 1.2;
   --text-logo--letter-spacing: -0.02em;
+  --text-tagline: 2rem; /* 32 — слоган панели «О сервисе» (макеты Vhod, Parol, Priglashenie) */
+  --text-tagline--line-height: 1.2;
+  --text-tagline--letter-spacing: -0.02em;
   --text-logo-lg: 3rem; /* 48 — логотип экрана входа (макеты Vhod, Parol) */
   --text-logo-lg--line-height: 1;
   --text-logo-lg--letter-spacing: -0.03em;
@@ -143,6 +146,8 @@
   --radius-item: 14px;
   /* Подсветка совпадения в списке (макет Poisk): лёгкое скругление метки внутри строки. */
   --radius-mark: 4px;
+  /* Галочка 24 px (макет Vhod: «Запомнить это устройство»). */
+  --radius-check: 8px;
 
   /* --- Тени (макеты): выпадающее, окно, лёгкий подъём выбранного сегмента --- */
   --shadow-popover: 0 12px 30px rgb(14 34 48 / 0.16), 0 0 0 1px #e3e7ec;

@@ -5,7 +5,7 @@ import { isDesktop } from './helpers'
 // PLT-17: на 768–1023 px сайдбар свёрнут до иконок, у каждой иконки подсказка с названием,
 // подсказка доступна и с клавиатуры (Base UI Tooltip открывается по фокусу).
 const SECTIONS = ['Расписание', 'Пациенты', 'Врачи', 'Склад', 'Клиника', 'Доступы']
-const PROFILE = 'Мой профиль: Алиева Динара'
+const PROFILE = 'Меню пользователя: Алиева Динара'
 
 test.describe('сайдбар на 768–1023 px', () => {
   test.skip(() => !isDesktop(), 'проверяется на десктопном проекте с уменьшенным окном')
@@ -40,7 +40,7 @@ test.describe('сайдбар на 768–1023 px', () => {
       await expect(page.locator(anyTooltip)).toHaveCount(0)
     }
 
-    const profile = page.getByRole('link', { name: PROFILE })
+    const profile = page.getByRole('button', { name: PROFILE })
     await profile.hover()
     await expect(tooltip).toHaveText(PROFILE)
 
@@ -48,7 +48,7 @@ test.describe('сайдбар на 768–1023 px', () => {
     await expect(tooltip).toHaveCount(0)
   })
 
-  test('подсказки открываются с клавиатуры: Tab по всем иконкам и карточке профиля', async ({ page }) => {
+  test('подсказки открываются с клавиатуры: Tab по всем иконкам и карточке пользователя', async ({ page }) => {
     await page.goto('/schedule')
 
     const nav = page.getByRole('navigation', { name: 'Разделы' })
@@ -64,21 +64,32 @@ test.describe('сайдбар на 768–1023 px', () => {
     }
 
     await page.keyboard.press('Tab')
-    const profile = page.getByRole('link', { name: PROFILE })
+    const profile = page.getByRole('button', { name: PROFILE })
     await expect(profile).toBeFocused()
     await expect(tooltip).toHaveText(PROFILE)
 
+    // Enter открывает меню пользователя (справа от свёрнутого сайдбара), фокус — на первом пункте.
+    await page.keyboard.press('Enter')
+    const item = page.getByRole('menuitem', { name: 'Мой профиль' })
+    await expect(item).toBeFocused()
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/\/profile$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Мой профиль')
   })
 
-  test('клик по карточке пользователя открывает «Мой профиль»', async ({ page }) => {
+  test('клик по карточке пользователя открывает меню: «Мой профиль» и «Выйти»', async ({ page }) => {
     await page.goto('/inventory')
 
-    await page.getByRole('link', { name: PROFILE }).click()
+    await page.getByRole('button', { name: PROFILE }).click()
+    const menu = page.getByRole('menu')
+    await expect(menu.getByRole('menuitem')).toHaveText(['Мой профиль', 'Выйти'])
+    // Меню — справа от свёрнутого сайдбара, в окне.
+    const sidebar = await page.locator('[data-sidebar-card]').boundingBox()
+    const popup = await menu.boundingBox()
+    expect(popup?.x ?? 0).toBeGreaterThanOrEqual((sidebar?.x ?? 0) + (sidebar?.width ?? 0))
+    await menu.getByRole('menuitem', { name: 'Мой профиль' }).click()
     await expect(page).toHaveURL(/\/profile$/)
     await expect(page).toHaveTitle('Мой профиль — Dentify')
-    await expect(page.getByRole('link', { name: PROFILE })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('button', { name: PROFILE })).toHaveAttribute('data-current', 'true')
   })
 })

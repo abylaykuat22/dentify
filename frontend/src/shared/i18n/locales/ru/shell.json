@@ -9,7 +9,7 @@
     "clinic": "Клиника",
     "access": "Доступы",
     "profile": "Мой профиль",
-    "profileOf": "Мой профиль: {name}",
+    "userMenu": "Меню пользователя: {name}",
     "more": "Ещё"
   },
   "header": {

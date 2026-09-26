@@ -15,7 +15,7 @@ test.describe('каркас (desktop)', () => {
     await expect(nav.getByRole('link')).toHaveCount(6)
     await expect(nav.getByRole('link', { name: 'Расписание' })).toHaveAttribute('aria-current', 'page')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Расписание')
-    await expect(page.getByRole('link', { name: 'Мой профиль' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Меню пользователя: Алиева Динара' })).toBeVisible()
   })
 
   test('вкладки-пилюли переключают маршрут и заголовок', async ({ page }) => {

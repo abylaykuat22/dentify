@@ -12,7 +12,7 @@ async function refocusTab(page: Page) {
 
 async function signIn(page: Page, login: string) {
   await page.getByLabel('Телефон или e-mail').fill(login)
-  await page.getByLabel('Пароль').fill('secret-1')
+  await page.getByLabel('Пароль', { exact: true }).fill('secret-1')
   await page.getByRole('button', { name: 'Войти' }).click()
 }
 
@@ -30,7 +30,7 @@ test.describe('сессия и /api/v1/me', () => {
     // Прав в спеке ещё нет — разделы не прячутся (закроет сервер ответом 403).
     await expect(page.getByRole('navigation', { name: 'Разделы' }).getByRole('link')).toHaveCount(6)
     // ФИО и инициалы — с сервера; роли нет — строки роли в карточке нет.
-    const profile = page.getByRole('link', { name: 'Мой профиль: Касымова Жанар' })
+    const profile = page.getByRole('button', { name: 'Меню пользователя: Касымова Жанар' })
     await expect(profile).toHaveText('КЖКасымова Жанар')
     await expect(page.locator('[data-shell-header]')).toContainText('Абая, 150')
   })
@@ -44,17 +44,17 @@ test.describe('сессия и /api/v1/me', () => {
 
     await expect(page).toHaveURL(/\/select-clinic\?returnTo=%2Fpatients%3Ffilter%3Dchildren$/)
     await expect(page).toHaveTitle('Выбор клиники — Dentify')
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Где работаем сегодня?')
-    const clinics = page.getByRole('list', { name: 'Клиники' }).getByRole('button')
-    // Отключённое членство («Сау Тіс») выбрать нельзя — карточек две.
-    await expect(clinics).toHaveCount(2)
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Где работаем сегодня?')
+    const places = page.getByRole('list', { name: 'Клиники и филиалы' }).getByRole('button')
+    // Карточка — филиал активного членства; отключённое членство («Сау Тіс») выбрать нельзя.
+    await expect(places).toHaveCount(3)
     await expect(page.getByText('Сау Тіс')).toHaveCount(0)
 
-    await page.getByRole('button', { name: 'Войти в клинику Жас Тіс, Астана' }).click()
+    await page.getByRole('button', { name: 'Войти: Тұран, 24 — Жас Тіс, Астана' }).click()
 
     await expect(page).toHaveURL(/\/patients\?filter=children$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Пациенты')
-    // Единственный филиал выбранной клиники — в контексте шапки.
+    // Выбранный филиал — в контексте шапки.
     await expect(page.locator('[data-shell-header]')).toContainText('Тұран, 24')
   })
 
@@ -63,7 +63,7 @@ test.describe('сессия и /api/v1/me', () => {
     await page.goto('/schedule')
 
     await expect(page).toHaveURL(/\/select-clinic\?returnTo=%2Fschedule$/)
-    await expect(page.getByRole('list', { name: 'Клиники' }).getByRole('button')).toHaveCount(2)
+    await expect(page.getByRole('list', { name: 'Клиники и филиалы' }).getByRole('button')).toHaveCount(3)
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
     expect(overflow).toBeLessThanOrEqual(0)
 

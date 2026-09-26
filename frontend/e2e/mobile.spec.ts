@@ -85,7 +85,7 @@ test.describe('телефон 390×844: нижняя панель', () => {
   test('пункты по правам: ассистент видит склад, врач двух клиник — нет', async ({ page, context }) => {
     await usePersona(context, 'multi')
     await page.goto('/select-clinic')
-    await page.getByRole('button', { name: /Ақ Тіс/ }).click()
+    await page.getByRole('button', { name: 'Войти: Абая, 150 — Ақ Тіс, Алматы' }).click()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Расписание')
 
     await expect(bottomNav(page).getByRole('link')).toHaveText(['Расписание', 'Пациенты', '', 'Ещё'])

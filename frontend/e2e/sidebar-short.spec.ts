@@ -7,7 +7,7 @@ import { hitArea, horizontalOverflow, isDesktop, swipe } from './helpers'
 // прокручивается сама — каждый раздел и карточка «Мой профиль» достижимы колесом, клавиатурой и
 // прокруткой; активный пункт виден сразу; страница вбок не прокручивается.
 const SECTIONS = ['Расписание', 'Пациенты', 'Врачи', 'Склад', 'Клиника', 'Доступы']
-const PROFILE = 'Мой профиль: Алиева Динара'
+const PROFILE = 'Меню пользователя: Алиева Динара'
 
 const SIZES = [
   { width: 844, height: 390, note: 'iPhone боком, иконки' },
@@ -19,7 +19,7 @@ const SIZES = [
 /** Пункты сайдбара по порядку: разделы, затем карточка профиля. */
 function sidebarItems(page: Page): Locator[] {
   const nav = page.getByRole('navigation', { name: 'Разделы' })
-  return [...SECTIONS.map((name) => nav.getByRole('link', { name })), page.getByRole('link', { name: PROFILE })]
+  return [...SECTIONS.map((name) => nav.getByRole('link', { name })), page.getByRole('button', { name: PROFILE })]
 }
 
 /**
@@ -75,8 +75,9 @@ test.describe('сайдбар в низком окне', () => {
         expect(await fullyVisible(item), (await item.getAttribute('aria-label')) ?? '').toBe(true)
       }
 
-      // Последний пункт действительно нажимается.
-      await page.getByRole('link', { name: PROFILE }).click()
+      // Последний пункт действительно нажимается: меню пользователя → «Мой профиль».
+      await page.getByRole('button', { name: PROFILE }).click()
+      await page.getByRole('menuitem', { name: 'Мой профиль' }).click()
       await expect(page).toHaveURL(/\/profile$/)
       await expect(page.getByRole('heading', { level: 1 })).toHaveText('Мой профиль')
     })
@@ -86,7 +87,7 @@ test.describe('сайдбар в низком окне', () => {
     await page.setViewportSize({ width: 844, height: 390 })
     await openSchedule(page)
 
-    const profile = page.getByRole('link', { name: PROFILE })
+    const profile = page.getByRole('button', { name: PROFILE })
     expect(await fullyVisible(profile)).toBe(false)
 
     const card = page.locator('[data-sidebar-card]')
@@ -113,15 +114,20 @@ test.describe('сайдбар в низком окне', () => {
     }
   })
 
-  for (const { path, name } of [
-    { path: '/access', name: 'Доступы' },
-    { path: '/profile', name: PROFILE },
+  for (const { path, item: active } of [
+    {
+      path: '/access',
+      item: (page: Page) => page.locator('[data-sidebar]').getByRole('link', { name: 'Доступы', exact: true }),
+    },
+    // Карточка пользователя — кнопка меню, «активна» на «Моём профиле» (`data-current`).
+    { path: '/profile', item: (page: Page) => page.locator('[data-sidebar]').getByRole('button', { name: PROFILE }) },
   ]) {
     test(`844×390: открыт ${path} — активный пункт виден сразу, без прокрутки руками`, async ({ page }) => {
       await page.setViewportSize({ width: 844, height: 390 })
       await page.goto(path)
-      const item = page.locator('[data-sidebar]').getByRole('link', { name, exact: true })
-      await expect(item).toHaveAttribute('aria-current', 'page')
+      const item = active(page)
+      if (path === '/profile') await expect(item).toHaveAttribute('data-current', 'true')
+      else await expect(item).toHaveAttribute('aria-current', 'page')
       await expect.poll(() => fullyVisible(item)).toBe(true)
     })
   }
@@ -157,7 +163,7 @@ test.describe('телефон боком: сайдбар пальцем', () => 
     }
     expect(small).toEqual([])
 
-    const profile = page.getByRole('link', { name: PROFILE })
+    const profile = page.getByRole('button', { name: PROFILE })
     expect(await fullyVisible(profile)).toBe(false)
 
     const box = await page.locator('[data-sidebar-card]').boundingBox()

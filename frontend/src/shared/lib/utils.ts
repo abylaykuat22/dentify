@@ -1,27 +1,12 @@
-import { createCn } from 'cn/config'
+import { createCn } from 'cn/engine'
+
+import tables from './cn-tables'
 
 /**
- * Имена размеров шрифта, радиусов и теней из `@theme` «Кресла» (src/styles/index.css).
- * `cn` должен их знать: иначе `text-body` он примет за цвет и выкинет рядом с `text-ink`,
- * а `rounded-lg rounded-pill` оставит оба класса. Совпадение с CSS проверяет
- * src/styles/tokens.test.ts.
+ * `cn` — официальная утилита shadcn (замена clsx + tailwind-merge) на таблицах, собранных заранее
+ * под тему «Кресла» (`cn build`, плагин в vite.config.ts → `cn-tables.ts`, не править руками): она знает
+ * размеры, радиусы и тени из `@theme` (src/styles/index.css) — `text-body` не примет за цвет и не выкинет
+ * рядом с `text-ink`, из `rounded-lg rounded-pill` оставит последний. Это сторожит
+ * src/styles/tokens.test.ts. Импортировать только отсюда: пакет `cn` напрямую запрещён ESLint'ом.
  */
-export const THEME_SCALES = {
-  text: ['h1', 'h2', 'h3', 'h4', 'body-lg', 'body', 'body-sm', 'label', 'caption', 'nav', 'logo', 'logo-lg', 'avatar-lg'],
-  radius: ['pill', 'window', 'card', 'block', 'tile', 'row', 'item', 'mark'],
-  shadow: ['popover', 'window', 'raised', 'field', 'dock', 'lamp-glow'],
-} as const
-
-/**
- * `cn` — официальная утилита shadcn (замена clsx + tailwind-merge), настроенная на тему
- * «Кресла». Импортировать только отсюда: пакет `cn` напрямую запрещён ESLint'ом.
- */
-export const cn = createCn({
-  extend: {
-    theme: {
-      text: [...THEME_SCALES.text],
-      radius: [...THEME_SCALES.radius],
-      shadow: [...THEME_SCALES.shadow],
-    },
-  },
-})
+export const cn = createCn(tables)

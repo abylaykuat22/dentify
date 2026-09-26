@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { i18n } from '@/shared/i18n'
 
 import { getMe, terminateAccountSession } from './generated/endpoints/account/account'
-import { login } from './generated/endpoints/auth/auth'
+import { login, logout } from './generated/endpoints/auth/auth'
 import { ApiError, codeForStatus, http, NetworkError, onUnauthorized, parseProblem, parseRetryAfter } from './http'
 import { owner } from './mocks/fixtures'
 import { server } from './mocks/node'
@@ -100,6 +100,26 @@ describe('CSRF', () => {
 
     server.use(route.delete(SESSION, () => problems.forbidden('error.csrf', 'Страница устарела.')))
     await expect(terminateAccountSession('s-1')).rejects.toMatchObject({ status: 403, code: 'error.csrf' })
+  })
+
+  it('вход меняет токен (мок входа — как AccountSignIn.signIn): следующее изменение несёт новый', async () => {
+    const sent: string[] = []
+    const listener = ({ request }: { request: Request }) => {
+      if (request.method === 'POST') sent.push(`${new URL(request.url).pathname} ${request.headers.get('X-XSRF-TOKEN')}`)
+    }
+    server.events.on('request:start', listener)
+    try {
+      await login({ login: 'owner@example.kz', password: 'secret', rememberMe: true })
+      await logout()
+    } finally {
+      server.events.removeListener('request:start', listener)
+    }
+
+    // До входа — токен из GET /auth/csrf, после входа — новый из ответа входа (не прежний).
+    expect(sent).toEqual([
+      '/api/v1/auth/login mock-xsrf-token',
+      expect.stringMatching(/^\/api\/v1\/auth\/logout mock-xsrf-token-\d+$/),
+    ])
   })
 })
 

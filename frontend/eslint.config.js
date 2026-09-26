@@ -14,6 +14,7 @@ export default defineConfig([
     'test-results',
     'public/mockServiceWorker.js',
     'src/app/routeTree.gen.ts',
+    'src/shared/lib/cn-tables.ts',
     'src/shared/api/generated/**',
     'src/shared/api/.generated-check/**',
   ]),

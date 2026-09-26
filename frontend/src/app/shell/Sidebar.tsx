@@ -8,11 +8,13 @@ import { useMediaQuery } from '@/shared/lib/useMediaQuery'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
 
 import { homePathFor, type Section, visibleSections } from './sections'
+import { UserMenu } from './UserMenu'
 
 /**
  * Плавающий сайдбар «лагуна» по макету Raspisanie-Den: 6 разделов, активный — «лампа»,
- * внизу пользователь → «Мой профиль». На 768–1023 px сворачивается до иконок с подсказками
- * (Base UI Tooltip открывается и с клавиатуры, по фокусу). Ниже 768 px скрыт — там BottomNav.
+ * внизу карточка пользователя — меню «Мой профиль» и «Выйти» (`UserMenu`). На 768–1023 px
+ * сворачивается до иконок с подсказками (Base UI Tooltip открывается и с клавиатуры, по фокусу).
+ * Ниже 768 px скрыт — там BottomNav.
  *
  * Окно ниже сайдбара (телефон боком — это вид планшета, масштаб 200 %: PLT-21) — карточка не
  * вылезает за окно, а прокручивается сама (колесо, палец, Tab), страница при этом не двигается;
@@ -54,31 +56,7 @@ export function Sidebar({ user }: { user: CurrentUser }) {
           ))}
         </nav>
 
-        <Tooltip disabled={!collapsed}>
-          <TooltipTrigger
-            render={<Link to="/profile" activeOptions={{ includeSearch: false }} />}
-            aria-label={t('shell:nav.profileOf', { name: user.fullName })}
-            data-sidebar-item
-            className="mt-auto flex items-center gap-2.5 rounded-row bg-white/8 p-2 text-left hover:bg-white/15 data-[status=active]:bg-white/20 lg:p-3"
-          >
-            <span
-              aria-hidden="true"
-              className="flex size-9.5 shrink-0 items-center justify-center rounded-full bg-lamp font-heading text-body-sm font-bold text-ink"
-            >
-              {user.initials}
-            </span>
-            <span aria-hidden="true" className="hidden min-w-0 lg:block">
-              {/* ФИО целиком (фамилия первой, как в API), 14 px, как в макете Raspisanie-Den: обычное имя
-                  встаёт в строку, длинное переносится на вторую, а не обрезается. */}
-              <span className="line-clamp-2 text-body-sm font-bold break-words">{user.fullName}</span>
-              {/* Роли в /me пока нет (TODO в shared/api/me.ts) — тогда строка не выводится. */}
-              {user.role ? (
-                <span className="block truncate text-caption text-lagoon-muted">{user.role.name}</span>
-              ) : null}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent side="right">{t('shell:nav.profileOf', { name: user.fullName })}</TooltipContent>
-        </Tooltip>
+        <UserMenu user={user} collapsed={collapsed} />
       </div>
     </aside>
   )
@@ -105,8 +83,11 @@ function SidebarItem({ section, collapsed }: { section: Section; collapsed: bool
   )
 }
 
-/** Активный пункт: раздел или карточка профиля (логотип — ссылка на домашний раздел — не в счёт). */
-const ACTIVE_ITEM = '[data-sidebar-item][aria-current="page"]'
+/**
+ * Активный пункт: раздел или карточка пользователя на «Моём профиле» (`data-current`: это кнопка меню,
+ * а не ссылка). Логотип — ссылка на домашний раздел — не в счёт.
+ */
+const ACTIVE_ITEM = '[data-sidebar-item][aria-current="page"], [data-sidebar-item][data-current]'
 
 /**
  * Показать активный пункт целиком в прокручиваемой карточке сайдбара — только внутри неё, от

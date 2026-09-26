@@ -58,25 +58,30 @@ test.describe('доступность каркаса (PLT-21)', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Вход' })).toBeVisible()
     expect(await seriousViolations(page)).toEqual([])
 
-    // С клавиатуры: Tab по полям и кнопке — у каждого контур 3 px «лагуна».
+    // С клавиатуры: Tab по полям, «глазу», галочке и кнопке — у каждого контур 3 px «лагуна» (у поля
+    // пароля с «глазом» контур рисует пилюля-группа).
     const login = page.getByLabel('Телефон или e-mail')
-    const password = page.getByLabel('Пароль')
+    const password = page.getByLabel('Пароль', { exact: true })
+    const eye = page.getByRole('button', { name: 'Показать пароль' })
+    const remember = page.getByRole('checkbox', { name: 'Запомнить это устройство' })
     const submit = page.getByRole('button', { name: 'Войти' })
     await login.focus()
     await expect.poll(() => outline(login)).toBe(FOCUS_LAGOON)
     await page.keyboard.press('Tab')
     await expect(password).toBeFocused()
-    await expect.poll(() => outline(password)).toBe(FOCUS_LAGOON)
-    await page.keyboard.press('Tab')
-    await expect(submit).toBeFocused()
-    await expect.poll(() => outline(submit)).toBe(FOCUS_LAGOON)
+    await expect.poll(() => outline(page.locator('[data-slot="password-field"] [data-slot="input-group"]'))).toBe(FOCUS_LAGOON)
+    for (const next of [eye, remember, submit]) {
+      await page.keyboard.press('Tab')
+      await expect(next).toBeFocused()
+      await expect.poll(() => outline(next)).toBe(FOCUS_LAGOON)
+    }
   })
 
   test('выбор клиники: axe чистый, у карточки клиники — общий контур фокуса', async ({ page, context }) => {
     await usePersona(context, 'multi')
     await page.goto('/select-clinic')
-    const cards = page.getByRole('list', { name: 'Клиники' }).getByRole('button')
-    await expect(cards).toHaveCount(2)
+    const cards = page.getByRole('list', { name: 'Клиники и филиалы' }).getByRole('button')
+    await expect(cards).toHaveCount(3)
     expect(await seriousViolations(page)).toEqual([])
 
     await page.keyboard.press('Tab')

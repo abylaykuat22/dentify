@@ -90,14 +90,20 @@ const RESERVED_SPACING: Record<string, string[]> = {
   'shared/ui/combobox.tsx': ['pr-9'], // место под галочку выбранного пункта
   'shared/ui/dialog.tsx': ['pr-14'], // заголовок окна не заходит под крестик
   'shared/ui/StateScreen.tsx': ['py-16'], // воздух пустого состояния — два шага по 32
+  // Экраны без входа — геометрия макетов Vhod и VyborKliniki: поля панели «О сервисе» 44 · 48 · 36,
+  // карточка формы и поля страницы выбора клиники 40, запас под низ формы на телефоне 40.
+  'modules/access/AuthLayout.tsx': ['px-12', 'pt-11', 'pb-9', 'pb-10'],
+  'modules/access/LoginPage.tsx': ['p-10'],
+  'modules/access/AuthStubPage.tsx': ['p-10'],
+  'modules/access/SelectClinicPage.tsx': ['px-10', 'py-10'],
 }
 
 describe('отступы — шкала «Кресла» (PLT-20)', () => {
-  it('в shared/ui и каркасе — только шаги шкалы и макетов', () => {
+  it('в shared/ui, каркасе и экранах (modules) — только шаги шкалы и макетов', () => {
     const spacing = /^-?(p[xytrblse]?|m[xytrblse]?|gap(-[xy])?|space-[xy])-(.+)$/
     const allowed = new Set([...RHYTHM_STEPS, ...COMPONENT_STEPS])
     const offenders: string[] = []
-    for (const { file, text } of sources('shared/ui', 'app/shell')) {
+    for (const { file, text } of sources(...SCREEN_DIRS)) {
       for (const token of classTokens(text)) {
         const name = utility(token)
         const match = spacing.exec(name)

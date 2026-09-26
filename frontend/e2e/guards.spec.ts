@@ -11,7 +11,7 @@ test.describe('гарды', () => {
     await expect(page).toHaveTitle('Вход — Dentify')
 
     await page.getByLabel('Телефон или e-mail').fill('owner@example.kz')
-    await page.getByLabel('Пароль').fill('secret-1')
+    await page.getByLabel('Пароль', { exact: true }).fill('secret-1')
     await page.getByRole('button', { name: 'Войти' }).click()
 
     await expect(page).toHaveURL(/\/clinic\/prices$/)
@@ -27,7 +27,7 @@ test.describe('гарды', () => {
 
     await expect(page).toHaveURL(/\/login$/)
     await page.getByLabel('Телефон или e-mail').fill('owner@example.kz')
-    await page.getByLabel('Пароль').fill('secret-1')
+    await page.getByLabel('Пароль', { exact: true }).fill('secret-1')
     await page.getByRole('button', { name: 'Войти' }).click()
 
     await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/schedule$/)
@@ -39,7 +39,7 @@ test.describe('гарды', () => {
     await page.goto('/login')
 
     await page.getByLabel('Телефон или e-mail').fill('owner@example.kz')
-    await page.getByLabel('Пароль').fill('wrong')
+    await page.getByLabel('Пароль', { exact: true }).fill('wrong')
     await page.getByRole('button', { name: 'Войти' }).click()
 
     await expect(page.getByRole('alert')).toHaveText('Неверный телефон, e-mail или пароль')

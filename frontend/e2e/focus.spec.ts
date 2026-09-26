@@ -12,7 +12,7 @@ test.describe('фокус не теряется', () => {
     await page.goto('/login')
 
     await page.getByLabel('Телефон или e-mail').fill('owner@example.kz')
-    await page.getByLabel('Пароль').fill('wrong')
+    await page.getByLabel('Пароль', { exact: true }).fill('wrong')
     const submit = page.getByRole('button', { name: 'Войти' })
     await submit.focus()
     await page.keyboard.press('Enter')
@@ -32,7 +32,7 @@ test.describe('фокус не теряется', () => {
     await usePersona(context, 'none')
     await page.goto('/login')
     await page.getByLabel('Телефон или e-mail').fill('owner@example.kz')
-    await page.getByLabel('Пароль').fill('wrong')
+    await page.getByLabel('Пароль', { exact: true }).fill('wrong')
     await page.getByRole('button', { name: 'Войти' }).focus()
 
     // Состояние кнопки в момент запроса, до ответа сервера: каждое изменение её атрибутов.

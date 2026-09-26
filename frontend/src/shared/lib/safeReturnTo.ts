@@ -16,3 +16,22 @@ export function isSameOriginPath(value: string, origin: string = window.location
     return false
   }
 }
+
+/** Экран входа: возврат на него после входа снова показал бы форму входа, а не кабинет. */
+const LOGIN_PATH = '/login'
+
+/**
+ * Адрес возврата после входа и выбора клиники (`returnTo`): путь этого же приложения
+ * (`isSameOriginPath`) и не сам вход — ссылка `/login?returnTo=%2Flogin` после входа открыла бы форму
+ * входа снова. Регистр и «/» в конце роутер не различает, поэтому и здесь они не в счёт.
+ */
+export function isReturnPath(value: string, origin: string = window.location.origin): boolean {
+  if (!isSameOriginPath(value, origin)) return false
+  let path = new URL(value, origin).pathname
+  try {
+    path = decodeURIComponent(path)
+  } catch {
+    return false
+  }
+  return path.toLowerCase().replace(/\/+$/, '') !== LOGIN_PATH
+}

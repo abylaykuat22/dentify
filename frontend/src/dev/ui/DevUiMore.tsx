@@ -6,12 +6,15 @@ import { cn } from '@/shared/lib/utils'
 import { AlertStrip } from '@/shared/ui/alert-strip'
 import { Avatar } from '@/shared/ui/avatar'
 import { Button } from '@/shared/ui/button'
+import { Checkbox } from '@/shared/ui/checkbox'
 import { ChipGroup } from '@/shared/ui/chip'
 import { Combo } from '@/shared/ui/combo'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Field, FieldError, FieldLabel } from '@/shared/ui/field'
 import { IinInput, Input, PhoneInput } from '@/shared/ui/input'
+import { LoginField } from '@/shared/ui/login-field'
 import { Panel } from '@/shared/ui/panel'
+import { PasswordField } from '@/shared/ui/password-field'
 import { SearchField } from '@/shared/ui/search-field'
 import { Segmented } from '@/shared/ui/segmented'
 import { StateScreen } from '@/shared/ui/StateScreen'
@@ -49,6 +52,7 @@ export function DevUiMore() {
         <div className="flex min-w-0 flex-col gap-5">
           <ButtonSizesCard />
           <InputsCard />
+          <AuthFieldsCard />
           <TabsOverflowCard />
           <PeopleCard />
           <OverlaysCard />
@@ -264,6 +268,59 @@ function InputsCard() {
           shortcut={t('inputs.shortcut')}
         />
       </div>
+    </DemoCard>
+  )
+}
+
+/**
+ * Поля экранов без входа (T-IAM-03): «Телефон или e-mail» с маской +7, пароль с «глазом» — для входа,
+ * в режиме «новый пароль» (индикатор zxcvbn-ts и чек-лист; пустой — чтобы эталон скриншота не зависел
+ * от загрузки словарей) и «повтор» (сверка с новым), галочка «Запомнить».
+ */
+function AuthFieldsCard() {
+  const { t } = useTranslation('devUi')
+  const [login, setLogin] = useState('')
+  const [password, setPassword] = useState('')
+  const [repeat, setRepeat] = useState('')
+  const [remember, setRemember] = useState(true)
+  return (
+    <DemoCard title={t('authFields.title')}>
+      <span className="text-label font-semibold text-graphite">{t('authFields.loginNote')}</span>
+      <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
+        <Field>
+          <FieldLabel htmlFor="ds-login">{t('authFields.login')}</FieldLabel>
+          <LoginField id="ds-login" value={login} onChange={setLogin} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="ds-password">{t('authFields.password')}</FieldLabel>
+          <PasswordField id="ds-password" defaultValue="aktis2026" />
+        </Field>
+        <Field className="md:col-span-2">
+          <FieldLabel htmlFor="ds-new-password">{t('authFields.newPassword')}</FieldLabel>
+          <PasswordField
+            id="ds-new-password"
+            mode="new"
+            value={password}
+            onChange={(event) => setPassword(event.currentTarget.value)}
+            userInputs={[login]}
+          />
+          <span className="text-caption font-semibold text-graphite">{t('authFields.newPasswordNote')}</span>
+        </Field>
+        <Field className="md:col-span-2">
+          <FieldLabel htmlFor="ds-repeat-password">{t('authFields.repeatPassword')}</FieldLabel>
+          <PasswordField
+            id="ds-repeat-password"
+            mode="repeat"
+            original={password}
+            value={repeat}
+            onChange={(event) => setRepeat(event.currentTarget.value)}
+          />
+        </Field>
+      </div>
+      <label className="flex min-h-11 w-fit cursor-pointer items-center gap-3 text-body font-bold">
+        <Checkbox checked={remember} onCheckedChange={setRemember} />
+        {t('authFields.remember')}
+      </label>
     </DemoCard>
   )
 }

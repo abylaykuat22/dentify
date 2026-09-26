@@ -51,7 +51,7 @@ describe('ICU-склонения (i18next-icu)', () => {
 
   it('подстановки — {name}, а не {{name}}', () => {
     expect(t('common:ui.steps.progress', { current: 2, total: 3 })).toBe('Шаг 2 из 3')
-    expect(t('shell:nav.profileOf', { name: 'Тестова Алия' })).toBe('Мой профиль: Тестова Алия')
+    expect(t('shell:nav.userMenu', { name: 'Тестова Алия' })).toBe('Меню пользователя: Тестова Алия')
   })
 
   it('нет ключа — ошибка в консоли dev-сборки и тестов, на экране — сам ключ', () => {

@@ -95,14 +95,24 @@ export const plain: MeResponse = {
 export const personas: Record<Exclude<MockPersona, 'none'>, MeWithRights> = { owner, assistant, multi, plain }
 
 /**
- * Ответ /me с клиникой сессии, как её выбрал бы сервер: из активного членства; филиал — если он
- * единственный (SelectContextRequest.branchId = null). Нет такого членства — undefined.
+ * Ответ /me с клиникой сессии, как её выбрал бы сервер (`AccountContexts.select`): из активного
+ * членства; филиал — указанный, если он среди доступных членству, без него — единственный доступный
+ * (`SelectContextRequest.branchId = null`), иначе не выбран. Нет такого членства или филиала — undefined.
  */
-export function withContext(me: MeWithRights, clinicId: string | undefined): MeWithRights | undefined {
+export function withContext(
+  me: MeWithRights,
+  clinicId: string | undefined,
+  branchId: string | null = null,
+): MeWithRights | undefined {
   const membership: MeMembership | undefined = me.memberships.find(
     (item) => item.clinic.id === clinicId && item.status === 'ACTIVE',
   )
   if (!membership) return undefined
-  const branch = membership.branches.length === 1 ? (membership.branches[0] ?? null) : null
-  return { ...me, context: { clinic: membership.clinic, branch } }
+  const branch = branchId
+    ? membership.branches.find((item) => item.id === branchId)
+    : membership.branches.length === 1
+      ? membership.branches[0]
+      : null
+  if (branch === undefined) return undefined
+  return { ...me, context: { clinic: membership.clinic, branch: branch ?? null } }
 }
