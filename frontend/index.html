@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- viewport-fit=cover — safe-area iOS (env(safe-area-inset-*)); interactive-widget — экранная
+         клавиатура уменьшает окно, и нижний лист с полем поднимается над ней (PLT-18). -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="color-scheme" content="light" />
+    <!-- Шрифты первого экрана — сразу, вместе с JS, а не после отрисовки (PLT-22, LCP): заголовки
+         Rubik 600 и текст Nunito Sans 600/800, кириллица. Остальные веса и подмножества браузер
+         берёт по unicode-range из @font-face (src/styles/fonts.ts). Путь — тот же файл, что в
+         @font-face: Vite выпускает его один раз с хэшем. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource/rubik/files/rubik-cyrillic-600-normal.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource/nunito-sans/files/nunito-sans-cyrillic-600-normal.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource/nunito-sans/files/nunito-sans-cyrillic-800-normal.woff2" />
+    <title>Dentify</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

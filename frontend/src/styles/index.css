@@ -1,0 +1,273 @@
+/* Классы ищутся только в исходниках (src/, путь — от этого файла), а не во всём frontend: иначе
+   любой посторонний файл в папке (отчёты проверок, .txt/.tsv) — повод для @tailwindcss/vite
+   перезагрузить все открытые страницы dev-сервера, и e2e падают на «Execution context was destroyed». */
+@import "tailwindcss" source("../");
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* `typing:` — пока фокус в текстовом поле (на телефоне открыта экранная клавиатура). Нижняя
+   панель телефона в этот момент прячется (`typing:hidden`): не закрывает поле и не съедает
+   высоту над клавиатурой (PLT-18). */
+@custom-variant typing (&:where(body:has(:is(input:not([type='checkbox'], [type='radio'], [type='button'], [type='submit'], [type='reset']), textarea, select, [contenteditable='true']):focus) *));
+
+/*
+ * Дизайн-система «Кресло» — токены (wiki/projects/dentify/design-directions.md, § Токены;
+ * визуальный эталон — design/mockups/Sistema.dc.html). Один набор для десктопа и телефона.
+ * Витрина всех токенов и компонентов — /dev/ui (только dev-сборка).
+ *
+ * Палитра Tailwind по умолчанию выключена (`--color-*: initial`): в разметке доступны только
+ * цвета «Кресла» — `bg-red-500` просто не сгенерируется. Пары текст/фон проверяет юнит-тест
+ * контраста (src/styles/contrast.test.ts, WCAG AA ≥ 4.5:1). Новые имена размеров, радиусов и
+ * теней должны знать `cn` (src/shared/lib/utils.ts) — это тоже проверяет тест.
+ *
+ * Отступы — стандартная шкала Tailwind (`--spacing: 0.25rem`): ритм между блоками — шаги
+ * 1 · 2 · 3 · 4 · 6 · 8 = 4 · 8 · 12 · 16 · 24 · 32 px (`p-4`, `gap-3`, `mt-6` …), внутри
+ * компонентов — шаги макетов 0.5 · 1.5 · 2.5 · 3.5 · 4.5 · 5 · 5.5 · 7 (2–28 px). Размеры
+ * шрифта, радиусы и отступы мимо этого набора ловит src/styles/usage.test.ts.
+ */
+@theme {
+  --color-*: initial;
+  --spacing: 0.25rem;
+}
+
+@theme static {
+  /* --- Основные --- */
+  --color-white: #ffffff;
+  --color-lagoon: #0f3d4c; /* навигация, акцентный текст, фокус */
+  --color-lagoon-deep: #082a35; /* тень/нажатие на лагуне (макет Raspisanie-Den) */
+  --color-lagoon-muted: #d5e3e7; /* текст пунктов меню на лагуне (макет Raspisanie-Den) */
+  --color-lamp: #ffcb47; /* главное действие — одна жёлтая кнопка на область */
+  --color-lamp-deep: #f2b51e; /* линия «сейчас», точки, нажатая лампа */
+  --color-ink: #0e2230; /* текст, выбранное состояние */
+  --color-graphite: #5a6772; /* подписи */
+  --color-slate: #4f5b66; /* метки полей */
+  --color-fog: #eceff3; /* фон страницы, контейнер пилюль */
+  --color-mist: #f5f7f9; /* внутренние блоки */
+  --color-line: #e1e6ec; /* контур 2 px */
+  --color-danger: #9b1c12; /* опасное: текст и заливка */
+  --color-danger-bg: #fde2e0; /* опасное: фон плашки */
+  --color-danger-line: #f3b9b2; /* контур «Не пришёл» (макет Sistema) */
+  --color-highlight: #fff4d1; /* активная строка списка */
+  --color-match: #ffe9a8; /* подсветка совпадения в поиске */
+  --color-past: #f0f2f5; /* прошедшие записи */
+
+  /* --- Цвета врачей: фон записи / текст / насыщенный (аватар, точка) --- */
+  --color-doctor-teal: #d3eeee;
+  --color-doctor-teal-fg: #0b4a4f;
+  --color-doctor-teal-strong: #1a8388; /* макет — #1B8A8F, затемнён до 4.5:1 с белым (PLT-21) */
+  --color-doctor-coral: #fce0da;
+  --color-doctor-coral-fg: #7a2a1e;
+  --color-doctor-coral-strong: #ca4d3a; /* макет — #D2503C, затемнён до 4.5:1 с белым */
+  --color-doctor-lilac: #e5e1fb;
+  --color-doctor-lilac-fg: #3d3394;
+  --color-doctor-lilac-strong: #5b4fd1;
+  --color-doctor-sky: #ddebfb;
+  --color-doctor-sky-fg: #1e4f8f;
+  --color-doctor-sky-strong: #2f6fd1;
+  --color-doctor-sand: #f6eacb;
+  --color-doctor-sand-fg: #6b4a0b;
+  --color-doctor-sand-strong: #a16a1b; /* макет — #B7791F, затемнён до 4.5:1 с белым */
+  --color-doctor-rose: #f9ddea;
+  --color-doctor-rose-fg: #7b1f4b;
+  --color-doctor-rose-strong: #b83280;
+
+  /* --- Статусы записи: точка (design-directions) + слово (текст — макет Sistema) --- */
+  --color-status-planned: #3a6fd8; /* Придёт */
+  --color-status-planned-fg: #264c9e;
+  --color-status-arrived: #f2b51e; /* Пришёл */
+  --color-status-arrived-fg: #7a4e07;
+  --color-status-in-chair: #16a064; /* В кресле */
+  --color-status-in-chair-fg: #0b5a3c;
+  --color-status-done-fg: #4f5b66; /* Готово: галочка, серый */
+  --color-status-cancelled-fg: #5a6772; /* Отменена: зачёркнуто */
+
+  /* --- Состояния зуба: заливка цвета врача + контур насыщенным (макет Pacient) --- */
+  --color-tooth-caries: var(--color-doctor-sand);
+  --color-tooth-caries-line: var(--color-doctor-sand-strong);
+  --color-tooth-filling: var(--color-doctor-sky);
+  --color-tooth-filling-line: var(--color-doctor-sky-strong);
+  --color-tooth-canals: var(--color-doctor-rose);
+  --color-tooth-canals-line: var(--color-doctor-rose-strong);
+  --color-tooth-crown: var(--color-doctor-lilac);
+  --color-tooth-crown-line: var(--color-doctor-lilac-strong);
+  --color-tooth-implant: var(--color-doctor-teal);
+  --color-tooth-implant-line: var(--color-doctor-teal-strong);
+  --color-tooth-removed-line: #b8c2cc; /* удалён — пунктир */
+
+  /* --- Шрифты: Rubik 600 — заголовки, имена, цифры; Nunito Sans 500–800 — текст --- */
+  --font-sans: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --text-h1: 1.875rem; /* 30 — заголовок экрана */
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: 1.625rem; /* 26 — заголовок экрана на телефоне */
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h3: 1.25rem; /* 20 — заголовок карточки, панели */
+  --text-h3--line-height: 1.3;
+  --text-h4: 1.0625rem; /* 17 — имена, цифры */
+  --text-h4--line-height: 1.35;
+  --text-body-lg: 1rem; /* 16 */
+  --text-body-lg--line-height: 1.45;
+  --text-body: 0.9375rem; /* 15 — основной текст, кнопки, поля */
+  --text-body--line-height: 1.4;
+  --text-body-sm: 0.875rem; /* 14 */
+  --text-body-sm--line-height: 1.4;
+  --text-label: 0.8125rem; /* 13 — метки полей, чипы */
+  --text-label--line-height: 1.35;
+  --text-caption: 0.78125rem; /* 12.5 — подписи */
+  --text-caption--line-height: 1.35;
+  /* Вне шкалы текста — только по макетам, с назначением (design-directions § Шрифты): */
+  --text-nav: 0.71875rem; /* 11.5 — подпись под иконкой нижней панели (макеты Telefon*) */
+  --text-nav--line-height: 1.2;
+  --text-logo: 1.5rem; /* 24 — логотип «dentify.» в сайдбаре и шапке (все макеты) */
+  --text-logo--line-height: 1.2;
+  --text-logo--letter-spacing: -0.02em;
+  --text-logo-lg: 3rem; /* 48 — логотип экрана входа (макеты Vhod, Parol) */
+  --text-logo-lg--line-height: 1;
+  --text-logo-lg--letter-spacing: -0.03em;
+  --text-avatar-lg: 1.375rem; /* 22 — инициалы крупного аватара 64 px (макеты Pacient, Vrach-Profil) */
+  --text-avatar-lg--line-height: 1;
+
+  /* --- Формы: пилюля 999 · окна 28 · карточки и сайдбар 24 · внутренние блоки 20 ·
+         плитки дней 18 · строки списков и плашки 16 (макеты) · записи и пункты меню 14 --- */
+  --radius-pill: 999px;
+  --radius-window: 28px;
+  --radius-card: 24px;
+  --radius-block: 20px;
+  --radius-tile: 18px;
+  --radius-row: 16px;
+  --radius-item: 14px;
+  /* Подсветка совпадения в списке (макет Poisk): лёгкое скругление метки внутри строки. */
+  --radius-mark: 4px;
+
+  /* --- Тени (макеты): выпадающее, окно, лёгкий подъём выбранного сегмента --- */
+  --shadow-popover: 0 12px 30px rgb(14 34 48 / 0.16), 0 0 0 1px #e3e7ec;
+  --shadow-window: 0 28px 70px rgb(14 34 48 / 0.3);
+  --shadow-raised: 0 1px 3px rgb(14 34 48 / 0.18);
+  /* Белое поле на «тумане» — поиск в шапке (макет Raspisanie-Den). */
+  --shadow-field: 0 1px 2px rgb(14 34 48 / 0.06);
+  /* Нижняя панель телефона и её «+» (макеты Telefon*): тень плавающей панели и свечение «лампы». */
+  --shadow-dock: 0 10px 30px rgb(14 34 48 / 0.3);
+  --shadow-lamp-glow: 0 6px 18px rgb(242 181 30 / 0.45);
+}
+
+/*
+ * Брейкпоинты mobile-first (T-PLT-10): телефон < 768 · планшет `md:` 768–1023 · десктоп `lg:`
+ * ≥ 1024; `xl:` 1280 — уточнение внутри десктопа. Стандартные `sm:` и `2xl:` выключены (их класс
+ * просто не сгенерируется). Единицы одни (px) — иначе Tailwind сортирует варианты неверно.
+ * Те же числа — src/shared/lib/breakpoints.ts (MEDIA для useMediaQuery); сверяет тест.
+ */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* Переменные shadcn/ui, отображённые на токены «Кресла» (их читают компоненты shadcn). */
+@theme inline {
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: var(--color-fog);
+  --foreground: var(--color-ink);
+  --card: var(--color-white);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-lamp);
+  --primary-foreground: var(--color-ink);
+  --secondary: var(--color-white);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-mist);
+  --muted-foreground: var(--color-graphite);
+  --accent: var(--color-highlight);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-danger);
+  --border: var(--color-line);
+  --input: var(--color-line);
+  --ring: var(--color-lagoon);
+  --radius: 0.875rem;
+
+  /* Цвет контура фокуса (PLT-21: 3 px «лагуна»). На тёмных поверхностях (лагуна, чернила)
+     лагуна не видна — там `surface-dark` переключает контур на белый. */
+  --focus-color: var(--color-lagoon);
+}
+
+/* Тёмная поверхность (сайдбар, нижняя панель, уведомление): контур фокуса — белый. */
+@utility surface-dark {
+  --focus-color: var(--color-white);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: light;
+    @apply font-sans;
+  }
+
+  body {
+    margin: 0;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    @apply bg-background text-foreground;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* Видимый фокус (PLT-21): контур 3 px «лагуна» у любого элемента, получившего фокус с
+     клавиатуры. Компоненты не гасят его своими ring-классами — контур один на всё приложение. */
+  :focus-visible {
+    outline: 3px solid var(--focus-color);
+    outline-offset: 2px;
+  }
+
+  /* prefers-reduced-motion (PLT-21): анимации панелей, окон, списков и уведомлений — мгновенные.
+     Base UI дожидается конца перехода, поэтому длительность почти нулевая, а не `none`. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

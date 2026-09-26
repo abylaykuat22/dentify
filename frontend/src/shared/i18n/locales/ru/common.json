@@ -1,0 +1,88 @@
+{
+  "app": {
+    "name": "Dentify",
+    "logo": "dentify",
+    "logoShort": "d"
+  },
+  "languages": {
+    "label": "Язык интерфейса",
+    "ru": {
+      "short": "Рус",
+      "full": "Русский"
+    },
+    "kk": {
+      "short": "Қаз",
+      "full": "Қазақша"
+    }
+  },
+  "age": "{age, plural, one {# год} few {# года} many {# лет} other {# года}}",
+  "dates": {
+    "dayLabel": "EEEE, d MMMM",
+    "moment": "d MMMM, HH:mm"
+  },
+  "user": {
+    "avatar": "Инициалы {name}",
+    "roleAtClinic": "{role} · {clinic}"
+  },
+  "titles": {
+    "page": "{screen} — {app}",
+    "tab": "{tab} · {section} — {app}",
+    "notFound": "Страница не найдена",
+    "forbidden": "Нет доступа"
+  },
+  "states": {
+    "forbidden": {
+      "title": "Раздел «{section}» закрыт для вашей роли",
+      "text": "Попросите владельца открыть доступ"
+    },
+    "notFound": {
+      "title": "Такой страницы нет",
+      "text": "Возможно, ссылка устарела или в ней опечатка"
+    },
+    "error": {
+      "title": "Нет связи с сервером",
+      "text": "Изменения сохранятся, когда связь вернётся",
+      "action": "Повторить"
+    },
+    "loading": "Загрузка…",
+    "home": "На главную"
+  },
+  "stub": {
+    "soon": "Экран в разработке",
+    "withSoon": "{text} · {soon}"
+  },
+  "ui": {
+    "closePanel": "Закрыть панель",
+    "close": "Закрыть",
+    "back": "Назад",
+    "moreActions": "Ещё действия",
+    "combo": {
+      "empty": "Ничего не найдено",
+      "toggle": "Показать варианты",
+      "clear": "Очистить"
+    },
+    "search": {
+      "clear": "Очистить поиск"
+    },
+    "steps": {
+      "progress": "Шаг {current} из {total}",
+      "progressWithLabel": "Шаг {current} из {total} · {label}",
+      "backHint": "Вернуться к предыдущему шагу"
+    },
+    "toast": {
+      "undo": "Вернуть",
+      "region": "Уведомления"
+    },
+    "alert": {
+      "prefix": "Внимание: "
+    },
+    "status": {
+      "planned": "Придёт",
+      "arrived": "Пришёл",
+      "inChair": "В кресле",
+      "done": "Готово",
+      "noShow": "Не пришёл",
+      "cancelled": "Отменена"
+    }
+  }
+}
