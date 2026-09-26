@@ -1,0 +1,42 @@
+# Профиль интеграционных тестов (AbstractIntegrationTest): PostgreSQL 18 и Valkey в Testcontainers.
+# URL, логин и пароль приложения отдаёт @ServiceConnection (роль dentify_app), пароль Flyway
+# (dentify_owner) — @DynamicPropertySource. Порты приложения и actuator — случайные.
+management:
+  server:
+    port: 0
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  structured:
+    ecs:
+      service:
+        environment: test
+
+spring:
+  flyway:
+    # + тестовые таблицы проверок платформы (LocalizedText в jsonb) — только в тестовой базе
+    locations: classpath:db/migration, classpath:db/test-migration
+  messages:
+    # + тексты кодов пробных эндпоинтов (ProblemProbeController) — test-messages.properties
+    basename: messages, test-messages
+  cache:
+    # Кэши, созданные заранее, тоже получают префикс клиники (TenantCacheTests.everyCacheHasClinicPrefix)
+    cache-names: test-preset, global.test-preset
+
+# Казахский включён только в тестах: словарь messages_kk.properties лежит в тестовых ресурсах и доказывает, что
+# включение языка — это словари и флаг, без правок кода (PLT-11). Без Accept-Language и cookie ответ — русский.
+dentify:
+  i18n:
+    kk: true
+  security:
+    geoip:
+      # Тестовая база MaxMind формата GeoIP2 City (Apache-2.0/MIT): 81.2.69.142 — Лондон. Тесты Maven идут из backend/
+      database: src/test/resources/geoip/GeoIP2-City-Test.mmdb
+
+# /v3/api-docs нужен OpenApiContractTests: проверка ответов ProblemDetail и выгрузка api/openapi.json.
+# Swagger UI в тестах выключен, как в prod.
+springdoc:
+  api-docs:
+    enabled: true

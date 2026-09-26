@@ -1,0 +1,7 @@
+GeoIP2-City-Test.mmdb — тестовая база MaxMind DB формата GeoIP2 City (вымышленные сети и города, не настоящая
+геолокация). Нужна тестам города в списке сессий: 81.2.69.142 — Лондон, 2.125.160.216 — Boxford (без русского
+названия).
+
+Источник: https://github.com/maxmind/MaxMind-DB/blob/main/test-data/GeoIP2-City-Test.mmdb
+Скачано 2026-09-25, файл не изменён.
+Copyright (c) 2013 - 2026 by MaxMind, Inc. Лицензия — Apache License 2.0 или MIT, на выбор.

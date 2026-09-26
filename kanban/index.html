@@ -1,0 +1,576 @@
+<title>Канбан Dentify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,500..800&family=Rubik:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#ECEFF3; --tray:#DEE4EA; --lane:#E3E8ED; --card:#FFFFFF; --mist:#F5F7F9;
+  --ink:#0E2230; --graphite:#5A6772; --line:#E1E6EC; --line-strong:#C9D2DA;
+  --lagoon:#0F3D4C; --on-lagoon:#FFFFFF; --on-lagoon-dim:rgba(255,255,255,.74); --lagoon-track:rgba(255,255,255,.18);
+  --lamp:#FFCB47; --lamp-deep:#F2B51E; --on-lamp:#0E2230;
+  --hi:#FFF4D1; --danger:#9B1C12; --danger-bg:#FDE2E0;
+  --toast:#0E2230; --on-toast:#FFFFFF;
+  --shadow:0 18px 48px rgba(14,34,48,.16);
+  --st-backlog:#8A96A0; --st-todo:#3A6FD8; --st-doing:#F2B51E; --st-review:#5B4FD1; --st-done:#16A064;
+  --m-PLT-bg:#E4E9EE; --m-PLT-fg:#34424D;
+  --m-IAM-bg:#E5E1FB; --m-IAM-fg:#3D3394;
+  --m-CLN-bg:#DDEBFB; --m-CLN-fg:#1E4F8F;
+  --m-STF-bg:#D3EEEE; --m-STF-fg:#0B4A4F;
+  --m-PAT-bg:#FCE0DA; --m-PAT-fg:#7A2A1E;
+  --m-SCH-bg:#F6EACB; --m-SCH-fg:#6B4A0B;
+  --m-MED-bg:#F9DDEA; --m-MED-fg:#7B1F4B;
+  --m-INV-bg:#DDF3E4; --m-INV-fg:#1F5E3A;
+  --r-win:28px; --r-card:24px; --r-block:20px; --r-item:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0B1820; --tray:#13262F; --lane:#10212A; --card:#172D37; --mist:#1C3440;
+    --ink:#E6EEF2; --graphite:#9AABB6; --line:#24404C; --line-strong:#35535F;
+    --hi:#3B3319; --danger:#FF9D92; --danger-bg:#47211D;
+    --toast:#2A4753; --on-toast:#FFFFFF;
+    --shadow:0 18px 48px rgba(0,0,0,.5);
+    --st-backlog:#72828D;
+    --m-PLT-bg:#26343D; --m-PLT-fg:#CBD5DC;
+    --m-IAM-bg:#2B2752; --m-IAM-fg:#CFC8FF;
+    --m-CLN-bg:#1D3350; --m-CLN-fg:#BCD6FA;
+    --m-STF-bg:#123A3D; --m-STF-fg:#A8E3E3;
+    --m-PAT-bg:#45231D; --m-PAT-fg:#F8C3B7;
+    --m-SCH-bg:#3F3316; --m-SCH-fg:#F1D993;
+    --m-MED-bg:#43203A; --m-MED-fg:#F5BDD7;
+    --m-INV-bg:#173A26; --m-INV-fg:#B5E8C6;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1820; --tray:#13262F; --lane:#10212A; --card:#172D37; --mist:#1C3440;
+  --ink:#E6EEF2; --graphite:#9AABB6; --line:#24404C; --line-strong:#35535F;
+  --hi:#3B3319; --danger:#FF9D92; --danger-bg:#47211D;
+  --toast:#2A4753; --on-toast:#FFFFFF;
+  --shadow:0 18px 48px rgba(0,0,0,.5);
+  --st-backlog:#72828D;
+  --m-PLT-bg:#26343D; --m-PLT-fg:#CBD5DC;
+  --m-IAM-bg:#2B2752; --m-IAM-fg:#CFC8FF;
+  --m-CLN-bg:#1D3350; --m-CLN-fg:#BCD6FA;
+  --m-STF-bg:#123A3D; --m-STF-fg:#A8E3E3;
+  --m-PAT-bg:#45231D; --m-PAT-fg:#F8C3B7;
+  --m-SCH-bg:#3F3316; --m-SCH-fg:#F1D993;
+  --m-MED-bg:#43203A; --m-MED-fg:#F5BDD7;
+  --m-INV-bg:#173A26; --m-INV-fg:#B5E8C6;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:500 15px/1.45 "Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  display:flex; flex-direction:column; gap:12px;
+  padding-inline:16px; padding-block:12px 16px; overflow:hidden;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--lamp-deep); outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.rubik{font-family:Rubik,"Nunito Sans",system-ui,sans-serif; font-weight:600}
+
+/* ---------- top bar ---------- */
+.top{
+  flex-shrink:0; background:var(--lagoon); color:var(--on-lagoon);
+  border-radius:var(--r-card); padding:14px 18px 14px 16px;
+  display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.lampdot{width:34px;height:34px;border-radius:999px;background:var(--lamp);flex-shrink:0;
+  box-shadow:0 0 0 6px rgba(255,203,71,.18)}
+.brand h1{margin:0;font:600 21px/1.1 Rubik,system-ui,sans-serif;letter-spacing:.2px}
+.brand p{margin:2px 0 0;color:var(--on-lagoon-dim);font-size:13px;font-weight:600}
+.brand a{color:var(--on-lagoon);text-underline-offset:3px}
+.prog{margin-left:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.prog-main{display:flex;align-items:center;gap:12px}
+.prog-pct{font:600 28px/1 Rubik,system-ui,sans-serif}
+.prog-meta{display:flex;flex-direction:column;gap:6px;min-width:150px}
+.prog-meta span{font-size:13px;font-weight:700;color:var(--on-lagoon-dim)}
+.bar{height:8px;border-radius:999px;background:var(--lagoon-track);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:var(--lamp);width:0;transition:width .4s ease}
+.sync{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;
+  background:var(--lagoon-track);font-size:13px;font-weight:700;white-space:nowrap}
+.sync::before{content:"";width:9px;height:9px;border-radius:999px;background:#9AA7B1}
+.sync[data-s="on"]::before{background:#3DDC91}
+.sync[data-s="err"]::before{background:#FF7A6B}
+
+/* ---------- controls ---------- */
+.controls{flex-shrink:0;display:flex;gap:10px 12px;flex-wrap:wrap;align-items:center}
+.search{position:relative;flex:1 1 260px;max-width:360px}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--graphite);pointer-events:none}
+.search input{width:100%;height:44px;border-radius:999px;border:2px solid var(--line);
+  background:var(--card);padding:0 16px 0 42px;font-weight:600}
+.search input::placeholder{color:var(--graphite);font-weight:500}
+.tray{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--tray);
+  overflow-x:auto;scrollbar-width:none;max-width:100%}
+.tray::-webkit-scrollbar{display:none}
+.chip{border:0;background:transparent;border-radius:999px;height:36px;padding:0 14px;
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:14px;font-weight:700;color:var(--ink)}
+.chip:hover{background:var(--card)}
+.chip b{font:600 13px/1 Rubik,system-ui,sans-serif;width:22px;height:22px;border-radius:999px;
+  display:inline-grid;place-items:center;background:var(--card);color:var(--ink)}
+.chip .cnt{font-size:12px;font-weight:700;color:var(--graphite)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip[aria-pressed="true"] .cnt{color:var(--bg);opacity:.75}
+.chip[aria-pressed="true"] b{background:var(--lamp);color:var(--on-lamp)}
+.chip .sw{width:10px;height:10px;border-radius:999px}
+
+/* ---------- board ---------- */
+.board{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,minmax(250px,1fr));
+  gap:12px;overflow-x:auto;overscroll-behavior-x:contain}
+.lane{min-height:0;display:flex;flex-direction:column;background:var(--lane);border-radius:var(--r-card);
+  border:2px dashed transparent;transition:border-color .15s,background .15s}
+.lane.over{border-color:var(--lamp-deep);background:var(--hi)}
+.lane-h{display:flex;align-items:center;gap:9px;padding:14px 16px 10px}
+.lane-h h2{margin:0;font:600 17px/1.2 Rubik,system-ui,sans-serif}
+.dot{width:10px;height:10px;border-radius:999px;flex-shrink:0;background:var(--st-backlog)}
+.s-todo .dot,.dot.s-todo{background:var(--st-todo)}
+.s-doing .dot,.dot.s-doing{background:var(--st-doing)}
+.s-review .dot,.dot.s-review{background:var(--st-review)}
+.s-done .dot,.dot.s-done{background:var(--st-done)}
+.lane-h .cnt{margin-left:auto;min-width:30px;height:26px;padding:0 9px;border-radius:999px;background:var(--card);
+  display:inline-grid;place-items:center;font:600 13px/1 Rubik,system-ui,sans-serif}
+.lane-b{flex:1;min-height:0;overflow-y:auto;padding:0 10px 12px;display:flex;flex-direction:column;gap:8px}
+.ph{position:sticky;top:0;z-index:1;background:var(--lane);padding:8px 6px 4px;font-size:11.5px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--graphite)}
+.lane.over .ph{background:var(--hi)}
+.empty{margin:4px 6px;padding:18px 14px;border-radius:var(--r-item);border:2px dashed var(--line-strong);
+  color:var(--graphite);font-size:13.5px;text-align:center}
+
+.card{display:flex;flex-direction:column;gap:8px;text-align:left;width:100%;
+  background:var(--card);border:2px solid transparent;border-radius:18px;padding:12px 14px}
+.card:hover{border-color:var(--line-strong)}
+.card.sel{border-color:var(--lamp-deep)}
+.card.dragging{opacity:.45}
+.card-top{display:flex;align-items:center;gap:8px}
+.mod{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.02em;
+  background:var(--m-PLT-bg);color:var(--m-PLT-fg)}
+.m-IAM{background:var(--m-IAM-bg);color:var(--m-IAM-fg)} .m-CLN{background:var(--m-CLN-bg);color:var(--m-CLN-fg)}
+.m-STF{background:var(--m-STF-bg);color:var(--m-STF-fg)} .m-PAT{background:var(--m-PAT-bg);color:var(--m-PAT-fg)}
+.m-SCH{background:var(--m-SCH-bg);color:var(--m-SCH-fg)} .m-MED{background:var(--m-MED-bg);color:var(--m-MED-fg)}
+.m-INV{background:var(--m-INV-bg);color:var(--m-INV-fg)}
+.sw.m-PLT{background:var(--m-PLT-fg)} .sw.m-IAM{background:var(--m-IAM-fg)} .sw.m-CLN{background:var(--m-CLN-fg)} .sw.m-STF{background:var(--m-STF-fg)}
+.sw.m-PAT{background:var(--m-PAT-fg)} .sw.m-SCH{background:var(--m-SCH-fg)} .sw.m-MED{background:var(--m-MED-fg)} .sw.m-INV{background:var(--m-INV-fg)}
+.tid{font-size:12.5px;font-weight:700;color:var(--graphite)}
+.est{margin-left:auto;width:26px;height:26px;border-radius:999px;border:2px solid var(--line);display:inline-grid;place-items:center;
+  font:600 12px/1 Rubik,system-ui,sans-serif;color:var(--graphite)}
+.ct{font-size:15px;font-weight:700;line-height:1.35;color:var(--ink)}
+.s-done .ct{color:var(--graphite)}
+.card-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:0}
+.card-foot:empty{display:none}
+.mini{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--graphite)}
+.mini .bar{width:56px;height:6px;background:var(--line)}
+.mini .bar i{background:var(--st-done)}
+.wait{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--mist);
+  font-size:12px;font-weight:700;color:var(--graphite)}
+
+/* ---------- panel ---------- */
+.scrim{position:fixed;inset:0;background:rgba(14,34,48,.28);z-index:9}
+.panel{position:fixed;z-index:10;top:12px;bottom:12px;right:12px;width:min(470px,calc(100vw - 24px));
+  background:var(--card);border-radius:var(--r-win);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.panel-s{flex:1;min-height:0;overflow-y:auto;padding:20px 22px 22px;display:flex;flex-direction:column;gap:18px}
+.p-head{display:flex;align-items:center;gap:10px}
+.x{margin-left:auto;width:40px;height:40px;border-radius:999px;border:2px solid var(--line);background:var(--card);display:grid;place-items:center}
+.x:hover{border-color:var(--line-strong)}
+.panel h2{margin:0;font:600 22px/1.25 Rubik,system-ui,sans-serif;text-wrap:balance}
+.facts{display:flex;flex-wrap:wrap;gap:6px}
+.fact{padding:6px 12px;border-radius:999px;background:var(--mist);font-size:13px;font-weight:700;color:var(--graphite)}
+.fact strong{color:var(--ink);font-weight:800}
+.demo{margin:-8px 0 0;font-size:13.5px;color:var(--graphite)}
+.sec h3{margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--graphite);
+  display:flex;align-items:center;gap:8px}
+.sec h3 .num{letter-spacing:0;text-transform:none;color:var(--ink)}
+.seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:4px;padding:4px;border-radius:24px;background:var(--bg)}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.seg span{display:flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 12px;border-radius:999px;
+  font-size:13.5px;font-weight:700;white-space:nowrap}
+.seg label:hover span{background:var(--card)}
+.seg input:checked + span{background:var(--ink);color:var(--bg)}
+.seg input:focus-visible + span{outline:3px solid var(--lamp-deep);outline-offset:1px}
+.seg input:disabled + span{opacity:.55;cursor:default}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:9px 10px;border-radius:14px;cursor:pointer}
+.checks label:hover{background:var(--mist)}
+.checks input{appearance:none;flex-shrink:0;width:22px;height:22px;margin:0;border-radius:8px;border:2px solid var(--line-strong);
+  background:var(--card);display:grid;place-items:center;cursor:pointer}
+.checks input:checked{background:var(--st-done);border-color:var(--st-done)}
+.checks input:checked::after{content:"";width:10px;height:6px;border:solid #fff;border-width:0 0 2.5px 2.5px;transform:translateY(-1px) rotate(-45deg)}
+.checks input:disabled{cursor:default}
+.checks input:checked + span{color:var(--graphite);text-decoration:line-through;text-decoration-color:var(--line-strong)}
+.rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:var(--mist);font-size:14px;width:100%;text-align:left;border:0}
+button.row:hover{background:var(--hi)}
+.row .rid{flex-shrink:0;font-size:12.5px;font-weight:800;color:var(--graphite);min-width:62px;padding-top:1px}
+.row .dot{margin-top:6px}
+.row .rst{margin-left:auto;flex-shrink:0;font-size:12.5px;font-weight:700;color:var(--graphite);padding-top:1px}
+.p-foot{flex-shrink:0;padding:14px 22px 18px;border-top:2px solid var(--line);display:flex;gap:10px;align-items:center}
+.btn{height:48px;padding:0 22px;border-radius:999px;border:2px solid var(--line);background:var(--card);font-weight:800;font-size:15px}
+.btn:hover{border-color:var(--line-strong)}
+.btn-lamp{background:var(--lamp);border-color:var(--lamp);color:var(--on-lamp)}
+.btn-lamp:hover{background:var(--lamp-deep);border-color:var(--lamp-deep)}
+.p-foot .note{font-size:13px;color:var(--graphite)}
+
+/* ---------- toast & notices ---------- */
+.toast{position:fixed;z-index:20;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  max-width:calc(100vw - 32px);display:flex;align-items:center;gap:14px;padding:12px 12px 12px 18px;border-radius:999px;
+  background:var(--toast);color:var(--on-toast);box-shadow:var(--shadow);font-weight:700;font-size:14px}
+.toast button{border:0;background:transparent;color:var(--lamp);font-weight:800;padding:6px 10px;border-radius:999px}
+.toast button:hover{background:rgba(255,255,255,.1)}
+.fatal{margin:auto;max-width:460px;text-align:center;padding:32px;border-radius:var(--r-card);background:var(--card)}
+.fatal h2{margin:0 0 8px;font:600 20px/1.3 Rubik,system-ui,sans-serif}
+
+@media (max-width:760px){
+  body{gap:10px;padding-block:10px 12px}
+  .top{padding:12px 14px;gap:12px}
+  .brand h1{font-size:19px}
+  .prog{margin-left:0;width:100%;justify-content:space-between}
+  .prog-meta{flex:1}
+  .search{max-width:none;flex-basis:100%}
+  .board{grid-template-columns:repeat(5,86%);scroll-snap-type:x mandatory}
+  .lane{scroll-snap-align:start}
+  .panel{top:auto;bottom:0;right:0;left:0;width:auto;max-height:88%;border-radius:var(--r-win) var(--r-win) 0 0;
+    padding-bottom:env(safe-area-inset-bottom,0px)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<header class="top">
+  <div class="brand">
+    <span class="lampdot" aria-hidden="true"></span>
+    <div>
+      <h1>Dentify · задачи MVP</h1>
+      <p id="sub">Этапы 0–6 · <a href="https://claude.ai/artifact/XiPsn66wbKPwxqwiRpgBsM" target="_blank" rel="noopener">макеты экранов</a></p>
+    </div>
+  </div>
+  <div class="prog">
+    <div class="prog-main">
+      <span class="prog-pct num" id="pct">0%</span>
+      <div class="prog-meta"><span class="num" id="pcount">—</span><div class="bar"><i id="pbar"></i></div></div>
+    </div>
+    <span class="sync" id="sync" data-s="wait">Подключаю хранилище…</span>
+  </div>
+</header>
+
+<section class="controls" aria-label="Фильтры">
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Задача, T-SCH-04, требование…" aria-label="Поиск задач" autocomplete="off">
+  </div>
+  <div class="tray" id="phases" role="group" aria-label="Этап"></div>
+  <div class="tray" id="mods" role="group" aria-label="Модуль"></div>
+</section>
+
+<main class="board" id="board" aria-label="Доска задач"></main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="panel" id="panel" hidden role="dialog" aria-labelledby="p-title"></aside>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(() => {
+  const STATUSES = [['backlog','Бэклог'],['todo','К работе'],['doing','В работе'],['review','Проверка'],['done','Готово']];
+  const SNAME = Object.fromEntries(STATUSES);
+  const EMPTY = {backlog:'Пусто', todo:'Нечего брать — загляните в бэклог', doing:'Никто ничего не делает', review:'Нечего проверять', done:'Готовые задачи появятся здесь'};
+  const TYPE_RU = {backend:'бэкенд', frontend:'фронтенд', fullstack:'бэкенд + фронт', infra:'инфраструктура', test:'тесты', docs:'документация'};
+  const EST_RU = {S:'до ½ дня', M:'1–2 дня', L:'около 3 дней'};
+  const MODS = ['PLT','IAM','CLN','STF','PAT','SCH','MED','INV'];
+  const LS = 'dentify-kanban-filters';
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const mc = m => MODS.includes(m) ? 'm-' + m : 'm-PLT';
+
+  let D = null;                 // tasks.json
+  const byId = new Map(), rev = new Map(), order = new Map();
+  let st = {};                  // taskId -> {status, sub}
+  let db = null;
+  let F = {phase: null, mod: null, q: ''};
+  let openId = null, dragId = null, toastTimer = 0;
+
+  // ---------- state helpers ----------
+  const defStatus = t => t.phase === 0 ? 'todo' : 'backlog';
+  function cur(id) {
+    const t = byId.get(id), v = st[id];
+    const status = v && SNAME[v.status] ? v.status : defStatus(t);
+    const sub = v && v.sub && typeof v.sub === 'object' && !Array.isArray(v.sub) ? v.sub : {};
+    return {status, sub};
+  }
+  const statusOf = t => cur(t.id).status;
+  const subDone = t => (t.sub || []).filter(s => cur(t.id).sub[s.k] === true).length;
+  const waits = t => (t.deps || []).filter(d => byId.has(d) && statusOf(byId.get(d)) !== 'done');
+
+  function match(t) {
+    if (F.phase !== null && t.phase !== F.phase) return false;
+    if (F.mod && t.module !== F.mod) return false;
+    if (F.q && !t._hay.includes(F.q)) return false;
+    return true;
+  }
+
+  // ---------- chrome ----------
+  function buildChrome() {
+    $('board').innerHTML = STATUSES.map(([s, n]) =>
+      `<section class="lane s-${s}" data-status="${s}" aria-label="${n}">
+         <header class="lane-h"><span class="dot"></span><h2>${n}</h2><span class="cnt num" id="c-${s}">0</span></header>
+         <div class="lane-b" id="l-${s}"></div>
+       </section>`).join('');
+    const weeks = D.phases.reduce((a, p) => a + (p.weeks || 0), 0);
+    $('sub').innerHTML = `Этапы 0–${D.phases.length - 1} · ~${weeks} недель · <a href="https://claude.ai/artifact/XiPsn66wbKPwxqwiRpgBsM" target="_blank" rel="noopener">макеты экранов</a>`;
+  }
+
+  function renderFilters() {
+    const cnt = new Map(), dn = new Map();
+    for (const t of D.tasks) {
+      cnt.set(t.phase, (cnt.get(t.phase) || 0) + 1);
+      if (statusOf(t) === 'done') dn.set(t.phase, (dn.get(t.phase) || 0) + 1);
+    }
+    $('phases').innerHTML =
+      `<button class="chip" data-phase="" aria-pressed="${F.phase === null}">Все этапы</button>` +
+      D.phases.map(p => `<button class="chip" data-phase="${p.n}" aria-pressed="${F.phase === p.n}" title="${esc(p.name)} · ${p.weeks} нед. — демо: ${esc(p.demo || '')}">
+        <b>${p.n}</b>${esc(p.name)} <span class="cnt num">${dn.get(p.n) || 0}/${cnt.get(p.n) || 0}</span></button>`).join('');
+    $('mods').innerHTML =
+      `<button class="chip" data-mod="" aria-pressed="${!F.mod}">Все модули</button>` +
+      D.modules.map(m => `<button class="chip" data-mod="${esc(m.code)}" aria-pressed="${F.mod === m.code}" title="${esc(m.code)} — ${esc(m.name)}">
+        <span class="sw ${mc(m.code)}"></span>${esc(m.name)}</button>`).join('');
+  }
+
+  function cardHtml(t, s) {
+    const n = (t.sub || []).length, d = subDone(t), w = s === 'done' ? [] : waits(t);
+    const foot =
+      (n ? `<span class="mini num"><span class="bar"><i style="width:${Math.round(d / n * 100)}%"></i></span>${d}/${n}</span>` : '') +
+      (w.length ? `<span class="wait" title="Сначала: ${esc(w.join(', '))}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>ждёт ${w.length === 1 ? esc(w[0]) : w.length + ' задачи'}</span>` : '');
+    return `<button type="button" class="card${openId === t.id ? ' sel' : ''}" data-id="${esc(t.id)}" draggable="${!!db}">
+      <span class="card-top"><span class="mod ${mc(t.module)}">${esc(t.module)}</span><span class="tid num">${esc(t.id)}</span><span class="est" title="Оценка ${esc(t.est)} — ${EST_RU[t.est] || ''}">${esc(t.est)}</span></span>
+      <span class="ct">${esc(t.title)}</span>
+      <span class="card-foot">${foot}</span></button>`;
+  }
+
+  function render() {
+    const lanes = Object.fromEntries(STATUSES.map(([s]) => [s, []]));
+    for (const t of D.tasks) if (match(t)) lanes[statusOf(t)].push(t);
+    const pname = new Map(D.phases.map(p => [p.n, p.name]));
+    for (const [s] of STATUSES) {
+      const list = lanes[s].sort((a, b) => a.phase - b.phase || order.get(a.id) - order.get(b.id));
+      const el = $('l-' + s), top = el.scrollTop;
+      let html = '', ph = -1;
+      for (const t of list) {
+        if (t.phase !== ph && F.phase === null) { ph = t.phase; html += `<div class="ph">Этап ${ph} · ${esc(pname.get(ph) || '')}</div>`; }
+        html += cardHtml(t, s);
+      }
+      el.innerHTML = html || `<div class="empty">${F.q || F.mod || F.phase !== null ? 'Под фильтр ничего не попало' : EMPTY[s]}</div>`;
+      el.scrollTop = top;
+      $('c-' + s).textContent = list.length;
+    }
+    const total = D.tasks.length, done = D.tasks.filter(t => statusOf(t) === 'done').length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    $('pct').textContent = pct + '%';
+    $('pcount').textContent = `${done} из ${total} задач готово`;
+    $('pbar').style.width = pct + '%';
+    renderFilters();
+  }
+
+  // ---------- panel ----------
+  function openPanel(id) {
+    if (!byId.has(id)) return;
+    openId = id; renderPanel(); render();
+    $('panel').hidden = false;
+    $('scrim').hidden = !matchMedia('(max-width:760px)').matches;
+    $('panel').querySelector('.x')?.focus({preventScroll: true});
+  }
+  function closePanel() {
+    const id = openId; openId = null;
+    $('panel').hidden = true; $('scrim').hidden = true; render();
+    if (id) document.querySelector(`.card[data-id="${CSS.escape(id)}"]`)?.focus({preventScroll: true});
+  }
+  function renderPanel() {
+    const t = byId.get(openId); if (!t) return;
+    const c = cur(t.id), s = c.status, phase = D.phases.find(p => p.n === t.phase) || {};
+    const n = (t.sub || []).length, d = subDone(t), ro = !db;
+    const idx = STATUSES.findIndex(x => x[0] === s), next = STATUSES[idx + 1];
+    const depRow = id => {
+      const x = byId.get(id);
+      if (!x) return `<li class="row"><span class="rid">${esc(id)}</span><span>нет в бэклоге</span></li>`;
+      const xs = statusOf(x);
+      return `<li><button type="button" class="row" data-open="${esc(id)}"><span class="dot s-${xs}"></span><span class="rid num">${esc(id)}</span><span>${esc(x.title)}</span><span class="rst">${SNAME[xs]}</span></button></li>`;
+    };
+    const reqs = (t.req || []).map(r => {
+      const q = D.requirements[r];
+      return `<li class="row"><span class="rid num">${esc(r)}</span><span>${esc(q ? q.t : 'требование не найдено')}</span></li>`;
+    }).join('');
+    const back = rev.get(t.id) || [];
+    $('panel').innerHTML = `
+      <div class="panel-s">
+        <div class="p-head"><span class="mod ${mc(t.module)}">${esc(t.module)}</span><span class="tid num">${esc(t.id)}</span>
+          <button type="button" class="x" aria-label="Закрыть"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <h2 id="p-title">${esc(t.title)}</h2>
+        <div class="facts">
+          <span class="fact">Этап <strong>${t.phase} · ${esc(phase.name || '')}</strong></span>
+          <span class="fact">Оценка <strong>${esc(t.est)}</strong> · ${EST_RU[t.est] || ''}</span>
+          <span class="fact">${esc(TYPE_RU[t.type] || t.type || '')}</span>
+        </div>
+        ${phase.demo ? `<p class="demo">Демо этапа: ${esc(phase.demo)}</p>` : ''}
+        <div class="sec"><h3>Статус</h3>
+          <div class="seg" role="radiogroup" aria-label="Статус">${STATUSES.map(([k, nm]) =>
+            `<label><input type="radio" name="st" value="${k}" ${k === s ? 'checked' : ''} ${ro ? 'disabled' : ''}><span><i class="dot s-${k}"></i>${nm}</span></label>`).join('')}</div>
+        </div>
+        ${n ? `<div class="sec"><h3>Подзадачи <span class="num">${d}/${n}</span></h3><ul class="checks">${t.sub.map(x =>
+            `<li><label><input type="checkbox" data-sub="${esc(x.k)}" ${c.sub[x.k] === true ? 'checked' : ''} ${ro ? 'disabled' : ''}><span>${esc(x.t)}</span></label></li>`).join('')}</ul></div>` : ''}
+        ${reqs ? `<div class="sec"><h3>Требования</h3><ul class="rows">${reqs}</ul></div>` : ''}
+        ${(t.deps || []).length ? `<div class="sec"><h3>Сначала сделать</h3><ul class="rows">${t.deps.map(depRow).join('')}</ul></div>` : ''}
+        ${back.length ? `<div class="sec"><h3>Откроет задачи</h3><ul class="rows">${back.map(depRow).join('')}</ul></div>` : ''}
+      </div>
+      <div class="p-foot">${ro
+        ? `<span class="note">Прогресс меняется только в открытом артефакте на claude.ai.</span>`
+        : next ? `<button type="button" class="btn btn-lamp" data-move="${next[0]}">Дальше: ${next[1]}</button>` : `<span class="note">Задача закрыта. Вернуть её можно в «Статусе».</span>`}</div>`;
+  }
+
+  // ---------- writes ----------
+  function errText(e) {
+    const c = e && e.code;
+    if (c === 'quota_exceeded') return 'Хранилище заполнено — изменение не сохранилось';
+    if (c === 'resource_exhausted') return 'Слишком часто. Подождите пару секунд и повторите';
+    if (c === 'revoked' || c === 'not_granted' || c === 'invalid_argument') return 'Нет прав на запись в этой доске';
+    return 'Не сохранилось. Проверьте связь и повторите';
+  }
+  async function save(id, patch) {
+    if (!db || !byId.has(id)) return false;
+    const before = st[id], c = cur(id);
+    const body = {status: c.status, sub: {...c.sub}, ...patch, at: new Date().toISOString()};
+    for (const k of Object.keys(body.sub)) if (body.sub[k] !== true) delete body.sub[k];
+    st = {...st, [id]: body};
+    render(); if (openId === id) renderPanel();
+    try { await db.doc('tasks/' + id).set(body); return true; }
+    catch (e) {
+      st = {...st}; if (before) st[id] = before; else delete st[id];
+      render(); if (openId === id) renderPanel();
+      toast(errText(e)); return false;
+    }
+  }
+  async function move(id, status) {
+    const prev = cur(id).status;
+    if (!SNAME[status] || prev === status) return;
+    if (await save(id, {status})) toast(`${id} → ${SNAME[status]}`, () => save(id, {status: prev}));
+  }
+
+  function toast(text, undo) {
+    const el = $('toast');
+    el.innerHTML = `<span>${esc(text)}</span>` + (undo ? '<button type="button">Вернуть</button>' : '');
+    el.hidden = false;
+    if (undo) el.querySelector('button').onclick = () => { el.hidden = true; undo(); };
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 6000);
+  }
+
+  function setSync(s) {
+    const el = $('sync'); el.dataset.s = s;
+    el.textContent = {wait: 'Подключаю хранилище…', on: 'Прогресс общий и сохраняется',
+      off: 'Только просмотр — прогресс не сохраняется', err: 'Нет связи с хранилищем'}[s];
+  }
+
+  // ---------- events ----------
+  function bind() {
+    let qt = 0;
+    $('q').addEventListener('input', e => {
+      clearTimeout(qt);
+      qt = setTimeout(() => { F.q = e.target.value.trim().toLowerCase(); render(); }, 120);
+    });
+    $('phases').addEventListener('click', e => {
+      const b = e.target.closest('[data-phase]'); if (!b) return;
+      F.phase = b.dataset.phase === '' ? null : +b.dataset.phase; persist(); render();
+    });
+    $('mods').addEventListener('click', e => {
+      const b = e.target.closest('[data-mod]'); if (!b) return;
+      F.mod = b.dataset.mod || null; persist(); render();
+    });
+    const board = $('board');
+    board.addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openPanel(c.dataset.id); });
+    board.addEventListener('dragstart', e => {
+      const c = e.target.closest('.card');
+      if (!c || !db) { e.preventDefault(); return; }
+      dragId = c.dataset.id; c.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', dragId); e.dataTransfer.effectAllowed = 'move';
+    });
+    board.addEventListener('dragend', () => {
+      dragId = null; board.querySelectorAll('.dragging,.over').forEach(x => x.classList.remove('dragging', 'over'));
+    });
+    board.addEventListener('dragover', e => {
+      const l = e.target.closest('.lane'); if (!l || !dragId) return;
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      board.querySelectorAll('.lane.over').forEach(x => x !== l && x.classList.remove('over'));
+      l.classList.add('over');
+    });
+    board.addEventListener('dragleave', e => {
+      const l = e.target.closest('.lane'); if (l && !l.contains(e.relatedTarget)) l.classList.remove('over');
+    });
+    board.addEventListener('drop', e => {
+      const l = e.target.closest('.lane'); if (!l || !dragId) return;
+      e.preventDefault(); const id = dragId; l.classList.remove('over'); move(id, l.dataset.status);
+    });
+    const panel = $('panel');
+    panel.addEventListener('click', e => {
+      if (e.target.closest('.x')) return closePanel();
+      const o = e.target.closest('[data-open]'); if (o) return openPanel(o.dataset.open);
+      const m = e.target.closest('[data-move]'); if (m && openId) return move(openId, m.dataset.move);
+    });
+    panel.addEventListener('change', e => {
+      if (!openId) return;
+      if (e.target.name === 'st') return move(openId, e.target.value);
+      const k = e.target.dataset.sub;
+      if (k) save(openId, {sub: {...cur(openId).sub, [k]: e.target.checked}});
+    });
+    $('scrim').addEventListener('click', closePanel);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && openId) closePanel();
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') { e.preventDefault(); $('q').focus(); }
+    });
+  }
+
+  function persist() {
+    try { localStorage.setItem(LS, JSON.stringify({phase: F.phase, mod: F.mod})); } catch (e) {}
+  }
+  function restore() {
+    try {
+      const v = JSON.parse(localStorage.getItem(LS) || 'null');
+      if (v && (v.phase === null || D.phases.some(p => p.n === v.phase))) F.phase = v.phase;
+      if (v && (v.mod === null || D.modules.some(m => m.code === v.mod))) F.mod = v.mod;
+    } catch (e) {}
+  }
+
+  async function connect() {
+    let ns = null;
+    try { ns = window.claude && typeof window.claude.use === 'function' ? await window.claude.use('db') : null; } catch (e) { ns = null; }
+    if (!ns) { setSync('off'); render(); if (openId) renderPanel(); return; }
+    db = ns; render(); if (openId) renderPanel();
+    db.collection('tasks').onSnapshot(snap => {
+      const next = {};
+      for (const d of snap.docs) if (d.exists && byId.has(d.id)) next[d.id] = d.data();
+      st = next; setSync('on'); render(); if (openId) renderPanel();
+    }, () => setSync('err'));
+  }
+
+  async function boot() {
+    try {
+      const r = await fetch('tasks.json', {cache: 'no-cache'});
+      if (!r.ok) throw new Error(r.status);
+      D = await r.json();
+    } catch (e) {
+      $('board').innerHTML = '<div class="fatal"><h2>Не загрузился список задач</h2><p>Файл tasks.json недоступен. Обновите страницу.</p></div>';
+      setSync('err'); return;
+    }
+    D.tasks.forEach((t, i) => {
+      byId.set(t.id, t); order.set(t.id, i);
+      t._hay = [t.id, t.title, t.module, ...(t.req || []), ...(t.req || []).map(r => D.requirements[r]?.t || ''), ...(t.sub || []).map(s => s.t)].join(' ').toLowerCase();
+    });
+    for (const t of D.tasks) for (const d of t.deps || []) { if (!rev.has(d)) rev.set(d, []); rev.get(d).push(t.id); }
+    restore(); buildChrome(); bind(); render();
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (byId.has(h)) openPanel(h);
+    connect();
+  }
+  boot();
+})();
+</script>

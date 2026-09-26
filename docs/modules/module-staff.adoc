@@ -1,0 +1,9 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Description
+|«Карточка врача»: сотрудники, специализации, смены и шаблоны смен. 
++
+От staff зависят schedule — через `staff :: api` и iam — через `staff :: events` (подписка на события).
+|Base package
+|`kz.dentify.staff`
+|===

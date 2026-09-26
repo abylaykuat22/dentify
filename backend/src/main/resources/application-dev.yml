@@ -1,0 +1,59 @@
+# Локальная разработка: сервисы из deploy/compose.dev.yml (deploy/dev.ps1 up), все на 127.0.0.1.
+# Пароли берутся из deploy/.env (тот же файл, что читает Compose) — запускать из каталога backend/.
+# Переменные окружения с теми же именами (DENTIFY_APP_PASSWORD и т.д.) имеют приоритет.
+spring:
+  config:
+    import: optional:file:../deploy/.env[.properties]
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5433/dentify
+    password: ${DENTIFY_APP_PASSWORD}
+  flyway:
+    password: ${DENTIFY_OWNER_PASSWORD}
+    # Локальная база копит миграции из разных веток: пришедшая позже миграция с более ранней меткой
+    # применяется, а не роняет validate. Flyway пишет об этом WARN при каждом старте — ожидаемо.
+    # В test и prod — false (docs/architecture.md, «Файлы и версии»).
+    out-of-order: true
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: ${VALKEY_PASSWORD}
+
+# Спецификация OpenAPI и Swagger UI — только локально: http://127.0.0.1:8080/swagger-ui.html. UI есть при запуске
+# с Maven-профилем dev (./mvnw -Pdev spring-boot:run): без него на classpath только спецификация.
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+# Город в списке сессий — из локальной GeoIP-базы; её нет в репозитории, как скачать — backend/README.md
+# («GeoIP-база»). Нет файла — город пустой, приложение работает. Swagger UI (только dev) использует inline-стили.
+dentify:
+  # Dev-сид (iam.internal.DemoOwnerSeed): демо-клиника «Dentify Demo», филиал «Абая, 150» и владелец
+  # owner@demo.dentify.kz с паролем DENTIFY_DEV_OWNER_PASSWORD из deploy/.env (его создаёт deploy/dev.ps1 up).
+  dev:
+    owner-password: ${DENTIFY_DEV_OWNER_PASSWORD:}
+  security:
+    geoip:
+      database: ../deploy/geoip/dbip-city-lite.mmdb
+    content-security-policy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+
+# Как и сервисы Compose — только 127.0.0.1: из сети машины разработчика бэкенд не виден
+# (Caddy профиля proxy достаёт его через host.docker.internal).
+server:
+  address: 127.0.0.1
+
+management:
+  server:
+    address: 127.0.0.1
+  endpoint:
+    health:
+      show-components: always
+      show-details: always
+
+logging:
+  structured:
+    ecs:
+      service:
+        environment: dev

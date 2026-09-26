@@ -1,0 +1,10 @@
+# Скрипты, которые исполняются внутри Linux-контейнеров, обязаны иметь LF,
+# иначе на Windows (core.autocrlf=true) init-скрипты БД и MinIO падают на "\r".
+*.sh        text eol=lf
+Caddyfile*  text eol=lf
+*.yml       text eol=lf
+.env.example text eol=lf
+*.ps1        text eol=crlf
+# Спецификация OpenAPI пишется тестом OpenApiContractTests с LF: иначе на Windows тест переписывал бы
+# файл после каждого checkout, а CI-проверка «спека совпадает с закоммиченной» видела бы разницу.
+api/openapi.json text eol=lf

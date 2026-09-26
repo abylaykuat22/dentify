@@ -1,0 +1,638 @@
+{
+ "v": 3,
+ "attachments": {},
+ "boards": {
+  "Raspisanie-Den.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "День",
+   "page": "raspisanie"
+  },
+  "Raspisanie-Nedelya.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Неделя врача",
+   "page": "raspisanie"
+  },
+  "Zapis-1.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Новая запись · 1 Пациент",
+   "page": "raspisanie"
+  },
+  "Zapis.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 1200,
+   "h": 820,
+   "title": "Новая запись · 2 Врач и время",
+   "page": "raspisanie"
+  },
+  "Zapis-3.dc.html": {
+   "x": 1280,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Новая запись · 3 Услуги",
+   "page": "raspisanie"
+  },
+  "Perenos-Otmena.dc.html": {
+   "x": 2800,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Перенос и отмена",
+   "page": "raspisanie"
+  },
+  "Arhiv.dc.html": {
+   "x": 0,
+   "y": 2040,
+   "w": 1440,
+   "h": 900,
+   "title": "Архив записей",
+   "page": "raspisanie"
+  },
+  "Pacienty.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Список",
+   "page": "pacienty"
+  },
+  "Pacient-Novyj.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Новый пациент",
+   "page": "pacienty"
+  },
+  "Pacient-Osnovnoe.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Карточка · Основное",
+   "page": "pacienty"
+  },
+  "Pacient.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Карточка · Медкарта",
+   "page": "pacienty"
+  },
+  "Pacient-Vizity.dc.html": {
+   "x": 1520,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Карточка · Визиты",
+   "page": "pacienty"
+  },
+  "Pacient-Fajly.dc.html": {
+   "x": 3040,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Карточка · Файлы",
+   "page": "pacienty"
+  },
+  "Priem.dc.html": {
+   "x": 0,
+   "y": 2040,
+   "w": 1440,
+   "h": 900,
+   "title": "Запись приёма",
+   "page": "pacienty"
+  },
+  "Vrachi.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Сотрудники",
+   "page": "vrachi"
+  },
+  "Vrachi-Grafiki.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Графики",
+   "page": "vrachi"
+  },
+  "Vrach-Profil.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Врач · Профиль",
+   "page": "vrachi"
+  },
+  "Vrach-Grafik.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Врач · График",
+   "page": "vrachi"
+  },
+  "Vrach-Zapisi.dc.html": {
+   "x": 1520,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Врач · Записи",
+   "page": "vrachi"
+  },
+  "Vrach-Dostup.dc.html": {
+   "x": 3040,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Врач · Доступ",
+   "page": "vrachi"
+  },
+  "Vrach-Uvolnenie.dc.html": {
+   "x": 0,
+   "y": 2040,
+   "w": 1440,
+   "h": 900,
+   "title": "Увольнение",
+   "page": "vrachi"
+  },
+  "Sklad-Ostatki.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Остатки",
+   "page": "sklad"
+  },
+  "Sklad-Nomenklatura.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Номенклатура",
+   "page": "sklad"
+  },
+  "Sklad-Dokumenty.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Документы",
+   "page": "sklad"
+  },
+  "Sklad-Prihod.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Приход",
+   "page": "sklad"
+  },
+  "Sklad-Inventarizaciya.dc.html": {
+   "x": 1520,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Инвентаризация",
+   "page": "sklad"
+  },
+  "Sklad-Postavshchiki.dc.html": {
+   "x": 3040,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Поставщики и склады",
+   "page": "sklad"
+  },
+  "Klinika-Profil.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Профиль",
+   "page": "klinika"
+  },
+  "Klinika-Filialy.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Филиалы",
+   "page": "klinika"
+  },
+  "Klinika-Kresla.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Кресла",
+   "page": "klinika"
+  },
+  "Klinika-Prajs.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Прайс",
+   "page": "klinika"
+  },
+  "Klinika-Spravochniki.dc.html": {
+   "x": 1520,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Справочники",
+   "page": "klinika"
+  },
+  "Klinika-Nastrojki.dc.html": {
+   "x": 3040,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Настройки",
+   "page": "klinika"
+  },
+  "Dostupy-Sotrudniki.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Сотрудники",
+   "page": "dostupy"
+  },
+  "Dostupy-Priglashenie.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Приглашение",
+   "page": "dostupy"
+  },
+  "Dostupy-Roli.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Роли и права",
+   "page": "dostupy"
+  },
+  "Dostupy-Zhurnal.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Журнал действий",
+   "page": "dostupy"
+  },
+  "Dostupy-Vhody.dc.html": {
+   "x": 1520,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Входы и сессии",
+   "page": "dostupy"
+  },
+  "Vhod.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Вход",
+   "page": "obshchee"
+  },
+  "Parol.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Восстановление пароля",
+   "page": "obshchee"
+  },
+  "Priglashenie.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Приглашение сотрудника",
+   "page": "obshchee"
+  },
+  "VyborKliniki.dc.html": {
+   "x": 0,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Выбор клиники",
+   "page": "obshchee"
+  },
+  "Registraciya-1.dc.html": {
+   "x": 1520,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Регистрация · 1 Клиника",
+   "page": "obshchee"
+  },
+  "Registraciya-2.dc.html": {
+   "x": 3040,
+   "y": 1020,
+   "w": 1440,
+   "h": 900,
+   "title": "Регистрация · 2 Филиал и кресла",
+   "page": "obshchee"
+  },
+  "Profil.dc.html": {
+   "x": 0,
+   "y": 2040,
+   "w": 1440,
+   "h": 900,
+   "title": "Мой профиль",
+   "page": "obshchee"
+  },
+  "Sostoyaniya.dc.html": {
+   "x": 1520,
+   "y": 2040,
+   "w": 1440,
+   "h": 900,
+   "title": "Пустые и служебные состояния",
+   "page": "obshchee"
+  },
+  "Poisk.dc.html": {
+   "x": 3040,
+   "y": 2040,
+   "w": 1200,
+   "h": 760,
+   "title": "Поиск Ctrl K",
+   "page": "obshchee"
+  },
+  "Telefon.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Расписание",
+   "page": "telefon"
+  },
+  "Telefon-Pacient.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Карточка пациента",
+   "page": "telefon"
+  },
+  "Telefon-Zapis.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Новая запись",
+   "page": "telefon"
+  },
+  "Telefon-Eshche.dc.html": {
+   "x": 0,
+   "y": 964,
+   "w": 390,
+   "h": 844,
+   "title": "Меню «Ещё»",
+   "page": "telefon"
+  },
+  "Sistema.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1200,
+   "title": "Дизайн-система «Кресло»",
+   "page": "sistema"
+  },
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "A · «Эмаль»",
+   "page": "napravleniya"
+  },
+  "Karta.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "B · «Карта»",
+   "page": "napravleniya"
+  },
+  "Kreslo.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "C · «Кресло» — выбрано",
+   "page": "napravleniya"
+  }
+ },
+ "createdOnFiles": {
+  "at": "2026-09-24T14:46:57Z",
+  "v": 1
+ },
+ "designSystems": [],
+ "launch": {
+  "view": "canvas",
+  "page": "raspisanie"
+ },
+ "notes": {
+  "t_raspisanie": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Расписание",
+   "maxW": 4480,
+   "w": 240,
+   "page": "raspisanie"
+  },
+  "t_pacienty": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Пациенты",
+   "maxW": 4480,
+   "w": 240,
+   "page": "pacienty"
+  },
+  "t_vrachi": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Врачи",
+   "maxW": 4480,
+   "w": 240,
+   "page": "vrachi"
+  },
+  "t_sklad": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Склад",
+   "maxW": 4480,
+   "w": 240,
+   "page": "sklad"
+  },
+  "t_klinika": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Клиника",
+   "maxW": 4480,
+   "w": 240,
+   "page": "klinika"
+  },
+  "t_dostupy": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Доступы",
+   "maxW": 4480,
+   "w": 240,
+   "page": "dostupy"
+  },
+  "t_obshchee": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Вход и общее",
+   "maxW": 4480,
+   "w": 240,
+   "page": "obshchee"
+  },
+  "t_telefon": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Телефон",
+   "maxW": 1440,
+   "w": 240,
+   "page": "telefon"
+  },
+  "t_napravleniya": {
+   "kind": "title1",
+   "x": 0,
+   "y": -300,
+   "text": "Направления",
+   "maxW": 4480,
+   "w": 240,
+   "page": "napravleniya"
+  }
+ },
+ "order": [
+  "Raspisanie-Den.dc.html",
+  "Raspisanie-Nedelya.dc.html",
+  "Zapis-1.dc.html",
+  "Zapis.dc.html",
+  "Zapis-3.dc.html",
+  "Perenos-Otmena.dc.html",
+  "Arhiv.dc.html",
+  "Pacienty.dc.html",
+  "Pacient-Novyj.dc.html",
+  "Pacient-Osnovnoe.dc.html",
+  "Pacient.dc.html",
+  "Pacient-Vizity.dc.html",
+  "Pacient-Fajly.dc.html",
+  "Priem.dc.html",
+  "Vrachi.dc.html",
+  "Vrachi-Grafiki.dc.html",
+  "Vrach-Profil.dc.html",
+  "Vrach-Grafik.dc.html",
+  "Vrach-Zapisi.dc.html",
+  "Vrach-Dostup.dc.html",
+  "Vrach-Uvolnenie.dc.html",
+  "Sklad-Ostatki.dc.html",
+  "Sklad-Nomenklatura.dc.html",
+  "Sklad-Dokumenty.dc.html",
+  "Sklad-Prihod.dc.html",
+  "Sklad-Inventarizaciya.dc.html",
+  "Sklad-Postavshchiki.dc.html",
+  "Klinika-Profil.dc.html",
+  "Klinika-Filialy.dc.html",
+  "Klinika-Kresla.dc.html",
+  "Klinika-Prajs.dc.html",
+  "Klinika-Spravochniki.dc.html",
+  "Klinika-Nastrojki.dc.html",
+  "Dostupy-Sotrudniki.dc.html",
+  "Dostupy-Priglashenie.dc.html",
+  "Dostupy-Roli.dc.html",
+  "Dostupy-Zhurnal.dc.html",
+  "Dostupy-Vhody.dc.html",
+  "Vhod.dc.html",
+  "Parol.dc.html",
+  "Priglashenie.dc.html",
+  "VyborKliniki.dc.html",
+  "Registraciya-1.dc.html",
+  "Registraciya-2.dc.html",
+  "Profil.dc.html",
+  "Sostoyaniya.dc.html",
+  "Poisk.dc.html",
+  "Telefon.dc.html",
+  "Telefon-Pacient.dc.html",
+  "Telefon-Zapis.dc.html",
+  "Telefon-Eshche.dc.html",
+  "Sistema.dc.html",
+  "Main.dc.html",
+  "Karta.dc.html",
+  "Kreslo.dc.html"
+ ],
+ "pages": [
+  {
+   "id": "raspisanie",
+   "name": "Расписание"
+  },
+  {
+   "id": "pacienty",
+   "name": "Пациенты"
+  },
+  {
+   "id": "vrachi",
+   "name": "Врачи"
+  },
+  {
+   "id": "sklad",
+   "name": "Склад"
+  },
+  {
+   "id": "klinika",
+   "name": "Клиника"
+  },
+  {
+   "id": "dostupy",
+   "name": "Доступы"
+  },
+  {
+   "id": "obshchee",
+   "name": "Вход и общее"
+  },
+  {
+   "id": "telefon",
+   "name": "Телефон"
+  },
+  {
+   "id": "sistema",
+   "name": "Дизайн-система"
+  },
+  {
+   "id": "napravleniya",
+   "name": "Направления"
+  }
+ ],
+ "title": "Dentify — экраны MVP"
+}

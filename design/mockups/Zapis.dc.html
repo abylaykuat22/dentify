@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Новая запись — мастер</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1200px;height:820px;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+<div aria-hidden="true" style="position:absolute;left:16px;top:16px;bottom:16px;width:216px;border-radius:24px;background:#0F3D4C"></div>
+<div aria-hidden="true" style="position:absolute;left:256px;top:28px;width:380px;height:40px;border-radius:12px;background:#DDE2E8"></div>
+<div aria-hidden="true" style="position:absolute;left:256px;top:150px;right:24px;bottom:24px;border-radius:24px;background:#FFFFFF"></div>
+<div aria-hidden="true" style="position:absolute;inset:0;background:rgba(14,34,48,0.42)"></div>
+
+<section role="dialog" aria-modal="true" aria-labelledby="wiz-title" style="position:absolute;left:210px;top:36px;width:780px;height:748px;background:#FFFFFF;border-radius:28px;box-shadow:0 28px 70px rgba(14,34,48,0.30);display:flex;flex-direction:column;overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:26px 28px 16px">
+<h2 id="wiz-title" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:26px;letter-spacing:-0.02em">Новая запись</h2>
+<div style="flex-grow:1"></div>
+<button type="button" aria-label="Закрыть" style="width:44px;height:44px;border:0;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+
+<ol aria-label="Шаги" style="list-style:none;margin:0;padding:0 28px 20px;display:flex;align-items:center;gap:8px">
+<li style="height:40px;padding:0 16px 0 6px;display:flex;align-items:center;gap:8px;border-radius:999px;background:#ECEFF3;font-size:14px;font-weight:700">
+<span style="width:28px;height:28px;border-radius:50%;background:#0F3D4C;color:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>Айгерим Сейтқазы</li>
+<li aria-hidden="true" style="width:20px;height:2px;border-radius:2px;background:#D5DBE2"></li>
+<li aria-current="step" style="height:40px;padding:0 18px 0 6px;display:flex;align-items:center;gap:8px;border-radius:999px;background:#FFCB47;font-size:14px;font-weight:800">
+<span style="width:28px;height:28px;border-radius:50%;background:#0E2230;color:#FFCB47;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:700;font-size:14px">2</span>Врач и время</li>
+<li aria-hidden="true" style="width:20px;height:2px;border-radius:2px;background:#D5DBE2"></li>
+<li style="height:40px;padding:0 16px 0 6px;display:flex;align-items:center;gap:8px;border-radius:999px;border:2px solid #E1E6EC;font-size:14px;font-weight:700;color:#4F5B66">
+<span style="width:26px;height:26px;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:13px">3</span>Услуги<span style="font-weight:600;color:#5A6772">· можно пропустить</span></li>
+</ol>
+
+<div style="flex-grow:1;padding:4px 28px 20px;display:flex;flex-direction:column;gap:20px;min-height:0">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:13.5px;font-weight:800;color:#4F5B66">Специальность</span>
+<div role="radiogroup" aria-label="Специальность" style="display:flex;flex-wrap:wrap;gap:8px">
+<button type="button" role="radio" aria-checked="true" style="height:44px;padding:0 18px 0 14px;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFCB47" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Терапия</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Хирургия</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Ортодонтия</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Ортопедия</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Гигиена</button>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:13.5px;font-weight:800;color:#4F5B66">Врач</span>
+<div role="radiogroup" aria-label="Врач" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+<button type="button" role="radio" aria-checked="true" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid #0E2230;border-radius:20px;background:#FFFFFF;text-align:left">
+<span style="width:46px;height:46px;border-radius:50%;background:#1B8A8F;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:15px;flex-shrink:0">СА</span>
+<span style="display:flex;flex-direction:column;gap:2px;flex-grow:1"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">Сауле Ахметова</span><span style="font-size:13.5px;color:#5A6772">Ближайшее — завтра, 10:00</span></span>
+<span style="width:28px;height:28px;border-radius:50%;background:#FFCB47;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0E2230" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span>
+</button>
+<button type="button" role="radio" aria-checked="false" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid #E1E6EC;border-radius:20px;background:#FFFFFF;text-align:left">
+<span style="width:46px;height:46px;border-radius:50%;background:#5B4FD1;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:15px;flex-shrink:0">МО</span>
+<span style="display:flex;flex-direction:column;gap:2px;flex-grow:1"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">Мадина Оспанова</span><span style="font-size:13.5px;color:#5A6772">Ближайшее — сегодня, 16:30</span></span>
+<span style="width:28px;height:28px;border-radius:50%;border:2px solid #D5DBE2;flex-shrink:0"></span>
+</button>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:13.5px;font-weight:800;color:#4F5B66">День</span>
+<div role="radiogroup" aria-label="День" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px">
+<button type="button" role="radio" aria-checked="false" disabled style="height:66px;border:0;border-radius:18px;background:#F5F7F9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#8994A0;cursor:not-allowed"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Чт 24</span><span style="font-size:12.5px;font-weight:700">нет окон</span></button>
+<button type="button" role="radio" aria-checked="true" style="height:66px;border:0;border-radius:18px;background:#0E2230;color:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Пт 25</span><span style="font-size:12.5px;font-weight:700;color:#FFCB47">4 окна</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Сб 26</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">2 окна</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Пн 28</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">6 окон</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Вт 29</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">5 окон</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Ср 30</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">3 окна</span></button>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:800;color:#4F5B66">Время · Кресло 1</span>
+<span style="display:flex;padding:4px;border-radius:999px;background:#ECEFF3">
+<button type="button" aria-pressed="false" style="height:32px;padding:0 13px;border:0;border-radius:999px;background:transparent;font-size:13.5px;font-weight:700;color:#5A6772">30 мин</button>
+<button type="button" aria-pressed="false" style="height:32px;padding:0 13px;border:0;border-radius:999px;background:transparent;font-size:13.5px;font-weight:700;color:#5A6772">45</button>
+<button type="button" aria-pressed="true" style="height:32px;padding:0 13px;border:0;border-radius:999px;background:#FFFFFF;font-size:13.5px;font-weight:800">60</button>
+<button type="button" aria-pressed="false" style="height:32px;padding:0 13px;border:0;border-radius:999px;background:transparent;font-size:13.5px;font-weight:700;color:#5A6772">90</button>
+</span></span>
+<div role="radiogroup" aria-label="Время" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px">
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">09:00</button>
+<button type="button" role="radio" aria-checked="false" disabled style="height:48px;border:0;border-radius:999px;background:#F5F7F9;font-family:Rubik,sans-serif;font-weight:500;font-size:16px;color:#9AA4AE;text-decoration:line-through;cursor:not-allowed">09:30</button>
+<button type="button" role="radio" aria-checked="true" style="height:48px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">10:00</button>
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">11:30</button>
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">14:00</button>
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">15:00</button>
+</div>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;padding:16px 28px 22px;border-top:2px solid #F0F2F5">
+<button type="button" title="Вернуться к выбору пациента — выбор времени не сохранится" style="height:48px;padding:0 14px 0 8px;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:800"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>Назад</button>
+<span style="height:40px;padding:0 14px;border-radius:999px;background:#ECEFF3;display:inline-flex;align-items:center;font-size:14px;font-weight:700;white-space:nowrap">Пт 25.09 · 10:00–11:00 · Кресло 1</span>
+<span style="flex-grow:1"></span>
+<button type="button" style="height:48px;padding:0 20px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:15px;font-weight:800">Записать</button>
+<button type="button" style="height:48px;padding:0 18px 0 22px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFCB47;color:#0E2230;font-size:15px;font-weight:800">Услуги<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

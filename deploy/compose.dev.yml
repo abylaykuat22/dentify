@@ -1,0 +1,160 @@
+# Dentify — локальное окружение разработки (Docker Compose v2).
+#
+#   deploy/dev.ps1 up        (Windows)      deploy/dev.sh up       (bash)
+#
+# Все порты привязаны к 127.0.0.1: из сети машины разработчика ничего не видно.
+# Пароли — из deploy/.env (шаблон deploy/.env.example; dev.ps1/dev.sh создают .env при первом up).
+# Сервиса приложения (app) пока нет: backend и Vite запускаются на хосте. Его добавит T-PLT-15
+# (verify -e2e поднимает Compose целиком; PLT-26 «docker compose up поднимает рабочее приложение»).
+#
+# Образы закреплены тегом и digest: обновление — осознанное (новый тег + digest из
+# `docker buildx imagetools inspect <образ:тег>`), а не молчаливое при следующем pull.
+name: dentify
+
+x-common: &common
+  restart: unless-stopped
+  logging:
+    driver: local
+    options:
+      max-size: 10m
+      max-file: "3"
+
+services:
+  postgres:
+    <<: *common
+    image: postgres:18.6@sha256:5a5a84b19854a9ffaa54082c166ff4ec27473a361e496e5ea167f298f2da9722
+    environment:
+      POSTGRES_DB: dentify
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}
+      # читаются init-скриптом postgres/init/01-roles.sh при первом запуске тома
+      DENTIFY_OWNER_PASSWORD: ${DENTIFY_OWNER_PASSWORD:?set DENTIFY_OWNER_PASSWORD in deploy/.env}
+      DENTIFY_APP_PASSWORD: ${DENTIFY_APP_PASSWORD:?set DENTIFY_APP_PASSWORD in deploy/.env}
+    ports:
+      - "127.0.0.1:5433:5432" # 5432 на машине занят локальным PostgreSQL 15
+    volumes:
+      # PG 18+: том монтируется в /var/lib/postgresql (PGDATA = /var/lib/postgresql/18/docker)
+      - pgdata:/var/lib/postgresql
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # -h 127.0.0.1: пока идёт init, временный сервер слушает только сокет — healthy не раньше конца init
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d dentify"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+      start_interval: 1s
+
+  valkey:
+    <<: *common
+    image: valkey/valkey:8.1.10@sha256:640c5e62cea04b6d6f2084232651d0cc70362d31f4f805e7be94dbed6855e8f2
+    command: ["valkey-server", "--requirepass", "${VALKEY_PASSWORD:?set VALKEY_PASSWORD in deploy/.env}", "--appendonly", "yes"]
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD}
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "[ \"$$(valkey-cli -a \"$$VALKEY_PASSWORD\" --no-auth-warning ping)\" = PONG ]"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+      start_interval: 1s
+
+  mailpit:
+    <<: *common
+    image: axllent/mailpit:v1.31.2@sha256:74d609a42ec279aa63c6b4622a6fa9b5408d1ad5b1d76a1c4be40a265ce0863d
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    ports:
+      - "127.0.0.1:1025:1025" # SMTP
+      - "127.0.0.1:8025:8025" # веб-интерфейс
+    volumes:
+      - mailpit-data:/data
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+      start_interval: 1s
+
+  minio:
+    <<: *common
+    # Официальные образы minio/minio сняты с Docker Hub и Quay (2025); pgsty/minio — поддерживаемый
+    # сообществом форк того же сервера (AGPLv3). В проде — Object Storage в РК (Yandex Cloud kz1).
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z@sha256:b6bfe7239bfc83fb90d31612d9704d86039dd714f7904b3f1ad68f211e602372
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in deploy/.env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in deploy/.env}
+    ports:
+      - "127.0.0.1:9000:9000" # S3 API
+      - "127.0.0.1:9001:9001" # консоль
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:9000/minio/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+      start_interval: 1s
+
+  # Разовый сервис: приватный бакет + пользователь приложения. Отработал и вышел с кодом 0.
+  minio-init:
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z@sha256:cfc83108c3abb371f8fb84d99c1fdc88f8c237e022409b0081fb7c0a3be634dd
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/init/init.sh"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET: ${S3_BUCKET:?set S3_BUCKET in deploy/.env}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?set S3_ACCESS_KEY in deploy/.env}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?set S3_SECRET_KEY in deploy/.env}
+      MC_CONFIG_DIR: /tmp/.mc
+    volumes:
+      - ./minio/init.sh:/init/init.sh:ro
+    restart: "no"
+
+  # Только профилем proxy (deploy/dev.ps1 up -Proxy): прод-схема «один origin по HTTPS».
+  caddy:
+    <<: *common
+    image: caddy:2.11.4-alpine@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b
+    profiles: ["proxy"]
+    ports:
+      - "127.0.0.1:8443:8443"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+      start_interval: 1s
+
+volumes:
+  pgdata:
+    name: dentify-pgdata
+  valkey-data:
+    name: dentify-valkey-data
+  mailpit-data:
+    name: dentify-mailpit-data
+  minio-data:
+    name: dentify-minio-data
+  caddy-data:
+    name: dentify-caddy-data
+  caddy-config:
+    name: dentify-caddy-config

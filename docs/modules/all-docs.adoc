@@ -1,0 +1,35 @@
+== Dentify
+plantuml::components.puml[,,format=svg]
+
+== Склад
+plantuml::module-inventory.puml[,,format=svg]
+include::module-inventory.adoc[]
+
+== Медкарта
+plantuml::module-medical.puml[,,format=svg]
+include::module-medical.adoc[]
+
+== Пациенты
+plantuml::module-patient.puml[,,format=svg]
+include::module-patient.adoc[]
+
+== Платформа
+plantuml::module-platform.puml[,,format=svg]
+include::module-platform.adoc[]
+
+== Расписание
+plantuml::module-schedule.puml[,,format=svg]
+include::module-schedule.adoc[]
+
+== Сотрудники
+plantuml::module-staff.puml[,,format=svg]
+include::module-staff.adoc[]
+
+== Моя клиника
+plantuml::module-clinic.puml[,,format=svg]
+include::module-clinic.adoc[]
+
+== Доступы и аккаунты
+plantuml::module-iam.puml[,,format=svg]
+include::module-iam.adoc[]
+

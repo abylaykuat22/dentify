@@ -1,0 +1,1577 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "description" : "REST API Dentify. Ошибки — ProblemDetail по RFC 9457 с полями code, traceId и errors; списки — PageResponse с параметрами page, size, sort, q.",
+    "title" : "Dentify API",
+    "version" : "v1"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "tags" : [ {
+    "description" : "Свой аккаунт",
+    "name" : "account"
+  }, {
+    "description" : "Вход, выход и CSRF-токен",
+    "name" : "auth"
+  }, {
+    "description" : "Журнал действий клиники",
+    "name" : "audit"
+  } ],
+  "paths" : {
+    "/api/v1/account/sessions" : {
+      "delete" : {
+        "description" : "По умолчанию — все, кроме текущей. С includeCurrent=true — все, включая текущую: выход везде.",
+        "operationId" : "terminateAccountSessions",
+        "parameters" : [ {
+          "description" : "Завершить и текущую сессию",
+          "in" : "query",
+          "name" : "includeCurrent",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Сессии завершены"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Конфликт версии записи или уникальности"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нарушено бизнес-правило"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Завершить сессии аккаунта",
+        "tags" : [ "account" ]
+      },
+      "get" : {
+        "description" : "Сначала последние по активности; текущая помечена current. Список короткий — по одной сессии на браузер, поэтому без страниц и поиска.",
+        "operationId" : "listAccountSessions",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AccountSessionResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Активные сессии своего аккаунта",
+        "tags" : [ "account" ]
+      }
+    },
+    "/api/v1/account/sessions/{id}" : {
+      "delete" : {
+        "description" : "Сессия гаснет сразу. Текущую тоже можно завершить — это выход. Чужая или уже завершённая сессия — 404.",
+        "operationId" : "terminateAccountSession",
+        "parameters" : [ {
+          "description" : "Открытый id сессии из списка",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Сессия завершена"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Не найдено или принадлежит другой клинике"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Конфликт версии записи или уникальности"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нарушено бизнес-правило"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Завершить сессию",
+        "tags" : [ "account" ]
+      }
+    },
+    "/api/v1/audit-events" : {
+      "get" : {
+        "description" : "Сначала новые. Фильтры — вместе: период [from, to), кто (accountId или staffId), категория (module), тип объекта, объект (entityId — история одного объекта), действие и поиск q по имени объекта и тексту события. Интерфейс всегда передаёт период явно — from и to; без from и entityId сервер берёт последние 30 дней до to; с q период не длиннее 366 дней, иначе 400 audit.period.too-long. IP событий — маской для всех ролей.",
+        "operationId" : "listAuditEvents",
+        "parameters" : [ {
+          "description" : "Начало периода включительно, ISO 8601; нет — 30 дней до конца периода, у истории объекта — без начала",
+          "example" : "2026-09-24T00:00:00+05:00",
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "description" : "Конец периода не включительно, ISO 8601",
+          "example" : "2026-09-25T00:00:00+05:00",
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "description" : "Кто: аккаунт",
+          "in" : "query",
+          "name" : "accountId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "description" : "Кто: сотрудник",
+          "in" : "query",
+          "name" : "staffId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "description" : "Категория — модуль объекта",
+          "example" : "schedule",
+          "in" : "query",
+          "name" : "module",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "[a-z][a-z0-9.-]{0,99}"
+          }
+        }, {
+          "description" : "Тип объекта",
+          "example" : "schedule.appointment",
+          "in" : "query",
+          "name" : "entityType",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "[a-z][a-z0-9.-]{0,99}"
+          }
+        }, {
+          "description" : "Объект: история одного объекта",
+          "in" : "query",
+          "name" : "entityId",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "description" : "Действие",
+          "example" : "rescheduled",
+          "in" : "query",
+          "name" : "action",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "pattern" : "[a-z][a-z0-9.-]{0,99}"
+          }
+        }, {
+          "description" : "Номер страницы с 0",
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "description" : "Размер страницы; больше 100 — вернётся 100",
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "description" : "Сортировка: поля через запятую или повтором параметра, минус — по убыванию",
+          "in" : "query",
+          "name" : "sort",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "at", "-at" ]
+            }
+          }
+        }, {
+          "description" : "Строка поиска",
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 100
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseAuditEventResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "События журнала",
+        "tags" : [ "audit" ]
+      }
+    },
+    "/api/v1/audit-events/{id}" : {
+      "get" : {
+        "description" : "Событие другой клиники — 404, как несуществующее.",
+        "operationId" : "getAuditEvent",
+        "parameters" : [ {
+          "description" : "Id события",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuditEventResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Не найдено или принадлежит другой клинике"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Событие журнала",
+        "tags" : [ "audit" ]
+      }
+    },
+    "/api/v1/auth/csrf" : {
+      "get" : {
+        "description" : "Ставит cookie XSRF-TOKEN, если её нет. Её значение отправляется в заголовке X-XSRF-TOKEN с каждым изменяющим запросом, иначе ответ — 403 error.csrf.",
+        "operationId" : "getCsrfToken",
+        "responses" : {
+          "204" : {
+            "description" : "Cookie XSRF-TOKEN установлена или уже была"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Выдать CSRF-токен",
+        "tags" : [ "auth" ]
+      }
+    },
+    "/api/v1/auth/login" : {
+      "post" : {
+        "description" : "Нужен CSRF-токен: cookie XSRF-TOKEN из GET /api/v1/auth/csrf и её значение в заголовке X-XSRF-TOKEN. При успехе — новая cookie сессии DENTIFY_SESSION (HttpOnly, Secure, SameSite=Lax; с rememberMe — на 30 дней, иначе до закрытия браузера) и новый CSRF-токен. Ответ — как GET /api/v1/me: при одном активном членстве с одним филиалом клиника и филиал уже выбраны (context), иначе context пустой и интерфейс показывает выбор клиники. Неверный пароль и неизвестный логин — один ответ 401 iam.login.invalid. Лимиты: 5 неверных попыток на логин за 15 минут, затем 429 на 15 минут даже с верным паролем; 30 попыток с IP в минуту.",
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description" : "Вход выполнен"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "iam.login.invalid — неверный телефон, e-mail или пароль"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "iam.login.access-disabled — доступ отключён; error.csrf — нет CSRF-токена"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Конфликт версии записи или уникальности"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нарушено бизнес-правило"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "error.too-many-login-attempts — слишком много попыток; error.too-many-requests — сервер занят проверкой других паролей, пароль не проверен и попыткой не считается. Retry-After в секундах",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Войти по телефону или e-mail и паролю",
+        "tags" : [ "auth" ]
+      }
+    },
+    "/api/v1/auth/logout" : {
+      "post" : {
+        "description" : "Сессия завершается на сервере сразу и необратимо, cookie сессии и CSRF-токена стираются. Без сессии — тоже 204. Нужен CSRF-токен.",
+        "operationId" : "logout",
+        "responses" : {
+          "204" : {
+            "description" : "Выход выполнен"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Конфликт версии записи или уникальности"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нарушено бизнес-правило"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Выйти",
+        "tags" : [ "auth" ]
+      }
+    },
+    "/api/v1/me" : {
+      "get" : {
+        "description" : "Аккаунт, членства во всех клиниках (с филиалами, в которые можно войти) и клиника с филиалом сессии. context пустой — интерфейс показывает выбор клиники. Интерфейс перезапрашивает его при фокусе вкладки и после ответа 403.",
+        "operationId" : "getMe",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет права на действие"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Вошедший аккаунт",
+        "tags" : [ "account" ]
+      }
+    },
+    "/api/v1/me/context" : {
+      "post" : {
+        "description" : "Клиника — из своих активных членств, филиал — из доступных этому членству. Без branchId выбирается единственный доступный филиал, если он один. Дальше все запросы сессии идут в этой клинике. Нужен CSRF-токен.",
+        "operationId" : "selectContext",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SelectContextRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description" : "Клиника выбрана; ответ — как GET /api/v1/me"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Неверные данные запроса; ошибки полей — в errors"
+          },
+          "401" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нет сессии"
+          },
+          "403" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "iam.membership.disabled — доступ к клинике отключён; error.csrf — нет CSRF-токена"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "error.not-found — нет членства в клинике или филиал ему недоступен"
+          },
+          "409" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Конфликт версии записи или уникальности"
+          },
+          "422" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Нарушено бизнес-правило"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Превышен лимит запросов; через сколько повторить — в заголовке Retry-After",
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Через сколько секунд повторить запрос",
+                "required" : true,
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "minimum" : 1
+                }
+              }
+            }
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Внутренняя ошибка: только общий текст и traceId"
+          }
+        },
+        "summary" : "Выбрать клинику и филиал",
+        "tags" : [ "account" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "AccountSessionResponse" : {
+        "type" : "object",
+        "description" : "Активная сессия аккаунта",
+        "properties" : {
+          "browser" : {
+            "type" : [ "string", "null" ],
+            "description" : "Браузер с основной версией; null — не распознан",
+            "example" : "Chrome 140"
+          },
+          "city" : {
+            "type" : [ "string", "null" ],
+            "description" : "Город по IP из локальной GeoIP-базы; null — не определён",
+            "example" : "Almaty"
+          },
+          "current" : {
+            "type" : "boolean",
+            "description" : "Сессия, из которой пришёл запрос"
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "Открытый id сессии: по нему сессию завершают",
+            "example" : "q3Vd0bQ1m9m9uYcX4nZ1wA"
+          },
+          "ip" : {
+            "type" : [ "string", "null" ],
+            "description" : "IP входа маской",
+            "example" : "95.56.•.•"
+          },
+          "lastActiveAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "Время последнего запроса"
+          },
+          "os" : {
+            "type" : [ "string", "null" ],
+            "description" : "Операционная система; null — не распознана",
+            "example" : "Windows 10"
+          },
+          "rememberMe" : {
+            "type" : "boolean",
+            "description" : "Вход с «Запомнить»: сессия и cookie действуют 30 дней от входа, активность срок не продлевает, продлевает только новый вход"
+          },
+          "signedInAt" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "Время входа"
+          }
+        },
+        "required" : [ "current", "id", "lastActiveAt", "rememberMe", "signedInAt" ]
+      },
+      "AuditChangeResponse" : {
+        "type" : "object",
+        "description" : "Поле в разнице было → стало",
+        "properties" : {
+          "field" : {
+            "type" : "string",
+            "description" : "Путь поля в снимке объекта",
+            "example" : "date"
+          },
+          "from" : {
+            "type" : [ "string", "null" ],
+            "description" : "Было, отформатировано для показа; null — пусто",
+            "example" : "24.09.2026"
+          },
+          "label" : {
+            "type" : "string",
+            "description" : "Название поля на языке запроса",
+            "example" : "Дата"
+          },
+          "to" : {
+            "type" : [ "string", "null" ],
+            "description" : "Стало, отформатировано для показа; null — пусто",
+            "example" : "25.09.2026"
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "Вид значения; secret — пароль или токен: только отметка, что изменился",
+            "enum" : [ "text", "number", "boolean", "date", "time", "datetime", "instant", "enum", "list", "json", "secret" ]
+          }
+        },
+        "required" : [ "field", "label", "type" ]
+      },
+      "AuditEventResponse" : {
+        "type" : "object",
+        "description" : "Событие журнала действий",
+        "properties" : {
+          "accountId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid",
+            "description" : "Кто: аккаунт; null — система"
+          },
+          "action" : {
+            "type" : "string",
+            "description" : "Действие",
+            "example" : "rescheduled"
+          },
+          "actorName" : {
+            "type" : "string",
+            "description" : "Имя сотрудника; для системы и неизвестного аккаунта — общий текст",
+            "example" : "Динара Алиева"
+          },
+          "at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "Когда"
+          },
+          "changes" : {
+            "type" : "array",
+            "description" : "Разница было → стало по полям; пусто — без разницы",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditChangeResponse"
+            }
+          },
+          "entityId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid",
+            "description" : "Id объекта: ссылка Открыть; null — событие не про один объект"
+          },
+          "entityLabel" : {
+            "type" : [ "string", "null" ],
+            "description" : "Понятное имя объекта на момент события; ИИН и телефон без права — маской",
+            "example" : "Айгерим Сейтқазы"
+          },
+          "entityType" : {
+            "type" : "string",
+            "description" : "Тип объекта <модуль>.<объект>",
+            "example" : "schedule.appointment"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Id события"
+          },
+          "ip" : {
+            "type" : [ "string", "null" ],
+            "description" : "IP маской для всех ролей, полный IP наружу не отдаётся; null — событие вне HTTP-запроса",
+            "example" : "95.56.•.•"
+          },
+          "module" : {
+            "type" : "string",
+            "description" : "Модуль объекта — категория журнала",
+            "example" : "schedule"
+          },
+          "staffId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid",
+            "description" : "Кто: сотрудник клиники; null — система или аккаунт без сотрудника"
+          },
+          "text" : {
+            "type" : "string",
+            "description" : "Текст события на языке запроса",
+            "example" : "Перенос записи: Айгерим Сейтқазы"
+          }
+        },
+        "required" : [ "action", "actorName", "at", "changes", "entityType", "id", "module", "text" ]
+      },
+      "BranchRef" : {
+        "type" : "object",
+        "description" : "Филиал клиники",
+        "properties" : {
+          "city" : {
+            "type" : "string",
+            "description" : "Город",
+            "example" : "Алматы"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Филиал"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Название",
+            "example" : "Абая, 150"
+          }
+        },
+        "required" : [ "city", "id", "name" ]
+      },
+      "ClinicRef" : {
+        "type" : "object",
+        "description" : "Клиника",
+        "properties" : {
+          "city" : {
+            "type" : "string",
+            "description" : "Город",
+            "example" : "Алматы"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Клиника"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "Название",
+            "example" : "Dentify Demo"
+          }
+        },
+        "required" : [ "city", "id", "name" ]
+      },
+      "LoginRequest" : {
+        "type" : "object",
+        "description" : "Вход по телефону или e-mail и паролю",
+        "properties" : {
+          "login" : {
+            "type" : "string",
+            "description" : "Телефон в любой записи или e-mail: есть @ — e-mail, иначе телефон",
+            "example" : "+7 707 123 45 67",
+            "maxLength" : 320,
+            "minLength" : 0
+          },
+          "password" : {
+            "type" : "string",
+            "format" : "password",
+            "description" : "Пароль",
+            "maxLength" : 1024,
+            "minLength" : 0,
+            "writeOnly" : true
+          },
+          "rememberMe" : {
+            "type" : "boolean",
+            "description" : "Запомнить устройство: сессия и cookie на 30 дней от входа. Без галочки cookie живёт до закрытия браузера, а сессия — до 12 часов бездействия. В интерфейсе галочка включена по умолчанию"
+          }
+        },
+        "required" : [ "login", "password", "rememberMe" ]
+      },
+      "MeAccount" : {
+        "type" : "object",
+        "description" : "Аккаунт",
+        "properties" : {
+          "email" : {
+            "type" : [ "string", "null" ],
+            "description" : "E-mail; null — нет",
+            "example" : "dinara@example.kz"
+          },
+          "fullName" : {
+            "type" : "string",
+            "description" : "ФИО",
+            "example" : "Алиева Динара"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Аккаунт"
+          },
+          "initials" : {
+            "type" : "string",
+            "description" : "Инициалы для аватара: первые буквы двух первых слов ФИО",
+            "example" : "АД"
+          },
+          "language" : {
+            "type" : "string",
+            "description" : "Язык интерфейса",
+            "enum" : [ "ru", "kk" ],
+            "example" : "ru"
+          },
+          "phone" : {
+            "type" : [ "string", "null" ],
+            "description" : "Телефон в E.164; null — нет",
+            "example" : "+77071234567"
+          }
+        },
+        "required" : [ "fullName", "id", "initials", "language" ]
+      },
+      "MeContext" : {
+        "type" : "object",
+        "description" : "Клиника и филиал сессии",
+        "properties" : {
+          "branch" : {
+            "description" : "Филиал; null — не выбран",
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/BranchRef"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "clinic" : {
+            "$ref" : "#/components/schemas/ClinicRef",
+            "description" : "Клиника"
+          }
+        },
+        "required" : [ "clinic" ]
+      },
+      "MeMembership" : {
+        "type" : "object",
+        "description" : "Членство в клинике",
+        "properties" : {
+          "branches" : {
+            "type" : "array",
+            "description" : "Филиалы, в которые можно войти; у отключённого членства и приглашения — пусто",
+            "items" : {
+              "$ref" : "#/components/schemas/BranchRef"
+            }
+          },
+          "clinic" : {
+            "$ref" : "#/components/schemas/ClinicRef",
+            "description" : "Клиника"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Членство"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "ACTIVE — можно войти; DISABLED — доступ отключён; INVITED — приглашение не принято",
+            "enum" : [ "INVITED", "ACTIVE", "DISABLED" ]
+          }
+        },
+        "required" : [ "branches", "clinic", "id", "status" ]
+      },
+      "MeResponse" : {
+        "type" : "object",
+        "description" : "Вошедший аккаунт, его клиники и клиника сессии",
+        "properties" : {
+          "account" : {
+            "$ref" : "#/components/schemas/MeAccount",
+            "description" : "Аккаунт"
+          },
+          "context" : {
+            "description" : "Клиника и филиал сессии; null — клиника не выбрана",
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/MeContext"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "memberships" : {
+            "type" : "array",
+            "description" : "Членства во всех клиниках, в порядке создания, включая отключённые и приглашения",
+            "items" : {
+              "$ref" : "#/components/schemas/MeMembership"
+            }
+          }
+        },
+        "required" : [ "account", "memberships" ]
+      },
+      "PageResponseAuditEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditEventResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "items", "page", "size", "total" ]
+      },
+      "ProblemDetail" : {
+        "type" : "object",
+        "description" : "Ошибка API по RFC 9457 с расширениями Dentify: code, traceId, errors, modifiedAt/modifiedBy/modifiedByName у конфликта версии",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "Машинный код ошибки, он же ключ сообщения",
+            "example" : "error.validation"
+          },
+          "detail" : {
+            "type" : "string",
+            "description" : "Текст ошибки на языке пользователя: его показывает интерфейс",
+            "example" : "Проверьте правильность заполнения полей."
+          },
+          "errors" : {
+            "type" : [ "array", "null" ],
+            "description" : "Ошибки полей; есть, если ошибка касается полей формы или параметров",
+            "items" : {
+              "$ref" : "#/components/schemas/ProblemFieldError"
+            }
+          },
+          "instance" : {
+            "type" : [ "string", "null" ],
+            "description" : "Путь запроса",
+            "example" : "/api/v1/patients"
+          },
+          "modifiedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time",
+            "description" : "Конфликт версии (409 error.version-conflict): когда запись изменили последний раз",
+            "example" : "2026-10-01T06:38:00Z"
+          },
+          "modifiedBy" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid",
+            "description" : "Конфликт версии: id аккаунта автора последней правки; нет — правка системная"
+          },
+          "modifiedByName" : {
+            "type" : [ "string", "null" ],
+            "description" : "Конфликт версии: имя автора последней правки в клинике для плашки в интерфейсе",
+            "example" : "Динара Алиева"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "HTTP-статус",
+            "example" : 400
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "Заголовок по HTTP-статусу на языке пользователя",
+            "example" : "Некорректный запрос"
+          },
+          "traceId" : {
+            "type" : [ "string", "null" ],
+            "description" : "Идентификатор трассировки запроса: тот же, что в логах, его сообщают поддержке",
+            "example" : "68f1c0a2b3d4e5f60718293a4b5c6d7e"
+          },
+          "type" : {
+            "type" : [ "string", "null" ],
+            "description" : "URI типа ошибки. Нет поля — about:blank по RFC 9457: тип определяется HTTP-статусом",
+            "example" : "about:blank"
+          }
+        },
+        "required" : [ "code", "detail", "status", "title" ]
+      },
+      "ProblemFieldError" : {
+        "type" : "object",
+        "description" : "Ошибка поля формы или параметра запроса",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "Машинный код ошибки поля",
+            "example" : "validation.not-blank"
+          },
+          "field" : {
+            "type" : [ "string", "null" ],
+            "description" : "Путь поля: iin, items[0].quantity, name.ru; null — ошибка всей формы",
+            "example" : "iin"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "Текст ошибки на языке пользователя",
+            "example" : "Заполните поле."
+          }
+        },
+        "required" : [ "code", "message" ]
+      },
+      "SelectContextRequest" : {
+        "type" : "object",
+        "description" : "Выбор клиники и филиала сессии",
+        "properties" : {
+          "branchId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid",
+            "description" : "Филиал из branches этого членства; null — единственный доступный филиал, если он один, иначе филиал не выбран"
+          },
+          "clinicId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Клиника из memberships ответа /api/v1/me"
+          }
+        },
+        "required" : [ "clinicId" ]
+      }
+    }
+  }
+}

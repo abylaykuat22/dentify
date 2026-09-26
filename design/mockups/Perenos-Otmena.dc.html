@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Перенос и отмена записи</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;display:flex;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+
+<aside style="width:216px;flex-shrink:0;margin:16px;border-radius:24px;background:#0F3D4C;color:#FFFFFF;padding:24px 14px 18px;display:flex;flex-direction:column;gap:28px">
+<span style="font-family:Rubik,sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;padding:0 10px">dentify<span style="color:#FFCB47">.</span></span>
+<nav aria-label="Разделы" style="display:flex;flex-direction:column;gap:4px">
+<a href="#" aria-current="page" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;background:#FFCB47;color:#0E2230;font-weight:700;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Расписание</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg>Пациенты</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v5a5 5 0 0 0 10 0V3"></path><path d="M10 13v2a5 5 0 0 0 10 0v-2"></path><circle cx="20" cy="10.5" r="2"></circle></svg>Врачи</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"></path><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"></path></svg>Склад</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 21v-4h6v4M8.5 7.5h1M14.5 7.5h1M8.5 11.5h1M14.5 11.5h1"></path></svg>Клиника</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>Доступы</a>
+</nav>
+<div style="flex-grow:1"></div>
+<a href="#" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.08);color:#FFFFFF;text-decoration:none">
+<span style="width:38px;height:38px;border-radius:50%;background:#FFCB47;color:#0E2230;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px">ДА</span>
+<span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-size:14px;font-weight:700">Динара</span><span style="font-size:12px;color:#C5D6DB">Администратор</span></span>
+</a>
+</aside>
+
+<div aria-hidden="true" style="flex-grow:1;min-width:0;padding:24px 24px 24px 8px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:30px;letter-spacing:-0.02em;line-height:1.2">Расписание</span><span style="font-size:14px;color:#5A6772">Четверг, 24 сентября · филиал на Абая</span></div>
+<div style="flex-grow:1"></div>
+<span style="width:300px;height:48px;display:flex;align-items:center;gap:10px;padding:0 18px;border-radius:999px;background:#FFFFFF;color:#5A6772;font-size:14.5px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg>Найти пациента</span>
+</div>
+<div style="align-self:flex-start;display:flex;gap:4px;padding:5px;border-radius:999px;background:#FFFFFF">
+<span style="height:40px;padding:0 18px;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800;display:flex;align-items:center">День</span>
+<span style="height:40px;padding:0 18px;border-radius:999px;font-size:14.5px;font-weight:700;color:#5A6772;display:flex;align-items:center">Неделя</span>
+<span style="height:40px;padding:0 18px;border-radius:999px;font-size:14.5px;font-weight:700;color:#5A6772;display:flex;align-items:center">Архив</span>
+</div>
+<div style="flex-grow:1;min-height:0;background:#FFFFFF;border-radius:24px;padding:16px 16px 0;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+<div style="display:grid;grid-template-columns:52px repeat(4,minmax(0,1fr));gap:10px;align-items:center">
+<div></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:50%;background:#1B8A8F;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px;flex-shrink:0">СА</span><span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-weight:700;font-size:14.5px">Кресло 1</span><span style="font-size:12.5px;color:#5A6772">Ахметова · 09–14</span></span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:50%;background:#D2503C;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px;flex-shrink:0">АБ</span><span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-weight:700;font-size:14.5px">Кресло 2</span><span style="font-size:12.5px;color:#5A6772">Бекетов · 10–15</span></span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:50%;background:#5B4FD1;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px;flex-shrink:0">ЖК</span><span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-weight:700;font-size:14.5px">Кресло 3</span><span style="font-size:12.5px;color:#5A6772">Ким · 09–13</span></span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:50%;background:#2F6FD1;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px;flex-shrink:0">ЕН</span><span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-weight:700;font-size:14.5px">Кресло 4</span><span style="font-size:12.5px;color:#5A6772">Нурланұлы · 10–16</span></span></div>
+</div>
+<div style="position:relative;flex-grow:1;display:grid;grid-template-columns:52px repeat(4,minmax(0,1fr));column-gap:10px">
+<div style="position:relative;font-size:12.5px;font-weight:600;color:#5A6772">
+<span style="position:absolute;left:0;top:-2px">09:00</span>
+<span style="position:absolute;left:0;top:98px">10:00</span>
+<span style="position:absolute;left:0;top:198px">11:00</span>
+<span style="position:absolute;left:0;top:298px">12:00</span>
+<span style="position:absolute;left:0;top:398px">13:00</span>
+<span style="position:absolute;left:0;top:498px">14:00</span>
+</div>
+<div style="position:relative;background-image:repeating-linear-gradient(to bottom,#E6EAEF 0,#E6EAEF 1px,transparent 1px,transparent 100px)">
+<div style="position:absolute;left:0;right:0;top:266px;height:2px;background:#F2B51E"></div>
+<div style="position:absolute;left:0;right:0;top:2px;height:46px;border-radius:14px;background:#F0F2F5;padding:0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:13.5px;font-weight:700;color:#4F5B66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Нурлан Абенов</span><span style="font-size:12.5px;font-weight:600;color:#5A6772;white-space:nowrap">09:00</span></div>
+<div style="position:absolute;left:0;right:0;top:52px;height:96px;border-radius:14px;background:#F0F2F5;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700;color:#4F5B66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Дина Қасымова</span><span style="font-size:12.5px;font-weight:600;color:#5A6772;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">09:30–10:30 · пломба 26</span></div>
+<div style="position:absolute;left:0;right:0;top:177px;height:71px;border-radius:14px;background:#F0F2F5;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700;color:#4F5B66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Тимур Ли</span><span style="font-size:12.5px;font-weight:600;color:#5A6772;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">10:45–11:30 · гигиена</span></div>
+<div style="position:absolute;left:0;right:0;top:252px;height:96px;border-radius:14px;background:#D3EEEE;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:800;color:#0B4A4F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Айгерим Сейтқазы</span><span style="font-size:12.5px;font-weight:600;color:#2B6468;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">11:30–12:30 · кариес 36</span></div>
+<div style="position:absolute;left:0;right:0;top:402px;height:96px;border-radius:14px;background:#D3EEEE;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:800;color:#0B4A4F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Мадина Жұмабекова</span><span style="font-size:12.5px;font-weight:600;color:#2B6468;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">13:00–14:00 · каналы 46</span></div>
+<div style="position:absolute;left:0;right:0;top:502px;height:96px;border-radius:14px;background-image:repeating-linear-gradient(135deg,#EEF1F4 0,#EEF1F4 8px,#F7F8FA 8px,#F7F8FA 16px);display:flex;align-items:center;justify-content:center"><span style="font-size:12.5px;font-weight:600;color:#5A6772">Смена до 14:00</span></div>
+</div>
+<div style="position:relative;background-image:repeating-linear-gradient(to bottom,#E6EAEF 0,#E6EAEF 1px,transparent 1px,transparent 100px)">
+<div style="position:absolute;left:0;right:0;top:0px;height:100px;border-radius:14px;background-image:repeating-linear-gradient(135deg,#EEF1F4 0,#EEF1F4 8px,#F7F8FA 8px,#F7F8FA 16px);display:flex;align-items:center;justify-content:center"><span style="font-size:12.5px;font-weight:600;color:#5A6772">Смена с 10:00</span></div>
+<div style="position:absolute;left:0;right:0;top:266px;height:2px;background:#F2B51E"></div>
+<div style="position:absolute;left:0;right:0;top:102px;height:96px;border-radius:14px;background:#F0F2F5;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700;color:#4F5B66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Ерасыл Оспанов</span><span style="font-size:12.5px;font-weight:600;color:#5A6772;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">10:00–11:00 · удаление 48</span></div>
+<div style="position:absolute;left:0;right:0;top:227px;height:96px;border-radius:14px;background:#FCE0DA;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:800;color:#7A2A1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Алия Нұрланқызы</span><span style="font-size:12.5px;font-weight:600;color:#8E4336;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">11:15–12:15 · имплантация 46</span></div>
+<div style="position:absolute;left:0;right:0;top:352px;height:46px;border-radius:14px;background:#FFFFFF;padding:0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:2px solid #F3B9B2"><span style="font-size:13.5px;font-weight:700;color:#7A2A1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Данияр Серікбаев</span><span style="font-size:12.5px;font-weight:600;color:#9B1C12;white-space:nowrap">Не пришёл</span></div>
+<div style="position:absolute;left:0;right:0;top:452px;height:146px;border:2px dashed #C9D0D8;border-radius:14px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Свободно с 13:30</div>
+</div>
+<div style="position:relative;background-image:repeating-linear-gradient(to bottom,#E6EAEF 0,#E6EAEF 1px,transparent 1px,transparent 100px)">
+<div style="position:absolute;left:0;right:0;top:266px;height:2px;background:#F2B51E"></div>
+<div style="position:absolute;left:0;right:0;top:2px;height:71px;border-radius:14px;background:#F0F2F5;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700;color:#4F5B66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Камила Ахмедова</span><span style="font-size:12.5px;font-weight:600;color:#5A6772;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">09:00–09:45 · брекеты</span></div>
+<div style="position:absolute;left:0;right:0;top:102px;height:46px;border-radius:14px;background:#F0F2F5;padding:0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:13.5px;font-weight:700;color:#4F5B66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Руслан Тоқтаров</span><span style="font-size:12.5px;font-weight:600;color:#5A6772;white-space:nowrap">10:00</span></div>
+<div style="position:absolute;left:0;right:0;top:202px;height:71px;border-radius:14px;background:#E5E1FB;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:800;color:#3D3394;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Әлия Бекова</span><span style="font-size:12.5px;font-weight:600;color:#5A51A8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">11:00–11:45 · брекеты</span></div>
+<div style="position:absolute;left:0;right:0;top:302px;height:71px;border-radius:14px;background:#E5E1FB;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:800;color:#3D3394;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Санжар Әлиев</span><span style="font-size:12.5px;font-weight:600;color:#5A51A8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">12:00–12:45 · брекеты</span></div>
+<div style="position:absolute;left:0;right:0;top:400px;height:198px;border-radius:14px;background-image:repeating-linear-gradient(135deg,#EEF1F4 0,#EEF1F4 8px,#F7F8FA 8px,#F7F8FA 16px);display:flex;align-items:center;justify-content:center"><span style="font-size:12.5px;font-weight:600;color:#5A6772">Смена до 13:00</span></div>
+</div>
+<div style="position:relative;background-image:repeating-linear-gradient(to bottom,#E6EAEF 0,#E6EAEF 1px,transparent 1px,transparent 100px)">
+<div style="position:absolute;left:0;right:0;top:0px;height:100px;border-radius:14px;background-image:repeating-linear-gradient(135deg,#EEF1F4 0,#EEF1F4 8px,#F7F8FA 8px,#F7F8FA 16px);display:flex;align-items:center;justify-content:center"><span style="font-size:12.5px;font-weight:600;color:#5A6772">Смена с 10:00</span></div>
+<div style="position:absolute;left:0;right:0;top:266px;height:2px;background:#F2B51E"></div>
+<div style="position:absolute;left:0;right:0;top:102px;height:96px;border-radius:14px;background:#F0F2F5;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:700;color:#4F5B66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Бахыт Қалиев</span><span style="font-size:12.5px;font-weight:600;color:#5A6772;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">10:00–11:00 · осмотр</span></div>
+<div style="position:absolute;left:0;right:0;top:302px;height:96px;border-radius:14px;background:#DDEBFB;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:800;color:#1E4F8F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Гүлнар Смағұлова</span><span style="font-size:12.5px;font-weight:600;color:#3F6AA6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">12:00–13:00 · коронка 16</span></div>
+<div style="position:absolute;left:0;right:0;top:452px;height:71px;border-radius:14px;background:#DDEBFB;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:800;color:#1E4F8F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Олжас Ержанов</span><span style="font-size:12.5px;font-weight:600;color:#3F6AA6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">13:30–14:15 · коронка 26</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<div aria-hidden="true" style="position:absolute;inset:0;background:rgba(14,34,48,0.42)"></div>
+
+<div style="position:absolute;left:0;top:0;width:1440px;height:900px;display:flex;align-items:center;justify-content:center;gap:24px">
+
+<section role="dialog" aria-modal="true" aria-labelledby="mv-title" style="width:640px;align-self:stretch;margin:84px 0;background:#FFFFFF;border-radius:28px;box-shadow:0 28px 70px rgba(14,34,48,0.30);display:flex;flex-direction:column;overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:24px 28px 16px">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><h2 id="mv-title" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:26px;letter-spacing:-0.02em">Перенести запись</h2><span style="font-size:14px;font-weight:600;color:#5A6772">Айгерим Сейтқазы · Сауле Ахметова</span></div>
+<div style="flex-grow:1"></div>
+<button type="button" aria-label="Закрыть" style="width:44px;height:44px;border:0;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+
+<div style="padding:2px 28px 20px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 16px;border-radius:16px;background:#F5F7F9;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg><span style="font-weight:700;color:#5A6772">Сейчас:</span><span style="font-weight:800">Чт 24.09, 11:30–12:30 · Кресло 1</span></div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<span id="mv-day" style="font-size:13.5px;font-weight:800;color:#4F5B66">Новый день</span>
+<div role="radiogroup" aria-labelledby="mv-day" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px">
+<button type="button" role="radio" aria-checked="false" disabled style="height:66px;border:0;border-radius:18px;background:#F5F7F9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#8994A0;cursor:not-allowed"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Чт 24</span><span style="font-size:12.5px;font-weight:700">нет окон</span></button>
+<button type="button" role="radio" aria-checked="true" style="height:66px;border:0;border-radius:18px;background:#0E2230;color:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Пт 25</span><span style="font-size:12.5px;font-weight:700;color:#FFCB47">4 окна</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Сб 26</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">2 окна</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Пн 28</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">6 окон</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Вт 29</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">5 окон</span></button>
+<button type="button" role="radio" aria-checked="false" style="height:66px;border:2px solid #E1E6EC;border-radius:18px;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Ср 30</span><span style="font-size:12.5px;font-weight:700;color:#5A6772">3 окна</span></button>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<span id="mv-time" style="font-size:13.5px;font-weight:800;color:#4F5B66">Время · Кресло 1 · 60 мин</span>
+<div role="radiogroup" aria-labelledby="mv-time" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px">
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">09:00</button>
+<button type="button" role="radio" aria-checked="false" disabled style="height:48px;border:0;border-radius:999px;background:#F5F7F9;font-family:Rubik,sans-serif;font-weight:500;font-size:16px;color:#9AA4AE;text-decoration:line-through;cursor:not-allowed">09:30</button>
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">10:00</button>
+<button type="button" role="radio" aria-checked="true" style="height:48px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">11:30</button>
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">14:00</button>
+<button type="button" role="radio" aria-checked="false" style="height:48px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">15:00</button>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px">
+<label for="mv-notify" style="flex-grow:1;display:flex;align-items:center;gap:12px;min-height:48px;cursor:not-allowed"><input id="mv-notify" type="checkbox" disabled aria-describedby="mv-notify-hint" style="appearance:none;-webkit-appearance:none;margin:0;width:24px;height:24px;border-radius:8px;border:2px solid #D5DBE2;background:#F5F7F9;flex-shrink:0;cursor:not-allowed"><span style="display:flex;flex-direction:column;line-height:1.35"><span style="font-size:15px;font-weight:800;color:#8994A0">Сообщить пациенту</span><span id="mv-notify-hint" style="font-size:13px;font-weight:600;color:#5A6772">после подключения WhatsApp</span></span></label>
+<a href="#" style="min-height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:700;white-space:nowrap">Подключить WhatsApp</a>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;padding:16px 28px 22px;border-top:2px solid #F0F2F5;margin-top:auto">
+<span style="height:40px;padding:0 14px;border-radius:999px;background:#ECEFF3;display:inline-flex;align-items:center;font-size:14px;font-weight:700;white-space:nowrap">Пт 25.09 · 11:30–12:30</span>
+<span style="flex-grow:1"></span>
+<button type="button" style="height:48px;padding:0 22px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:15px;font-weight:800">Отмена</button>
+<button type="button" style="height:48px;padding:0 24px;border:0;border-radius:999px;background:#FFCB47;color:#0E2230;font-size:15px;font-weight:800">Перенести</button>
+</div>
+</section>
+
+<section role="dialog" aria-modal="true" aria-labelledby="cn-title" style="width:520px;align-self:stretch;margin:84px 0;background:#FFFFFF;border-radius:28px;box-shadow:0 28px 70px rgba(14,34,48,0.30);display:flex;flex-direction:column;overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:24px 28px 16px">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><h2 id="cn-title" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:26px;letter-spacing:-0.02em">Отменить запись</h2><span style="font-size:14px;font-weight:600;color:#5A6772">Айгерим Сейтқазы · Чт 24.09, 11:30 · Ахметова</span></div>
+<div style="flex-grow:1"></div>
+<button type="button" aria-label="Закрыть" style="width:44px;height:44px;border:0;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+
+<div style="padding:2px 28px 20px;display:flex;flex-direction:column;gap:16px">
+<fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:8px;min-width:0">
+<legend style="font-size:13.5px;font-weight:800;color:#4F5B66;padding:0;margin-bottom:10px">Причина отмены</legend>
+<label for="cn-r1" style="display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border:2px solid #E1E6EC;border-radius:20px;cursor:pointer"><input id="cn-r1" type="radio" name="cancel-reason" style="appearance:none;-webkit-appearance:none;margin:0;width:24px;height:24px;border-radius:50%;border:2px solid #C9D0D8;background:#FFFFFF;flex-shrink:0;cursor:pointer"><span style="font-size:15px;font-weight:700">Пациент заболел</span></label>
+<label for="cn-r2" style="display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border:2px solid #E1E6EC;border-radius:20px;cursor:pointer"><input id="cn-r2" type="radio" name="cancel-reason" style="appearance:none;-webkit-appearance:none;margin:0;width:24px;height:24px;border-radius:50%;border:2px solid #C9D0D8;background:#FFFFFF;flex-shrink:0;cursor:pointer"><span style="font-size:15px;font-weight:700">Перенёс по просьбе</span></label>
+<label for="cn-r3" style="display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border:2px solid #E1E6EC;border-radius:20px;cursor:pointer"><input id="cn-r3" type="radio" name="cancel-reason" style="appearance:none;-webkit-appearance:none;margin:0;width:24px;height:24px;border-radius:50%;border:2px solid #C9D0D8;background:#FFFFFF;flex-shrink:0;cursor:pointer"><span style="font-size:15px;font-weight:700">Не дозвонились</span></label>
+<div style="display:flex;flex-direction:column;gap:6px;padding:0 16px 16px;border:2px solid #0E2230;border-radius:20px">
+<label for="cn-r4" style="display:flex;align-items:center;gap:12px;min-height:48px;cursor:pointer"><input id="cn-r4" type="radio" name="cancel-reason" checked style="appearance:none;-webkit-appearance:none;margin:0;width:24px;height:24px;border-radius:50%;border:7px solid #0E2230;background:#FFFFFF;flex-shrink:0;cursor:pointer"><span style="font-size:15px;font-weight:800">Другое</span></label>
+<textarea id="cn-other" rows="3" aria-label="Причина отмены своими словами" style="margin-left:36px;height:84px;padding:12px 16px;border:2px solid #0E2230;border-radius:20px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:600;line-height:1.45;color:#0E2230;resize:none">Уезжает в командировку до конца месяца, перезвонит сама.</textarea>
+</div>
+</fieldset>
+<div style="display:flex;gap:10px;padding:12px 16px;border-radius:18px;background:#F5F7F9;font-size:14px;font-weight:600;color:#4F5B66;line-height:1.45"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 7.6v.3"></path></svg><span>Запись останется в архиве со статусом «Отменена», время 11:30–12:30 освободится.</span></div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;padding:16px 28px 22px;border-top:2px solid #F0F2F5;margin-top:auto;justify-content:flex-end">
+<button type="button" style="height:48px;padding:0 22px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:15px;font-weight:800">Не отменять</button>
+<button type="button" style="height:48px;padding:0 24px;border:0;border-radius:999px;background:#B42318;color:#FFFFFF;font-size:15px;font-weight:800">Отменить запись</button>
+</div>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

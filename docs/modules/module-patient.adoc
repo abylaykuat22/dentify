@@ -1,0 +1,9 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Description
+|«Карточка пациента»: персональные данные, представители, медблок, контакты. 
++
+От patient зависят schedule и medical — через `patient :: api`.
+|Base package
+|`kz.dentify.patient`
+|===

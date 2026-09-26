@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Состояния экранов</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden;display:flex">
+<aside style="width:216px;flex-shrink:0;margin:16px;border-radius:24px;background:#0F3D4C;color:#FFFFFF;padding:24px 14px 18px;display:flex;flex-direction:column;gap:28px">
+<span style="font-family:Rubik,sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;padding:0 10px">dentify<span style="color:#FFCB47">.</span></span>
+<nav aria-label="Разделы" style="display:flex;flex-direction:column;gap:4px">
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Расписание</a>
+<a href="#" aria-current="page" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;background:#FFCB47;color:#0E2230;font-weight:700;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg>Пациенты</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v5a5 5 0 0 0 10 0V3"></path><path d="M10 13v2a5 5 0 0 0 10 0v-2"></path><circle cx="20" cy="10.5" r="2"></circle></svg>Врачи</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"></path><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"></path></svg>Склад</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 21v-4h6v4M8.5 7.5h1M14.5 7.5h1M8.5 11.5h1M14.5 11.5h1"></path></svg>Клиника</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>Доступы</a>
+</nav>
+<div style="flex-grow:1"></div>
+<a href="#" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.08);color:#FFFFFF;text-decoration:none">
+<span style="width:38px;height:38px;border-radius:50%;background:#FFCB47;color:#0E2230;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px">ДА</span>
+<span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-size:14px;font-weight:700">Динара</span><span style="font-size:12px;color:#C5D6DB">Администратор</span></span>
+</a>
+</aside>
+<main style="flex-grow:1;min-width:0;padding:24px 24px 24px 8px;display:flex;flex-direction:column;gap:16px">
+<header style="display:flex;flex-direction:column;gap:4px">
+<h1 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:30px;letter-spacing:-0.02em">Состояния экранов</h1>
+<span style="font-size:14px;font-weight:600;color:#5A6772">Что видит сотрудник, когда данных нет, доступа нет или пропала связь</span>
+</header>
+<div style="flex-grow:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:16px">
+<section aria-labelledby="st-a" style="position:relative;min-height:0;background:#FFFFFF;border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
+<span style="position:absolute;left:20px;top:20px;height:30px;padding:0 12px;border-radius:999px;background:#F5F7F9;font-size:12.5px;font-weight:800;color:#4F5B66;display:inline-flex;align-items:center">а · Пустой список</span>
+<span style="width:88px;height:88px;margin-bottom:6px;border-radius:50%;background:#F5F7F9;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M19 8v6M22 11h-6"></path></svg></span>
+<h2 id="st-a" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Пациентов пока нет</h2>
+<p style="margin:0;max-width:380px;font-size:15px;font-weight:600;line-height:1.45;color:#5A6772">Добавьте первого или перенесите базу из Excel</p>
+<div style="display:flex;gap:10px;margin-top:10px"><button type="button" style="height:48px;padding:0 22px 0 16px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFCB47;color:#0E2230;font-weight:800;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Добавить пациента</button><button type="button" style="height:48px;padding:0 20px 0 16px;display:flex;align-items:center;gap:8px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-weight:800;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4.5M7.5 9 12 4.5 16.5 9"></path><path d="M4.5 15v3a2.5 2.5 0 0 0 2.5 2.5h10a2.5 2.5 0 0 0 2.5-2.5v-3"></path></svg>Импорт из Excel</button></div>
+</section>
+<section aria-labelledby="st-b" style="position:relative;min-height:0;background:#FFFFFF;border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
+<span style="position:absolute;left:20px;top:20px;height:30px;padding:0 12px;border-radius:999px;background:#F5F7F9;font-size:12.5px;font-weight:800;color:#4F5B66;display:inline-flex;align-items:center">б · Нет доступа</span>
+<span style="width:88px;height:88px;margin-bottom:6px;border-radius:50%;background:#F5F7F9;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path></svg></span>
+<h2 id="st-b" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Раздел «Склад» закрыт для вашей роли</h2>
+<p style="margin:0;max-width:380px;font-size:15px;font-weight:600;line-height:1.45;color:#5A6772">Попросите владельца открыть доступ</p>
+<div style="display:flex;gap:10px;margin-top:10px"><button type="button" style="height:48px;padding:0 20px;display:flex;align-items:center;gap:8px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-weight:800;font-size:15px">К расписанию</button></div>
+</section>
+<section aria-labelledby="st-c" style="position:relative;min-height:0;background:#FFFFFF;border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
+<span style="position:absolute;left:20px;top:20px;height:30px;padding:0 12px;border-radius:999px;background:#F5F7F9;font-size:12.5px;font-weight:800;color:#4F5B66;display:inline-flex;align-items:center">в · Нет связи</span>
+<span style="width:88px;height:88px;margin-bottom:6px;border-radius:50%;background:#F5F7F9;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h.01"></path><path d="M8.5 16.4a5 5 0 0 1 7 0"></path><path d="M5 12.9a10 10 0 0 1 5.2-2.7"></path><path d="M19 12.9a10 10 0 0 0-2-1.5"></path><path d="M2 8.8a15 15 0 0 1 4.2-2.6"></path><path d="M22 8.8a15 15 0 0 0-11.3-3.8"></path><path d="m2 2 20 20"></path></svg></span>
+<h2 id="st-c" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Нет связи с сервером</h2>
+<p style="margin:0;max-width:380px;font-size:15px;font-weight:600;line-height:1.45;color:#5A6772">Изменения сохранятся, когда связь вернётся</p>
+<div style="display:flex;gap:10px;margin-top:10px"><button type="button" style="height:48px;padding:0 20px 0 16px;display:flex;align-items:center;gap:8px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-weight:800;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"></path><path d="M20 4v4.5h-4.5"></path></svg>Повторить</button></div>
+</section>
+<section aria-labelledby="st-d" style="position:relative;min-height:0;background:#FFFFFF;border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
+<span style="position:absolute;left:20px;top:20px;height:30px;padding:0 12px;border-radius:999px;background:#F5F7F9;font-size:12.5px;font-weight:800;color:#4F5B66;display:inline-flex;align-items:center">г · Неверная ссылка</span>
+<span style="width:88px;height:88px;margin-bottom:6px;border-radius:50%;background:#F5F7F9;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"></circle><path d="m20.5 20.5-4.2-4.2"></path><path d="m8.5 8.5 5 5M13.5 8.5l-5 5"></path></svg></span>
+<h2 id="st-d" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Такой страницы нет</h2>
+<p style="margin:0;max-width:380px;font-size:15px;font-weight:600;line-height:1.45;color:#5A6772">Возможно, ссылка устарела или в ней опечатка</p>
+<div style="display:flex;gap:10px;margin-top:10px"><button type="button" style="height:48px;padding:0 20px;display:flex;align-items:center;gap:8px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-weight:800;font-size:15px">К расписанию</button></div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

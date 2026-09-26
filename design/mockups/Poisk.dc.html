@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Быстрый поиск Ctrl K</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1200px;height:760px;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+<div aria-hidden="true" style="position:absolute;left:16px;top:16px;bottom:16px;width:216px;border-radius:24px;background:#0F3D4C"></div>
+<div aria-hidden="true" style="position:absolute;left:256px;top:150px;right:24px;bottom:24px;border-radius:24px;background:#FFFFFF">
+<div style="position:absolute;left:70px;top:60px;width:230px;height:96px;border-radius:14px;background:#D3EEEE"></div>
+<div style="position:absolute;left:70px;top:176px;width:230px;height:96px;border-radius:14px;background:#D3EEEE"></div>
+<div style="position:absolute;left:320px;top:110px;width:230px;height:96px;border-radius:14px;background:#FCE0DA"></div>
+<div style="position:absolute;left:570px;top:40px;width:230px;height:70px;border-radius:14px;background:#E5E1FB"></div>
+<div style="position:absolute;left:570px;top:240px;width:230px;height:70px;border-radius:14px;background:#E5E1FB"></div>
+</div>
+<div aria-hidden="true" style="position:absolute;inset:0;background:rgba(14,34,48,0.42)"></div>
+
+<section role="dialog" aria-modal="true" aria-label="Быстрый поиск" style="position:absolute;left:260px;top:84px;width:680px;background:#FFFFFF;border-radius:28px;box-shadow:0 28px 70px rgba(14,34,48,0.32);overflow:hidden">
+<div style="height:72px;display:flex;align-items:center;gap:14px;padding:0 22px;border-bottom:2px solid #F0F2F5">
+<span style="width:40px;height:40px;border-radius:50%;background:#FFCB47;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0E2230" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg></span>
+<label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Поиск пациента или действия</label>
+<input id="q" value="айг" style="flex-grow:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:19px;font-weight:700;color:#0E2230">
+<kbd style="font-family:'Nunito Sans',sans-serif;font-size:12.5px;font-weight:800;padding:5px 11px;border-radius:999px;background:#ECEFF3;color:#4F5B66">Esc</kbd>
+</div>
+<div role="listbox" aria-label="Результаты" style="padding:10px">
+<div style="padding:8px 14px 6px;font-size:12.5px;font-weight:800;color:#5A6772">Пациенты</div>
+<div role="option" aria-selected="true" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:18px;background:#FFF4D1">
+<span style="width:44px;height:44px;border-radius:50%;background:#D3EEEE;color:#0B4A4F;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:15px;flex-shrink:0">АС</span>
+<span style="display:flex;flex-direction:column;gap:2px;flex-grow:1;min-width:0"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px"><mark style="background:#FFCB47;color:inherit;border-radius:5px;padding:0 2px">Айг</mark>ерим Сейтқазы</span><span style="font-size:13.5px;font-weight:600;color:#4F5B66">+7 707 ••• •• 45 · сегодня в 11:30, Кресло 1</span></span>
+<kbd style="font-family:'Nunito Sans',sans-serif;font-size:12.5px;font-weight:800;padding:5px 11px;border-radius:999px;background:#FFFFFF;color:#0E2230">Enter</kbd>
+</div>
+<div role="option" aria-selected="false" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:18px">
+<span style="width:44px;height:44px;border-radius:50%;background:#FCE0DA;color:#7A2A1E;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:15px;flex-shrink:0">АТ</span>
+<span style="display:flex;flex-direction:column;gap:2px;flex-grow:1;min-width:0"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px"><mark style="background:#FFE9A8;color:inherit;border-radius:5px;padding:0 2px">Айг</mark>үл Тлеубаева</span><span style="font-size:13.5px;font-weight:600;color:#4F5B66">+7 701 ••• •• 18 · последний визит 02.09</span></span>
+</div>
+<div role="option" aria-selected="false" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:18px">
+<span style="width:44px;height:44px;border-radius:50%;background:#E5E1FB;color:#3D3394;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:15px;flex-shrink:0">НС</span>
+<span style="display:flex;flex-direction:column;gap:2px;flex-grow:1;min-width:0"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">Нұр<mark style="background:#FFE9A8;color:inherit;border-radius:5px;padding:0 2px">айг</mark>үл Садықова</span><span style="font-size:13.5px;font-weight:600;color:#4F5B66">+7 747 ••• •• 03 · новый пациент</span></span>
+</div>
+<div style="padding:14px 14px 6px;font-size:12.5px;font-weight:800;color:#5A6772">Действия</div>
+<div role="option" aria-selected="false" style="display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:18px">
+<span style="width:44px;height:44px;border-radius:50%;background:#FFCB47;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E2230" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>
+<span style="flex-grow:1;font-size:16px;font-weight:600">Записать <b style="font-weight:800">Айгерим Сейтқазы</b></span>
+<kbd style="font-family:'Nunito Sans',sans-serif;font-size:12.5px;font-weight:800;padding:5px 11px;border-radius:999px;background:#ECEFF3;color:#4F5B66">N</kbd>
+</div>
+<div role="option" aria-selected="false" style="display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:18px">
+<span style="width:44px;height:44px;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3.2c-2.9 0-4.6 2.1-4.6 5 0 2.4.9 3.9 1.4 6.2.6 2.8.7 6.4 2.6 6.4 1.7 0 1.9-3.6 2.9-5.2.5-.8 1-1.1 1.7-1.1s1.2.3 1.7 1.1c1 1.6 1.2 5.2 2.9 5.2 1.9 0 2-3.6 2.6-6.4.5-2.3 1.4-3.8 1.4-6.2 0-2.9-1.7-5-4.6-5-1.9 0-2.6 1-4 1s-2.1-1-4-1z"></path></svg></span>
+<span style="flex-grow:1;font-size:16px;font-weight:600">Открыть медкарту</span>
+<kbd style="font-family:'Nunito Sans',sans-serif;font-size:12.5px;font-weight:800;padding:5px 11px;border-radius:999px;background:#ECEFF3;color:#4F5B66">M</kbd>
+</div>
+<div role="option" aria-selected="false" style="display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:18px">
+<span style="width:44px;height:44px;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 3.5h3.5l1.5 4-2 1.5a11 11 0 0 0 7 7l1.5-2 4 1.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5z"></path></svg></span>
+<span style="flex-grow:1;font-size:16px;font-weight:600">Позвонить</span>
+<kbd style="font-family:'Nunito Sans',sans-serif;font-size:12.5px;font-weight:800;padding:5px 11px;border-radius:999px;background:#ECEFF3;color:#4F5B66">C</kbd>
+</div>
+</div>
+<div style="height:52px;display:flex;align-items:center;gap:18px;padding:0 24px;background:#F5F7F9;font-size:13px;font-weight:600;color:#5A6772">
+<span><b style="font-weight:800;color:#0E2230">↑ ↓</b> выбрать</span><span><b style="font-weight:800;color:#0E2230">Enter</b> открыть</span><span><b style="font-weight:800;color:#0E2230">Esc</b> закрыть</span>
+<span style="flex-grow:1"></span><span>Ищет по ФИО, телефону и ИИН</span>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+# Maven Wrapper: скрипт для bash/Linux — только LF, для cmd — CRLF.
+/mvnw    text eol=lf
+*.cmd    text eol=crlf

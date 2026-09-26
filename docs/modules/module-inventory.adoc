@@ -1,0 +1,9 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Description
+|«Склад»: номенклатура, склады, поставщики, документы, движения и остатки. 
++
+Зависит от clinic (`clinic :: api`) и подписан на события schedule (`schedule :: events`: `AppointmentCompleted` → списание по нормам услуги).
+|Base package
+|`kz.dentify.inventory`
+|===

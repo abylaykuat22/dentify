@@ -1,0 +1,218 @@
+# Общие настройки Dentify. Профили: dev (локально против deploy/compose.dev.yml), test (Testcontainers),
+# prod (всё из переменных окружения). Профиль задаётся явно: SPRING_PROFILES_ACTIVE или
+# ./mvnw spring-boot:run (по умолчанию dev, см. pom.xml).
+spring:
+  application:
+    name: dentify-backend
+  autoconfigure:
+    # Пользователя в памяти со сгенерированным паролем (и WARN с паролем в логе) не создаём: аккаунты — в БД (iam),
+    # вход — platform.identity.AccountSignIn после проверки пароля в iam (docs/architecture.md, «Безопасность и сессии»).
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+  threads:
+    virtual:
+      enabled: true
+  task:
+    execution:
+      # Исполнители Spring Boot (@Async, @ApplicationModuleListener, планировщик) переносят в поток задачи контекст
+      # того, кто её поставил: клинику (platform.tenant.TenantThreadLocalAccessor) и traceId. Без этого асинхронный
+      # обработчик работал бы без клиники и без трассировки (docs/architecture.md, «Тенант-контекст»).
+      propagate-context: true
+  datasource:
+    # Приложение ходит ролью dentify_app: только DML, NOBYPASSRLS (deploy/postgres/init/01-roles.sh).
+    username: dentify_app
+    hikari:
+      pool-name: dentify-app
+      # Пул — явно, а не по умолчанию Hikari. Виртуальные потоки не ограничивают число одновременных запросов, поэтому
+      # предел одновременной работы с БД — сам пул: 10 соединений (каждая выдача — ещё и set_config app.clinic_id,
+      # platform.persistence.ClinicConnectionDataSource). Не дождались соединения за 5000 мс — ошибка сразу, а не 30 с
+      # ожидания по умолчанию. Менять по замеру нагрузки (T-PLT-24) и пределу соединений managed PostgreSQL.
+      maximum-pool-size: 10
+      connection-timeout: 5000
+      data-source-properties:
+        # Без подробностей сервера в тексте исключений драйвера: в них значения строки («Key (iin)=(…) already
+        # exists», «Failing row contains (…)»), а это ПД, и Hibernate пишет этот текст в лог WARN (PLT-10).
+        # SQLSTATE и имя ограничения остаются. Настройка PgJDBC logServerErrorDetail, по умолчанию true.
+        logServerErrorDetail: false
+  flyway:
+    # Миграции — от владельца схемы dentify_owner (DDL). URL тот же, что у приложения.
+    user: dentify_owner
+    default-schema: dentify
+    create-schemas: false
+    # db/migration/<модуль>/V<yyyy>_<MM>_<dd>_<HHmm>__<модуль>_<что>.sql — соглашения в docs/architecture.md,
+    # раздел «Миграции». Файл с неверным именем роняет старт, а не пропускается молча.
+    locations: classpath:db/migration
+    validate-migration-naming: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      # JSON-колонки (jsonb, LocalizedText) — через Jackson 3, как весь JSON приложения. Без настройки Hibernate
+      # выбрал бы Jackson 2: он на classpath только транзитивно, через swagger-core из springdoc.
+      hibernate.type.json_format_mapper: jackson3
+      # Ленивые связи и коллекции списка грузятся пачками до 50 id одним запросом, а не по одному (N+1)
+      # (docs/architecture.md, «Сущности»).
+      hibernate.default_batch_fetch_size: 50
+      # Страница с fetch коллекции (join fetch, @EntityGraph по коллекции) — ошибка, а не пагинация в памяти по всем
+      # строкам с WARN HHH90003004.
+      hibernate.query.fail_on_pagination_over_collection_fetch: true
+  data:
+    redis:
+      # Valkey — только сессии, лимиты и кэш; репозитории Spring Data Redis не используем (данные — в PostgreSQL).
+      repositories:
+        enabled: false
+      # Сколько ждать ответа и соединения Valkey. По умолчанию Lettuce ждёт команду 60 с, и запрос, в том числе с
+      # открытой транзакцией БД и соединением из пула (просмотр медкарты пишет метку окна в Valkey), висел бы минуту.
+      # Команды Valkey укладываются в миллисекунды; не дождались — ошибка сразу (docs/architecture.md, «Кэш»).
+      timeout: 3s
+      connect-timeout: 3s
+  session:
+    data:
+      redis:
+        # Индексированное хранилище (RedisIndexedSessionRepository): сессии аккаунта находятся по id аккаунта —
+        # список активных сессий и «завершить все» (PLT-04). Для индекса Spring Session включает в Valkey
+        # уведомления о ключах (CONFIG SET notify-keyspace-events); в managed Valkey — см. application-prod.yml.
+        repository-type: indexed
+        namespace: dentify:session
+  cache:
+    # Кэш Spring — в Valkey. Ключ кэша данных клиники начинается с её id, глобальный кэш — имя с приставкой global.
+    # (platform.cache.TenantCacheKeyPrefix). Время жизни по умолчанию — чтобы кэш не рос без предела. Свой срок —
+    # RedisCacheManagerBuilderCustomizer модуля с конфигурацией от builder.cacheDefaults():
+    # builder.withCacheConfiguration("x", builder.cacheDefaults().entryTtl(...)). Конфигурация от
+    # RedisCacheConfiguration.defaultCacheConfig() теряет префикс клиники, и старт падает (TenantCacheManagerCheck).
+    # spring.cache.redis.key-prefix и use-key-prefix не действуют: префикс ключа — всегда клиника.
+    type: redis
+    redis:
+      time-to-live: 1h
+  modulith:
+    # Moments (события DayHasPassed и т.п.) в MVP не нужны. Их автоконфигурация включает @EnableScheduling
+    # без TaskScheduler. Планировщик включает platform.audit.AuditConfiguration (партиции журнала действий, T-PLT-13),
+    # тогда Boot сам создаёт TaskScheduler; задачи для одного экземпляра — под ShedLock (T-PLT-14). Свойства нет в
+    # метаданных Modulith 2.1.1, но его читает @ConditionalOnProperty у MomentsAutoConfiguration.
+    moments:
+      enabled: false
+  web:
+    resources:
+      # Бэкенд — только API: статику (SPA) отдаёт Caddy. Boot не раздаёт /webjars/** и /** из classpath, поэтому
+      # webjar Swagger UI не открыть и там, где UI попал на classpath, а springdoc.swagger-ui.enabled=false.
+      # В dev Swagger UI отдаёт свой обработчик springdoc на /swagger-ui/**.
+      add-mappings: false
+  messages:
+    # Сообщения — messages.properties (русский, базовый файл: без него Boot не создаёт MessageSource),
+    # казахский позже — messages_kk.properties. Нет перевода — русский, а не язык ОС сервера.
+    # Язык запроса выбирает platform.i18n.DentifyLocaleResolver (docs/architecture.md, «Сообщения и i18n»).
+    fallback-to-system-locale: false
+
+# Языки (PLT-11, PLT-34). Казахский включается флагом вместе со словарями messages_kk; пока false — все ответы
+# на русском, какой бы язык ни пришёл в Accept-Language или cookie.
+dentify:
+  i18n:
+    kk: false
+  # Журнал действий (PLT-09, platform.audit; docs/architecture.md, «Журнал действий»): окно просмотров медкарты,
+  # предел строк выгрузки журнала, периоды ленты, партиции audit_log заранее — на сколько месяцев и когда проверять
+  # (cron, UTC).
+  audit:
+    view-dedup-window: 15m
+    export-max-rows: 10000
+    # Лента журнала без начала периода — за последние 30 дней; поиск по тексту — за период не длиннее 366 дней
+    # (индекса у поиска нет). История одного объекта (entityId) — за всё время.
+    default-period: 30d
+    search-max-period: 366d
+    partitions:
+      months-ahead: 3
+      cron: "0 17 3 * * *"
+
+# Контракт API (PLT-23): OpenAPI 3.1 по контроллерам /api/v1/** — группа v1, /v3/api-docs/v1 (её выгружает
+# OpenApiContractTests в api/openapi.json). Спецификация включена в dev и test, в prod выключена. Swagger UI — только
+# локально: зависимость в Maven-профиле dev (./mvnw -Pdev spring-boot:run) и включён в application-dev.yml; в jar
+# без -Pdev его нет. Ответы 4xx/5xx со схемой ProblemDetail и параметры страницы дописывает
+# platform.openapi.OpenApiConfiguration, а не описания ошибок из @ControllerAdvice. Глобальный paths-to-match не
+# задаём: в springdoc он перекрывает пути всех групп.
+springdoc:
+  api-docs:
+    enabled: false
+    version: openapi_3_1
+  swagger-ui:
+    enabled: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  override-with-generic-response: false
+  # api/openapi.json коммитится: порядок ключей стабильный, чтобы диф показывал только изменения контракта
+  writer-with-order-by-keys: true
+  writer-with-default-pretty-printer: true
+
+server:
+  port: 8080
+  servlet:
+    session:
+      # Бездействие без «Запомнить» — 12 ч (PLT-04). Срок от входа, который активность не продлевает, —
+      # dentify.security.remember-me с «Запомнить» и dentify.security.session-max-age без него, оба 30 дней
+      # (platform.security.SessionLifetimeFilter)
+      timeout: 12h
+      cookie:
+        # Cookie сессии Spring Session (platform.security.SessionCookieSerializer). Secure — всегда: за Caddy запрос
+        # и так HTTPS, а в dev браузеры принимают Secure-cookie на http://localhost (localhost — безопасный контекст).
+        name: DENTIFY_SESSION
+        http-only: true
+        secure: true
+        same-site: lax
+  # За Caddy (TLS снимается на прокси): X-Forwarded-Proto/For учитывает RemoteIpValve Tomcat, иначе
+  # request.isSecure() = false — cookie сессии без Secure и редиректы на http, а все клиенты — один IP.
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      # Заголовкам X-Forwarded-* верим только от адреса прокси: сети CIDR через запятую (формат Tomcat 11; без «/» —
+      # регулярное выражение). Здесь — только loopback: тесты и dev (Caddy профиля proxy приходит через Docker Desktop
+      # с 127.0.0.1). Прод — точный адрес Caddy (application-prod.yml). Широкий дефолт Tomcat и Boot (все частные сети)
+      # и пустое значение (любой адрес) роняют старт (platform.security.TrustedProxiesCheck): клиент из частной сети
+      # ротацией X-Forwarded-For обходил бы лимиты по IP и подделывал IP в журнале входов и журнале действий
+      # (docs/architecture.md, «Лимиты частоты»).
+      internal-proxies: 127.0.0.0/8, ::1/128
+
+# Actuator — только на внутреннем порту 8081: наружу (Caddy → :8080) не публикуется.
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus, modulith
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      # show-components/show-details: в dev и test — always, в prod — never (по умолчанию)
+      group:
+        # готовность = приложение поднято + БД + Valkey (сессии); жизнь — только состояние JVM-приложения
+        readiness:
+          include: readinessState, db, redis
+  metrics:
+    tags:
+      # метка приложения на всех метриках: в Prometheus/Grafana несколько сервисов рядом
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        # бакеты гистограммы: алерт «p95 больше 1 с» (PLT-10) считается в Prometheus (histogram_quantile)
+        http.server.requests: true
+  tracing:
+    sampling:
+      # traceId в логах и ProblemDetail нужен на каждом запросе; экспорт спанов пока не настроен
+      probability: 1.0
+
+# Логи — JSON (ECS) с traceId/spanId из MDC. ИИН, телефон, e-mail маскирует
+# kz.dentify.platform.logging.PiiMaskingJsonMembersCustomizer (META-INF/spring.factories) — только в
+# структурированном формате, поэтому он задан и для файла: включат logging.file.name — маска останется.
+logging:
+  level:
+    # Запрос вошедшего на неизвестный путь (404) Spring MVC пишет WARN «No mapping for …» на каждый запрос: клиент
+    # засыпал бы лог до предела общего лимита API. 404 и так отдаёт ProblemDetail, как прямой запрос на /error
+    # (docs/architecture.md, «Ошибки API»).
+    org.springframework.web.servlet.PageNotFound: error
+  charset:
+    # JSON — всегда UTF-8 (RFC 8259); иначе на Windows консоль получает cp1251 и казахские буквы — «?».
+    # Читать в терминале Windows: chcp 65001 или Windows Terminal.
+    console: UTF-8
+  structured:
+    format:
+      console: ecs
+      file: ecs

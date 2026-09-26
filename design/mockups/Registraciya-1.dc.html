@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Регистрация — клиника</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden;display:flex;flex-direction:column">
+<header style="display:flex;align-items:center;justify-content:space-between;padding:32px 40px 0"><span style="font-family:Rubik,sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;color:#0F3D4C">dentify<span style="color:#F2B51E">.</span></span><span style="font-size:14.5px;font-weight:600;color:#5A6772">Уже есть аккаунт? <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-weight:800">Войти</a></span></header>
+<main style="flex-grow:1;display:flex;align-items:center;justify-content:center;padding:0 40px 56px">
+<section aria-labelledby="reg-title" style="width:760px;background:#FFFFFF;border-radius:28px;display:flex;flex-direction:column;overflow:hidden">
+<div style="display:flex;align-items:baseline;gap:12px;padding:28px 32px 18px"><h1 id="reg-title" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:30px;letter-spacing:-0.02em">Регистрация клиники</h1><span style="font-size:14px;font-weight:700;color:#5A6772">Шаг 1 из 3</span></div>
+<ol aria-label="Шаги регистрации" style="list-style:none;margin:0;padding:0 32px 22px;display:flex;align-items:center;gap:8px"><li aria-current="step" style="height:40px;padding:0 18px 0 6px;display:flex;align-items:center;gap:8px;border-radius:999px;background:#FFCB47;font-size:14px;font-weight:800"><span style="width:28px;height:28px;border-radius:50%;background:#0E2230;color:#FFCB47;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:700;font-size:14px">1</span>Клиника</li><li aria-hidden="true" style="width:20px;height:2px;border-radius:2px;background:#D5DBE2"></li><li style="height:40px;padding:0 16px 0 6px;display:flex;align-items:center;gap:8px;border-radius:999px;border:2px solid #E1E6EC;font-size:14px;font-weight:700;color:#4F5B66"><span style="width:26px;height:26px;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:13px">2</span>Филиал и кресла</li><li aria-hidden="true" style="width:20px;height:2px;border-radius:2px;background:#D5DBE2"></li><li style="height:40px;padding:0 16px 0 6px;display:flex;align-items:center;gap:8px;border-radius:999px;border:2px solid #E1E6EC;font-size:14px;font-weight:700;color:#4F5B66"><span style="width:26px;height:26px;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:13px">3</span>Владелец</li></ol>
+<div style="padding:4px 32px 26px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px">
+<div style="display:flex;flex-direction:column;gap:7px"><label for="r-name" style="font-size:13.5px;font-weight:800;color:#4F5B66">Название клиники</label><input id="r-name" value="Ақ Тіс" autocomplete="organization" style="height:48px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:700;color:#0E2230"></div>
+<div style="display:flex;flex-direction:column;gap:7px"><label for="r-city" style="font-size:13.5px;font-weight:800;color:#4F5B66">Город</label><span style="height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><input id="r-city" role="combobox" aria-expanded="false" aria-autocomplete="list" value="Алматы" style="flex-grow:1;height:44px;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:15px;font-weight:700;color:#0E2230"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg></span></div>
+<div style="display:flex;flex-direction:column;gap:7px"><label for="r-phone" style="font-size:13.5px;font-weight:800;color:#4F5B66">Телефон клиники</label><input id="r-phone" value="+7 727 ••• •• 40" autocomplete="tel" style="height:48px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:700;color:#0E2230;font-variant-numeric:tabular-nums"></div>
+<div style="display:flex;flex-direction:column;gap:7px"><label for="r-tz" style="font-size:13.5px;font-weight:800;color:#4F5B66">Часовой пояс</label><span style="height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><input id="r-tz" role="combobox" aria-expanded="false" aria-autocomplete="list" value="Казахстан, UTC+5" style="flex-grow:1;height:44px;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:15px;font-weight:700;color:#0E2230"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg></span><span style="font-size:12.5px;font-weight:700;color:#5A6772">Подставлен по городу</span></div>
+<div style="grid-column:1 / -1;display:flex;flex-direction:column;gap:10px">
+<span style="display:flex;align-items:baseline;gap:8px"><span id="r-dir" style="font-size:13.5px;font-weight:800;color:#4F5B66">Направления</span><span style="font-size:13px;font-weight:600;color:#5A6772">можно несколько</span></span>
+<div role="group" aria-labelledby="r-dir" style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" aria-pressed="true" style="height:44px;padding:0 18px 0 14px;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFCB47" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Терапия</button><button type="button" aria-pressed="true" style="height:44px;padding:0 18px 0 14px;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFCB47" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Хирургия</button><button type="button" aria-pressed="true" style="height:44px;padding:0 18px 0 14px;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFCB47" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Ортопедия</button><button type="button" aria-pressed="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Ортодонтия</button><button type="button" aria-pressed="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Имплантология</button><button type="button" aria-pressed="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Детская</button><button type="button" aria-pressed="false" style="height:44px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14.5px;font-weight:700">Гигиена</button></div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;padding:16px 32px 22px;border-top:2px solid #F0F2F5">
+<button type="button" style="height:48px;padding:0 12px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:800;color:#A1231A">Отмена</button>
+<span style="flex-grow:1;text-align:center;font-size:13.5px;font-weight:600;color:#5A6772">Всё можно изменить позже в разделе «Клиника»</span>
+<button type="button" style="height:48px;padding:0 18px 0 22px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFCB47;color:#0E2230;font-weight:800;font-size:15px">Далее: филиал<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

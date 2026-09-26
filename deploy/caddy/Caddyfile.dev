@@ -1,0 +1,31 @@
+# Caddy в dev — только профилем proxy: deploy/dev.ps1 up -Proxy.
+# Обычная разработка идёт через прокси Vite (5173 → backend 8080), Caddy не нужен.
+# Этот прокси повторяет прод-схему: один origin по HTTPS, /api → backend, остальное → фронт,
+# чтобы проверить cookie Secure/SameSite, CSRF и заголовки так, как они будут на сервере.
+#
+# Сертификат выпускает внутренний CA Caddy: браузер предупредит, пока не доверите корневой
+# сертификат (docker compose cp caddy:/data/caddy/pki/authorities/local/root.crt .).
+# host.docker.internal в Docker Desktop доходит и до сервисов на 127.0.0.1 хоста (проверено);
+# на Linux с голым Docker Engine backend и Vite должны слушать адрес шлюза docker0 или 0.0.0.0.
+{
+	local_certs
+	skip_install_trust
+}
+
+localhost:8443 {
+	encode zstd gzip
+
+	# Actuator слушает только внутренний порт 8081 и через прокси недоступен. Явный 404, иначе /actuator/*
+	# ушёл бы в Vite и получил index.html со статусом 200. Обязателен и в прод-Caddyfile (T-PLT-25, PLT-10).
+	handle /actuator* {
+		respond 404
+	}
+
+	handle /api/* {
+		reverse_proxy host.docker.internal:8080
+	}
+
+	handle {
+		reverse_proxy host.docker.internal:5173
+	}
+}

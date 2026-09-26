@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Расписание на телефоне</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0E2230;text-decoration:none}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+<header style="display:flex;align-items:center;gap:12px;padding:22px 16px 8px">
+<div style="display:flex;flex-direction:column;gap:2px;flex-grow:1">
+<h1 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:23px;letter-spacing:-0.02em">Доброе утро, Динара</h1>
+<span style="font-size:14px;font-weight:600;color:#5A6772">Чт, 24 сентября · Абая, 150</span>
+</div>
+<button type="button" aria-label="Поиск пациента" style="width:46px;height:46px;border:0;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg></button>
+</header>
+
+<div role="radiogroup" aria-label="День" style="display:flex;gap:4px;padding:8px 12px">
+<button type="button" role="radio" aria-checked="false" style="flex:1 1 0;height:62px;border:0;border-radius:18px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#5A6772">Пн</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">21</span></button>
+<button type="button" role="radio" aria-checked="false" style="flex:1 1 0;height:62px;border:0;border-radius:18px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#5A6772">Вт</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">22</span></button>
+<button type="button" role="radio" aria-checked="false" style="flex:1 1 0;height:62px;border:0;border-radius:18px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#5A6772">Ср</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">23</span></button>
+<button type="button" role="radio" aria-checked="true" style="flex:1 1 0;height:62px;border:0;border-radius:18px;background:#0E2230;color:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#FFCB47">Чт</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">24</span></button>
+<button type="button" role="radio" aria-checked="false" style="flex:1 1 0;height:62px;border:0;border-radius:18px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#5A6772">Пт</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">25</span></button>
+<button type="button" role="radio" aria-checked="false" style="flex:1 1 0;height:62px;border:0;border-radius:18px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#5A6772">Сб</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">26</span></button>
+<button type="button" role="radio" aria-checked="false" style="flex:1 1 0;height:62px;border:0;border-radius:18px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#8994A0"><span style="font-size:12px;font-weight:700">Вс</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">27</span></button>
+</div>
+
+<div style="display:flex;gap:8px;padding:4px 16px 14px">
+<button type="button" style="height:40px;padding:0 14px 0 5px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:13.5px;font-weight:700;white-space:nowrap"><span style="width:30px;height:30px;border-radius:50%;background:#FCE0DA;color:#7A2A1E;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600">2</span>Обзвонить</button>
+<button type="button" style="height:40px;padding:0 14px 0 5px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:13.5px;font-weight:700;white-space:nowrap"><span style="width:30px;height:30px;border-radius:50%;background:#D3EEEE;color:#0B4A4F;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600">3</span>Свободных окна</button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px;padding:0 16px">
+<span style="font-size:13px;font-weight:800;color:#5A6772;padding:0 4px">Сейчас · 11:40</span>
+<a href="#" style="display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:20px;background:#FCE0DA">
+<span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px;color:#7A2A1E">Алия Нұрланқызы</span><span style="height:26px;padding:0 10px;border-radius:999px;background:#FFFFFF;font-size:12.5px;font-weight:800;color:#0B5A3C;display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:#16A064"></span>В кресле</span></span>
+<span style="font-size:14px;font-weight:700;color:#8E4336">11:15–12:15 · имплантация 46</span>
+<span style="font-size:13px;font-weight:600;color:#8E4336">Кресло 2 · Бекетов</span>
+</a>
+<a href="#" style="display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:20px;background:#D3EEEE;box-shadow:0 0 0 3px #ECEFF3,0 0 0 6px #FFCB47">
+<span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px;color:#0B4A4F">Айгерим Сейтқазы</span><span style="height:26px;padding:0 10px;border-radius:999px;background:#FFFFFF;font-size:12.5px;font-weight:800;color:#7A4E07;display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:#F2B51E"></span>Пришёл</span></span>
+<span style="font-size:14px;font-weight:700;color:#2B6468">11:30–12:30 · кариес 36</span>
+<span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:#9B1C12"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"></path><path d="M12 10v4.5M12 17.2v.3"></path></svg>Аллергия на лидокаин</span>
+</a>
+<span style="font-size:13px;font-weight:800;color:#5A6772;padding:6px 4px 0">Далее</span>
+<a href="#" style="display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:20px;background:#E5E1FB">
+<span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px;color:#3D3394">Санжар Әлиев</span><span style="height:26px;padding:0 10px;border-radius:999px;background:#FFFFFF;font-size:12.5px;font-weight:800;color:#264C9E;display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:#3A6FD8"></span>Придёт</span></span>
+<span style="font-size:14px;font-weight:700;color:#5A51A8">12:00–12:45 · брекеты</span>
+<span style="font-size:13px;font-weight:600;color:#5A51A8">Кресло 3 · Ким</span>
+</a>
+<button type="button" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:2px dashed #C9D0D8;border-radius:20px;background:#FFFFFF;text-align:left">
+<span style="width:40px;height:40px;border-radius:50%;background:#FFCB47;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E2230" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:2px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Свободно 12:30–13:00</span><span style="font-size:13px;font-weight:600;color:#5A6772">Кресло 1 · Ахметова</span></span>
+</button>
+<a href="#" style="display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:20px;background:#D3EEEE">
+<span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px;color:#0B4A4F">Мадина Жұмабекова</span><span style="height:26px;padding:0 10px;border-radius:999px;background:#FFFFFF;font-size:12.5px;font-weight:800;color:#264C9E;display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:#3A6FD8"></span>Придёт</span></span>
+<span style="font-size:14px;font-weight:700;color:#2B6468">13:00–14:00 · каналы 46</span>
+<span style="font-size:13px;font-weight:600;color:#2B6468">Кресло 1 · Ахметова</span>
+</a>
+</div>
+
+<nav aria-label="Разделы" style="position:absolute;left:12px;right:12px;bottom:12px;height:70px;border-radius:26px;background:#0F3D4C;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:0 6px;box-shadow:0 10px 30px rgba(14,34,48,0.30)">
+<a href="#" aria-current="page" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:800;color:#FFCB47">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Расписание</a>
+<a href="#" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:#D5E3E7">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg>Пациенты</a>
+<span style="display:flex;justify-content:center"><button type="button" aria-label="Новая запись" style="width:60px;height:60px;margin-top:-30px;border:5px solid #ECEFF3;border-radius:50%;background:#FFCB47;color:#0E2230;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(242,181,30,0.45)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></span>
+<a href="#" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:#D5E3E7">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"></path><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"></path></svg>Склад</a>
+<a href="#" style="display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:#D5E3E7">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="18.5" cy="12" r="1.8"></circle></svg>Ещё</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

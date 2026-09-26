@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Клиника — справочники</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;display:flex;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+
+<aside style="width:216px;flex-shrink:0;margin:16px;border-radius:24px;background:#0F3D4C;color:#FFFFFF;padding:24px 14px 18px;display:flex;flex-direction:column;gap:28px">
+<span style="font-family:Rubik,sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;padding:0 10px">dentify<span style="color:#FFCB47">.</span></span>
+<nav aria-label="Разделы" style="display:flex;flex-direction:column;gap:4px">
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Расписание</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg>Пациенты</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v5a5 5 0 0 0 10 0V3"></path><path d="M10 13v2a5 5 0 0 0 10 0v-2"></path><circle cx="20" cy="10.5" r="2"></circle></svg>Врачи</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"></path><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"></path></svg>Склад</a>
+<a href="#" aria-current="page" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;background:#FFCB47;color:#0E2230;font-weight:700;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 21v-4h6v4M8.5 7.5h1M14.5 7.5h1M8.5 11.5h1M14.5 11.5h1"></path></svg>Клиника</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>Доступы</a>
+</nav>
+<div style="flex-grow:1"></div>
+<a href="#" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.08);color:#FFFFFF;text-decoration:none">
+<span style="width:38px;height:38px;border-radius:50%;background:#FFCB47;color:#0E2230;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px">ЕЖ</span>
+<span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-size:14px;font-weight:700">Ерболат</span><span style="font-size:12px;color:#C5D6DB">Владелец</span></span>
+</a>
+</aside>
+
+<main style="flex-grow:1;min-width:0;padding:24px 24px 24px 8px;display:flex;flex-direction:column;gap:16px">
+<header style="display:flex;align-items:center;gap:12px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<h1 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:30px;letter-spacing:-0.02em">Клиника</h1>
+<span style="font-size:14px;font-weight:600;color:#5A6772">«Ақ Тіс» · 2 филиала · 6 кресел</span>
+</div>
+</header>
+
+<div role="tablist" aria-label="Разделы клиники" style="align-self:flex-start;display:flex;gap:4px;padding:5px;border-radius:999px;background:#FFFFFF">
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Профиль</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Филиалы</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Кресла</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Прайс</button>
+<button type="button" role="tab" aria-selected="true" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800">Справочники</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Настройки</button>
+</div>
+
+<div style="flex-grow:1;display:flex;gap:16px;min-height:0">
+<nav aria-label="Справочники" style="width:300px;flex-shrink:0;background:#FFFFFF;border-radius:24px;padding:18px 12px 14px;display:flex;flex-direction:column;gap:10px">
+<h2 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px;padding:0 8px 2px">Справочники</h2>
+<div style="display:flex;flex-direction:column;gap:2px">
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Специальности<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">9</span></a>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Причины обращения<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">12</span></a>
+<a href="#" aria-current="true" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;background:#FFF4D1;color:#0E2230;font-size:14.5px;font-weight:800;text-decoration:none">Причины отмены<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#FFFFFF;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">6</span></a>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Источники пациентов<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">7</span></a>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Метки пациентов<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">10</span></a>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Аллергены<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">8</span></a>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Состояния зубов<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">14</span></a>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Единицы измерения<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">6</span></a>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:44px;padding:0 10px 0 14px;border-radius:14px;color:#0E2230;font-size:14.5px;font-weight:700;text-decoration:none">Причины списания<span style="min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">5</span></a>
+</div>
+<div style="flex-grow:1"></div>
+<span style="display:flex;gap:9px;padding:0 8px;font-size:13.5px;font-weight:600;color:#4F5B66;line-height:1.45"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 7.6v.3"></path></svg><span>Справочники общие для обоих филиалов.</span></span>
+</nav>
+
+<section aria-label="Причины отмены" style="flex-grow:1;min-width:0;background:#FFFFFF;border-radius:24px;padding:22px 24px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<h2 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Причины отмены</h2>
+<span style="font-size:14px;font-weight:600;color:#5A6772">Администратор выбирает причину, когда отменяет запись. Порядок — как в списке.</span>
+</div>
+<div aria-hidden="true" style="display:grid;grid-template-columns:44px minmax(0,1fr) 200px 76px 44px 44px;gap:10px;padding:6px 12px 0;font-size:12.5px;font-weight:800;color:#5A6772"><span></span><span>Причина</span><span>В записях</span><span>Активна</span><span></span><span></span></div>
+<div role="list" style="display:flex;flex-direction:column;gap:2px">
+<div role="listitem" style="display:grid;grid-template-columns:44px minmax(0,1fr) 200px 76px 44px 44px;gap:10px;align-items:center;padding:6px 12px;border-radius:16px">
+<button type="button" aria-label="Перетащить" style="width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#8A96A1;display:flex;align-items:center;justify-content:center;cursor:grab"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"></circle><circle cx="15" cy="6" r="1.7"></circle><circle cx="9" cy="12" r="1.7"></circle><circle cx="15" cy="12" r="1.7"></circle><circle cx="9" cy="18" r="1.7"></circle><circle cx="15" cy="18" r="1.7"></circle></svg></button>
+<span title="Пациент заболел" style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;color:#0E2230;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Пациент заболел</span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772">использовано 34 раза</span>
+<button type="button" role="switch" aria-checked="true" aria-label="Пациент заболел: активна" style="height:44px;padding:0;border:0;background:transparent;display:inline-flex;align-items:center;flex-shrink:0"><span style="position:relative;display:block;width:48px;height:28px;border-radius:999px;background:#0E2230"><span style="position:absolute;top:4px;left:24px;width:20px;height:20px;border-radius:50%;background:#FFCB47"></span></span></button>
+<button type="button" aria-label="Изменить" style="width:44px;height:44px;border:0;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg></button>
+<button type="button" aria-label="Удалить" disabled title="Нельзя удалить: причина уже выбиралась в записях" style="width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#C3CBD3;display:flex;align-items:center;justify-content:center;cursor:not-allowed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15M10 11v5.5M14 11v5.5"></path><path d="m6.5 7 .8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"></path><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"></path></svg></button>
+</div>
+<div role="listitem" style="display:grid;grid-template-columns:44px minmax(0,1fr) 200px 76px 44px 44px;gap:10px;align-items:center;padding:6px 12px;border-radius:16px">
+<button type="button" aria-label="Перетащить" style="width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#8A96A1;display:flex;align-items:center;justify-content:center;cursor:grab"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"></circle><circle cx="15" cy="6" r="1.7"></circle><circle cx="9" cy="12" r="1.7"></circle><circle cx="15" cy="12" r="1.7"></circle><circle cx="9" cy="18" r="1.7"></circle><circle cx="15" cy="18" r="1.7"></circle></svg></button>
+<span title="Перенёс на другой день" style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;color:#0E2230;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Перенёс на другой день</span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772">использовано 48 раз</span>
+<button type="button" role="switch" aria-checked="true" aria-label="Перенёс на другой день: активна" style="height:44px;padding:0;border:0;background:transparent;display:inline-flex;align-items:center;flex-shrink:0"><span style="position:relative;display:block;width:48px;height:28px;border-radius:999px;background:#0E2230"><span style="position:absolute;top:4px;left:24px;width:20px;height:20px;border-radius:50%;background:#FFCB47"></span></span></button>
+<button type="button" aria-label="Изменить" style="width:44px;height:44px;border:0;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg></button>
+<button type="button" aria-label="Удалить" disabled title="Нельзя удалить: причина уже выбиралась в записях" style="width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#C3CBD3;display:flex;align-items:center;justify-content:center;cursor:not-allowed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15M10 11v5.5M14 11v5.5"></path><path d="m6.5 7 .8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"></path><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"></path></svg></button>
+</div>
+<div role="listitem" style="display:grid;grid-template-columns:44px minmax(0,1fr) 200px 76px 44px 44px;gap:10px;align-items:center;padding:6px 12px;border-radius:16px">
+<button type="button" aria-label="Перетащить" style="width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#8A96A1;display:flex;align-items:center;justify-content:center;cursor:grab"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"></circle><circle cx="15" cy="6" r="1.7"></circle><circle cx="9" cy="12" r="1.7"></circle><circle cx="15" cy="12" r="1.7"></circle><circle cx="9" cy="18" r="1.7"></circle><circle cx="15" cy="18" r="1.7"></circle></svg></button>
+<span title="Не может прийти из-за работы" style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;color:#0E2230;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Не может прийти из-за работы</span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772">использовано 21 раз</span>
+<button type="button" role="switch" aria-checked="true" aria-label="Не может прийти из-за работы: активна" style="height:44px;padding:0;border:0;background:transparent;display:inline-flex;align-items:center;flex-shrink:0"><span style="position:relative;display:block;width:48px;height:28px;border-radius:999px;background:#0E2230"><span style="position:absolute;top:4px;left:24px;width:20px;height:20px;border-radius:50%;background:#FFCB47"></span></span></button>
+<button type="button" aria-label="Изменить" style="width:44px;height:44px;border:0;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg></button>
+<button type="button" aria-label="Удалить" disabled title="Нельзя удалить: причина уже выбиралась в записях" style="width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#C3CBD3;display:flex;align-items:center;justify-content:center;cursor:not-allowed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15M10 11v5.5M14 11v5.5"></path><path d="m6.5 7 .8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"></path><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"></path></svg></button>
+</div>
+<div role="listitem" style="display:grid;grid-template-columns:44px minmax(0,1fr) 200px 76px 44px 44px;gap:10px;align-items:center;padding:6px 12px;border-radius:16px">
+<button type="button" aria-label="Перетащить" style="width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#8A96A1;display:flex;align-items:center;justify-content:center;cursor:grab"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"></circle><circle cx="15" cy="6" r="1.7"></circle><circle cx="9" cy="12" r="1.7"></circle><circle cx="15" cy="12" r="1.7"></circle><circle cx="9" cy="18" r="1.7"></circle><circle cx="15" cy="18" r="1.7"></circle></svg></button>
+<span title="Врач заболел" style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;color:#0E2230;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Врач заболел</span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772">использовано 7 раз</span>
+<button type="button" role="switch" aria-checked="true" aria-label="Врач заболел: активна" style="height:44px;padding:0;border:0;background:transparent;display:inline-flex;align-items:center;flex-shrink:0"><span style="position:relative;display:block;width:48px;height:28px;border-radius:999px;background:#0E2230"><span style="position:absolute;top:4px;left:24px;width:20px;height:20px;border-radius:50%;background:#FFCB47"></span></span></button>
+<button type="button" aria-label="Изменить" style="width:44px;height:44px;border:0;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg></button>
+<button type="button" aria-label="Удалить" disabled title="Нельзя удалить: причина уже выбиралась в записях" style="width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#C3CBD3;display:flex;align-items:center;justify-content:center;cursor:not-allowed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15M10 11v5.5M14 11v5.5"></path><path d="m6.5 7 .8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"></path><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"></path></svg></button>
+</div>
+<div role="listitem" style="display:grid;grid-template-columns:44px minmax(0,1fr) 200px 76px 44px 44px;gap:10px;align-items:center;padding:6px 12px;border-radius:16px">
+<button type="button" aria-label="Перетащить" style="width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#8A96A1;display:flex;align-items:center;justify-content:center;cursor:grab"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"></circle><circle cx="15" cy="6" r="1.7"></circle><circle cx="9" cy="12" r="1.7"></circle><circle cx="15" cy="12" r="1.7"></circle><circle cx="9" cy="18" r="1.7"></circle><circle cx="15" cy="18" r="1.7"></circle></svg></button>
+<span title="Дорого" style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;color:#5A6772;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Дорого</span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772">использовано 5 раз</span>
+<button type="button" role="switch" aria-checked="false" aria-label="Дорого: активна" style="height:44px;padding:0;border:0;background:transparent;display:inline-flex;align-items:center;flex-shrink:0"><span style="position:relative;display:block;width:48px;height:28px;border-radius:999px;background:#D5DBE2"><span style="position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(14,34,48,0.22)"></span></span></button>
+<button type="button" aria-label="Изменить" style="width:44px;height:44px;border:0;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg></button>
+<button type="button" aria-label="Удалить" disabled title="Нельзя удалить: причина уже выбиралась в записях" style="width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#C3CBD3;display:flex;align-items:center;justify-content:center;cursor:not-allowed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15M10 11v5.5M14 11v5.5"></path><path d="m6.5 7 .8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"></path><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"></path></svg></button>
+</div>
+<div role="listitem" style="display:grid;grid-template-columns:44px minmax(0,1fr) 200px 76px 44px 44px;gap:10px;align-items:center;padding:6px 12px;border-radius:16px">
+<button type="button" aria-label="Перетащить" style="width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#8A96A1;display:flex;align-items:center;justify-content:center;cursor:grab"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"></circle><circle cx="15" cy="6" r="1.7"></circle><circle cx="9" cy="12" r="1.7"></circle><circle cx="15" cy="12" r="1.7"></circle><circle cx="9" cy="18" r="1.7"></circle><circle cx="15" cy="18" r="1.7"></circle></svg></button>
+<span title="Дубль записи" style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;color:#0E2230;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Дубль записи</span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772">ещё не использовалась</span>
+<button type="button" role="switch" aria-checked="true" aria-label="Дубль записи: активна" style="height:44px;padding:0;border:0;background:transparent;display:inline-flex;align-items:center;flex-shrink:0"><span style="position:relative;display:block;width:48px;height:28px;border-radius:999px;background:#0E2230"><span style="position:absolute;top:4px;left:24px;width:20px;height:20px;border-radius:50%;background:#FFCB47"></span></span></button>
+<button type="button" aria-label="Изменить" style="width:44px;height:44px;border:0;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg></button>
+<button type="button" aria-label="Удалить" style="width:44px;height:44px;border:0;border-radius:50%;background:#FDE2E0;color:#A1231A;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15M10 11v5.5M14 11v5.5"></path><path d="m6.5 7 .8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"></path><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"></path></svg></button>
+</div>
+</div>
+<div style="display:flex;gap:10px;padding:4px 0 0">
+<label for="sp-new" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0">Новая причина отмены</label><input id="sp-new" placeholder="Новая причина…" style="flex-grow:1;min-width:0;height:48px;padding:0 18px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:700;color:#0E2230">
+<button type="button" style="height:48px;padding:0 22px 0 16px;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;background:#FFCB47;color:#0E2230;font-size:15px;font-weight:800;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Добавить</button>
+</div>
+<div style="flex-grow:1"></div>
+<div style="display:flex;gap:10px;padding:14px 16px;border-radius:18px;background:#F5F7F9;font-size:14px;font-weight:600;color:#4F5B66;line-height:1.45">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 7.6v.3"></path></svg>
+<span>Удалить можно только причину, которую ещё ни разу не выбирали. Ненужную — выключите: в старых записях она останется, в новых её не будет.</span>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

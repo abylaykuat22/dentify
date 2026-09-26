@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- База сгенерирована start.spring.io (Boot 4.1.1, Java 25), затем дополнена. -->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.1</version>
+		<relativePath/>
+	</parent>
+
+	<groupId>kz.dentify</groupId>
+	<artifactId>dentify-backend</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>dentify-backend</name>
+	<description>Dentify: SaaS для стоматологий, модульный монолит на Spring Modulith</description>
+
+	<properties>
+		<java.version>25</java.version>
+		<spring-modulith.version>2.1.1</spring-modulith.version>
+		<!-- springdoc 3.1.x собран против Spring Boot 4.1 (родитель 3.1.1 — spring-boot-starter-parent 4.1.0) -->
+		<springdoc.version>3.1.1</springdoc.version>
+		<!-- Безопасность: версии вне BOM Boot. bucket4j-lettuce собран против Lettuce 6 (provided), с Lettuce 7 из
+		     Boot 4.1 проверен тестами лимитов (RateLimitTests) -->
+		<bouncycastle.version>1.86</bouncycastle.version>
+		<bucket4j.version>8.20.0</bucket4j.version>
+		<uap-java.version>1.6.1</uap-java.version>
+		<geoip2.version>5.2.0</geoip2.version>
+		<!-- Телефоны: разбор и нормализация в E.164 (platform.api.PhoneNumber), метаданные Google, без сети -->
+		<libphonenumber.version>9.0.40</libphonenumber.version>
+		<!-- ./mvnw spring-boot:run запускает профиль dev; другой — -Dspring-boot.run.profiles=… -->
+		<spring-boot.run.profiles>dev</spring-boot.run.profiles>
+	</properties>
+
+	<dependencies>
+		<!-- Веб, валидация -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- Контракт API: OpenAPI 3.1 из контроллеров (/v3/api-docs — dev и test). Спеку в api/openapi.json
+		     выгружает тест OpenApiContractTests. Swagger UI (starter -ui) — только в Maven-профиле dev ниже:
+		     в обычную сборку, тесты и jar для стенда и прода он не попадает. -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+			<version>${springdoc.version}</version>
+		</dependency>
+
+		<!-- Данные: PostgreSQL 18 + JPA, миграции Flyway, Valkey (протокол Redis) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<!-- Кэш Spring в Valkey (RedisCacheManager); ключи кэша данных клиники начинаются с clinic_id
+		     (platform.cache, docs/architecture.md «Тенант-контекст и изоляция клиник») -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+
+		<!-- Безопасность (PLT-04..06, docs/architecture.md «Безопасность и сессии»): Spring Security, сессии в Valkey
+		     (Spring Session, индекс по аккаунту), Argon2id (BouncyCastle — его требует Argon2PasswordEncoder Spring
+		     Security, версию Boot не ведёт), лимиты запросов (Bucket4j в Valkey через Lettuce), браузер и ОС сессии
+		     (uap-java), город по IP из локальной базы mmdb (GeoIP2 API MaxMind; база DB-IP Lite не коммитится). -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-session-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>${bouncycastle.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-lettuce</artifactId>
+			<version>${bucket4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ua-parser</groupId>
+			<artifactId>uap-java</artifactId>
+			<version>${uap-java.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.maxmind.geoip2</groupId>
+			<artifactId>geoip2</artifactId>
+			<version>${geoip2.version}</version>
+		</dependency>
+
+		<!-- Телефоны (IAM-01, CLN-01): любой ввод «8 707 …», «+7 (707) …», «707…» — в E.164 по метаданным
+		     libphonenumber (Google, Apache-2.0), регион по умолчанию KZ. Вне BOM Boot. -->
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>libphonenumber</artifactId>
+			<version>${libphonenumber.version}</version>
+		</dependency>
+
+		<!-- Модули: границы (core); /actuator/modulith на порту 8081 и наблюдаемость (insight,
+		     spring-modulith-runtime приходит с ним транзитивно) -->
+		<dependency>
+			<groupId>org.springframework.modulith</groupId>
+			<artifactId>spring-modulith-starter-core</artifactId>
+		</dependency>
+		<!-- @ApplicationModuleListener и другие аннотации событий модулей. Журнал публикаций (starter-jdbc) — T-PLT-14 -->
+		<dependency>
+			<groupId>org.springframework.modulith</groupId>
+			<artifactId>spring-modulith-events-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.modulith</groupId>
+			<artifactId>spring-modulith-starter-insight</artifactId>
+		</dependency>
+
+		<!-- Эксплуатация: Actuator (порт 8081), метрики Prometheus, traceId в логах -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-micrometer-tracing-brave</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+
+		<!-- Тесты -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-session-data-redis-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-micrometer-tracing-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.modulith</groupId>
+			<artifactId>spring-modulith-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.modulith</groupId>
+				<artifactId>spring-modulith-bom</artifactId>
+				<version>${spring-modulith.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-build-environment</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[25,)</version>
+									<message>Нужен JDK 25+: JAVA_HOME=C:\Users\abyla\.jdks\openjdk-25.0.2 (см. apps/dentify/CLAUDE.md)</message>
+								</requireJavaVersion>
+								<requireMavenVersion>
+									<version>[3.9,)</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- JDK 23+ без явного пути процессоров аннотации не запускает (javac -proc), поэтому путь задан:
+				     spring-modulith-apt — Javadoc модулей в канвы docs/modules/ (META-INF/spring-modulith/javadoc.json);
+				     spring-boot-configuration-processor — метаданные своих @ConfigurationProperties для IDE и канв.
+				     Версии — из BOM (Boot, spring-modulith-bom). -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.springframework.modulith</groupId>
+							<artifactId>spring-modulith-apt</artifactId>
+						</path>
+						<path>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-configuration-processor</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- свойство ${org.mockito:mockito-core:jar} (путь к jar) для агента Mockito в тестах -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- JDK 21+: Mockito — явным агентом, а не динамической загрузкой; JNA (Testcontainers на
+					     Windows) — с разрешённым native access; CDS выключен, т.к. агент дополняет bootclasspath -->
+					<argLine>-javaagent:${org.mockito:mockito-core:jar} --enable-native-access=ALL-UNNAMED -Xshare:off</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- META-INF/build-info.properties: версия и время сборки в /actuator/info (трекер ошибок, алерты) -->
+						<goals>
+							<goal>build-info</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!-- Swagger UI для локальной разработки: ./mvnw -Pdev spring-boot:run, http://127.0.0.1:8080/swagger-ui.html
+		     (в IDE — отметить Maven-профиль dev). Профиль включается только явно: jar без -Pdev, то есть стенд и
+		     прод, UI не содержит. В рантайме страховка — springdoc.swagger-ui.enabled=false вне dev и
+		     spring.web.resources.add-mappings=false (Boot не раздаёт /webjars/**). -->
+		<profile>
+			<id>dev</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.springdoc</groupId>
+					<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+					<version>${springdoc.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+
+</project>

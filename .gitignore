@@ -1,0 +1,20 @@
+# Секреты локального окружения: в репозитории только deploy/.env.example
+.env
+.env.*
+!.env.example
+
+# GeoIP-база города для списка сессий (DB-IP Lite, CC BY 4.0): скачивается, не коммитится (backend/README.md)
+deploy/geoip/
+
+# Сборка бэкенда (T-PLT-02) и фронта (T-PLT-05)
+backend/target/
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json

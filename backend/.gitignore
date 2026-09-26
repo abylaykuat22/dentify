@@ -1,0 +1,12 @@
+# Сборка
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.factorypath
+.vscode/

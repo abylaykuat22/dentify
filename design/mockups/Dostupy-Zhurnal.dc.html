@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Доступы — журнал действий</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;display:flex;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+
+<aside style="width:216px;flex-shrink:0;margin:16px;border-radius:24px;background:#0F3D4C;color:#FFFFFF;padding:24px 14px 18px;display:flex;flex-direction:column;gap:28px">
+<span style="font-family:Rubik,sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;padding:0 10px">dentify<span style="color:#FFCB47">.</span></span>
+<nav aria-label="Разделы" style="display:flex;flex-direction:column;gap:4px">
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Расписание</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg>Пациенты</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v5a5 5 0 0 0 10 0V3"></path><path d="M10 13v2a5 5 0 0 0 10 0v-2"></path><circle cx="20" cy="10.5" r="2"></circle></svg>Врачи</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"></path><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"></path></svg>Склад</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 21v-4h6v4M8.5 7.5h1M14.5 7.5h1M8.5 11.5h1M14.5 11.5h1"></path></svg>Клиника</a>
+<a href="#" aria-current="page" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;background:#FFCB47;color:#0E2230;font-weight:700;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>Доступы</a>
+</nav>
+<div style="flex-grow:1"></div>
+<a href="#" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.08);color:#FFFFFF;text-decoration:none">
+<span style="width:38px;height:38px;border-radius:50%;background:#FFCB47;color:#0E2230;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px;flex-shrink:0">ЕЖ</span>
+<span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-size:14px;font-weight:700">Ерболат</span><span style="font-size:12px;color:#C5D6DB">Владелец</span></span>
+</a>
+</aside>
+
+<main style="flex-grow:1;min-width:0;padding:24px 24px 24px 8px;display:flex;flex-direction:column;gap:16px">
+<header style="min-height:48px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+<h1 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:30px;letter-spacing:-0.02em">Доступы</h1>
+<div style="flex-grow:1"></div>
+<button type="button" style="height:48px;padding:0 20px 0 16px;display:flex;align-items:center;gap:8px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:15px;font-weight:800;white-space:nowrap;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5"></path><path d="M4.5 15.5v3a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-3"></path></svg>Выгрузить в Excel</button>
+</header>
+
+<div role="tablist" aria-label="Разделы доступов" style="align-self:flex-start;display:flex;gap:4px;padding:5px;border-radius:999px;background:#FFFFFF;flex-shrink:0">
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Сотрудники</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Роли</button>
+<button type="button" role="tab" aria-selected="true" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800">Журнал действий</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Входы и сессии</button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px;flex-shrink:0">
+<div style="display:flex;align-items:center;gap:8px">
+<div role="radiogroup" aria-label="Период" style="display:flex;gap:8px">
+<button type="button" role="radio" aria-checked="true" style="height:44px;padding:0 18px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14px;font-weight:800;white-space:nowrap">Сегодня</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap">Вчера</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap">7 дней</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap">30 дней</button>
+</div>
+<button type="button" style="height:44px;padding:0 18px 0 14px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Даты</button>
+<span aria-hidden="true" style="width:2px;height:24px;border-radius:2px;background:#D5DBE2;margin:0 6px"></span>
+<label for="j-emp" style="width:268px;height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border-radius:999px;background:#FFFFFF;color:#5A6772;cursor:text"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0">Сотрудник</span><input id="j-emp" role="combobox" aria-expanded="false" aria-autocomplete="list" placeholder="Все сотрудники" style="flex-grow:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:14.5px;font-weight:700;color:#0E2230"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg></label>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<div role="radiogroup" aria-label="Объект" style="display:flex;gap:8px">
+<button type="button" role="radio" aria-checked="true" style="height:44px;padding:0 18px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14px;font-weight:800;white-space:nowrap">Все объекты</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px 0 16px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><span style="width:10px;height:10px;border-radius:50%;background:#2F6FD1"></span>Записи</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px 0 16px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><span style="width:10px;height:10px;border-radius:50%;background:#1B8A8F"></span>Пациенты</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px 0 16px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><span style="width:10px;height:10px;border-radius:50%;background:#5B4FD1"></span>Медкарты</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px 0 16px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><span style="width:10px;height:10px;border-radius:50%;background:#B7791F"></span>Склад</button>
+<button type="button" role="radio" aria-checked="false" style="height:44px;padding:0 18px 0 16px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><span style="width:10px;height:10px;border-radius:50%;background:#B83280"></span>Доступы</button>
+</div>
+<div style="flex-grow:1"></div>
+<label for="j-q" style="width:320px;flex-shrink:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 18px;border-radius:999px;background:#FFFFFF;color:#5A6772;cursor:text"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><span style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0">Поиск по журналу</span><input id="j-q" placeholder="Пациент или действие" style="flex-grow:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:14.5px;font-weight:600;color:#0E2230"></label>
+</div>
+</div>
+
+<section aria-label="Журнал действий" style="flex-grow:1;min-height:0;background:#FFFFFF;border-radius:24px;padding:8px 12px;display:flex;flex-direction:column">
+<div style="display:flex;align-items:baseline;gap:8px;padding:12px 16px 6px">
+<h2 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:16px">Сегодня, 24 сентября</h2>
+<span style="font-size:14px;font-weight:600;color:#5A6772">· 46 действий</span>
+</div>
+
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+
+<li>
+<button type="button" aria-expanded="false" style="width:100%;min-height:52px;display:grid;grid-template-columns:52px 212px minmax(0,1fr) 104px 88px 20px;gap:14px;align-items:center;padding:6px 16px;border:0;border-radius:16px;background:transparent;text-align:left;color:#0E2230">
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">11:39</span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;border-radius:50%;background:#ECEFF3;color:#4F5B66;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;flex-shrink:0">АМ</span><span title="Асель Мұратқызы" style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Асель Мұратқызы</span></span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span title="Смена статуса" style="width:32px;height:32px;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="m8.3 12.3 2.6 2.6 4.9-5.1"></path></svg></span><span title="Асель отметила Тимура Ли: Придёт → Пришёл" style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Асель отметила <b style="font-weight:800">Тимура Ли</b>: Придёт → Пришёл</span></span>
+<span><span style="height:28px;padding:0 11px;border-radius:999px;background:#DDEBFB;color:#1E4F8F;font-size:12.5px;font-weight:800;display:inline-flex;align-items:center">Записи</span></span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772;font-variant-numeric:tabular-nums">95.56.•.•</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg>
+</button>
+</li>
+
+<li style="border-radius:16px;background:#FFF4D1">
+<button type="button" aria-expanded="true" aria-controls="j-d2" style="width:100%;min-height:52px;display:grid;grid-template-columns:52px 212px minmax(0,1fr) 104px 88px 20px;gap:14px;align-items:center;padding:6px 16px;border:0;border-radius:16px;background:transparent;text-align:left;color:#0E2230">
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">11:38</span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;border-radius:50%;background:#FFFFFF;color:#4F5B66;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;flex-shrink:0">ДА</span><span title="Динара Алиева" style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Динара Алиева</span></span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span title="Перенос" style="width:32px;height:32px;border-radius:50%;background:#FFFFFF;color:#4F5B66;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14.5M15 4.5 18.5 8 15 11.5"></path><path d="M20 16H5.5M9 12.5 5.5 16 9 19.5"></path></svg></span><span title="Динара перенесла запись Айгерим Сейтқазы: 24.09 11:30 → 25.09 10:00" style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Динара перенесла запись <b style="font-weight:800">Айгерим Сейтқазы</b>: 24.09 11:30 → 25.09 10:00</span></span>
+<span><span style="height:28px;padding:0 11px;border-radius:999px;background:#DDEBFB;color:#1E4F8F;font-size:12.5px;font-weight:800;display:inline-flex;align-items:center">Записи</span></span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772;font-variant-numeric:tabular-nums">95.56.•.•</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E2230" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14.5 6-6 6 6"></path></svg>
+</button>
+<div id="j-d2" role="region" aria-label="Что изменилось" style="margin:0 16px 12px 308px;padding:12px 12px 12px 18px;border-radius:14px;background:#FFFFFF;display:flex;align-items:center;gap:24px">
+<div style="display:grid;grid-template-columns:auto auto 16px auto;align-items:center;column-gap:14px;row-gap:6px">
+<span style="grid-column:1 / -1;font-size:12.5px;font-weight:800;color:#5A6772">Было → стало</span>
+<span style="font-size:14px;font-weight:700;color:#5A6772;padding-right:12px">Дата</span>
+<span style="font-family:Rubik,sans-serif;font-weight:500;font-size:15px;color:#5A6772;text-decoration:line-through;font-variant-numeric:tabular-nums">24.09.2026</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12h15M14 6.5l5.5 5.5-5.5 5.5"></path></svg>
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">25.09.2026</span>
+<span style="font-size:14px;font-weight:700;color:#5A6772;padding-right:12px">Время</span>
+<span style="font-family:Rubik,sans-serif;font-weight:500;font-size:15px;color:#5A6772;text-decoration:line-through;font-variant-numeric:tabular-nums">11:30</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12h15M14 6.5l5.5 5.5-5.5 5.5"></path></svg>
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">10:00</span>
+</div>
+<div style="flex-grow:1"></div>
+<a href="#" style="height:44px;padding:0 10px;display:inline-flex;align-items:center;gap:6px;font-size:14.5px;font-weight:800;white-space:nowrap">Открыть запись<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"></path></svg></a>
+</div>
+</li>
+
+<li>
+<button type="button" aria-expanded="false" style="width:100%;min-height:52px;display:grid;grid-template-columns:52px 212px minmax(0,1fr) 104px 88px 20px;gap:14px;align-items:center;padding:6px 16px;border:0;border-radius:16px;background:transparent;text-align:left;color:#0E2230">
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">11:32</span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;border-radius:50%;background:#1B8A8F;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;flex-shrink:0">СА</span><span title="Сауле Ахметова" style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Сауле Ахметова</span></span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span title="Просмотр" style="width:32px;height:32px;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></span><span title="Сауле открыла медкарту Айгерим Сейтқазы" style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Сауле открыла медкарту <b style="font-weight:800">Айгерим Сейтқазы</b></span></span>
+<span><span style="height:28px;padding:0 11px;border-radius:999px;background:#E5E1FB;color:#3D3394;font-size:12.5px;font-weight:800;display:inline-flex;align-items:center">Медкарты</span></span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772;font-variant-numeric:tabular-nums">95.56.•.•</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg>
+</button>
+</li>
+
+<li>
+<button type="button" aria-expanded="false" style="width:100%;min-height:52px;display:grid;grid-template-columns:52px 212px minmax(0,1fr) 104px 88px 20px;gap:14px;align-items:center;padding:6px 16px;border:0;border-radius:16px;background:transparent;text-align:left;color:#0E2230">
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">11:20</span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;border-radius:50%;background:#ECEFF3;color:#4F5B66;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;flex-shrink:0">АТ</span><span title="Айжан Тулегенова" style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Айжан Тулегенова</span></span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span title="Приход" style="width:32px;height:32px;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v10.5m0 0-4-4m4 4 4-4"></path><path d="M4 14.5v4a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5v-4"></path></svg></span><span title="Айжан провела приход № 58 от «МедСнаб»" style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Айжан провела приход <b style="font-weight:800">№ 58</b> от «МедСнаб»</span></span>
+<span><span style="height:28px;padding:0 11px;border-radius:999px;background:#F6EACB;color:#6B4A0B;font-size:12.5px;font-weight:800;display:inline-flex;align-items:center">Склад</span></span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772;font-variant-numeric:tabular-nums">95.56.•.•</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg>
+</button>
+</li>
+
+<li>
+<button type="button" aria-expanded="false" style="width:100%;min-height:52px;display:grid;grid-template-columns:52px 212px minmax(0,1fr) 104px 88px 20px;gap:14px;align-items:center;padding:6px 16px;border:0;border-radius:16px;background:transparent;text-align:left;color:#0E2230">
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">10:52</span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;border-radius:50%;background:#5B4FD1;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;flex-shrink:0">ЖК</span><span title="Жанна Ким" style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Жанна Ким</span></span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span title="Изменение" style="width:32px;height:32px;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg></span><span title="Жанна изменила план лечения Камилы Ахмедовой" style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Жанна изменила план лечения <b style="font-weight:800">Камилы Ахмедовой</b></span></span>
+<span><span style="height:28px;padding:0 11px;border-radius:999px;background:#E5E1FB;color:#3D3394;font-size:12.5px;font-weight:800;display:inline-flex;align-items:center">Медкарты</span></span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772;font-variant-numeric:tabular-nums">2.134.•.•</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg>
+</button>
+</li>
+
+<li>
+<button type="button" aria-expanded="false" style="width:100%;min-height:52px;display:grid;grid-template-columns:52px 212px minmax(0,1fr) 104px 88px 20px;gap:14px;align-items:center;padding:6px 16px;border:0;border-radius:16px;background:transparent;text-align:left;color:#0E2230">
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">10:40</span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;border-radius:50%;background:#ECEFF3;color:#4F5B66;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;flex-shrink:0">ЕЖ</span><span title="Ерболат Жақсылықов" style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Ерболат Жақсылықов</span></span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span title="Права доступа" style="width:32px;height:32px;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg></span><span title="Ерболат выдал Дане Ким роль «Ассистент»" style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Ерболат выдал <b style="font-weight:800">Дане Ким</b> роль «Ассистент»</span></span>
+<span><span style="height:28px;padding:0 11px;border-radius:999px;background:#F9DDEA;color:#7B1F4B;font-size:12.5px;font-weight:800;display:inline-flex;align-items:center">Доступы</span></span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772;font-variant-numeric:tabular-nums">37.99.•.•</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg>
+</button>
+</li>
+
+<li>
+<button type="button" aria-expanded="false" style="width:100%;min-height:52px;display:grid;grid-template-columns:52px 212px minmax(0,1fr) 104px 88px 20px;gap:14px;align-items:center;padding:6px 16px;border:0;border-radius:16px;background:transparent;text-align:left;color:#0E2230">
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums">10:15</span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;border-radius:50%;background:#ECEFF3;color:#4F5B66;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;flex-shrink:0">АМ</span><span title="Асель Мұратқызы" style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Асель Мұратқызы</span></span>
+<span style="display:flex;align-items:center;gap:10px;min-width:0"><span title="Новый пациент" style="width:32px;height:32px;border-radius:50%;background:#F5F7F9;color:#4F5B66;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M19 8v6M16 11h6"></path></svg></span><span title="Асель добавила пациента Санжара Әлиева" style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Асель добавила пациента <b style="font-weight:800">Санжара Әлиева</b></span></span>
+<span><span style="height:28px;padding:0 11px;border-radius:999px;background:#D3EEEE;color:#0B4A4F;font-size:12.5px;font-weight:800;display:inline-flex;align-items:center">Пациенты</span></span>
+<span style="font-size:13.5px;font-weight:600;color:#5A6772;font-variant-numeric:tabular-nums">95.56.•.•</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9.5 6 6 6-6"></path></svg>
+</button>
+</li>
+
+</ul>
+
+<div style="flex-grow:1"></div>
+<div style="display:flex;align-items:center;gap:10px;padding:10px 16px 6px">
+<span style="font-size:14px;font-weight:700;color:#5A6772">1–7 из 46</span>
+<div style="flex-grow:1"></div>
+<span style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:#5A6772;margin-right:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"></rect><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"></path></svg>Записи журнала нельзя изменить или удалить</span>
+<button type="button" aria-label="Предыдущая страница" disabled style="width:44px;height:44px;border:0;border-radius:50%;background:#F5F7F9;color:#9AA4AE;display:flex;align-items:center;justify-content:center;cursor:not-allowed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"></path></svg></button>
+<button type="button" aria-label="Следующая страница" style="width:44px;height:44px;border:0;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 6 6 6-6 6"></path></svg></button>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

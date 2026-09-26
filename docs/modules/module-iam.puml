@@ -1,0 +1,33 @@
+@startuml
+title <size:24>Доступы и аккаунты</size>
+
+set separator none
+top to bottom direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Component>
+
+System_Boundary("Dentify_boundary", "Dentify", $tags="") {
+  Container_Boundary("Dentify.Dentify_boundary", "Dentify", $tags="") {
+    Component(Dentify.Dentify.Доступыиаккаунты, "Доступы и аккаунты", $techn="Module", $descr="", $tags="", $link="")
+    Component(Dentify.Dentify.Платформа, "Платформа", $techn="Module", $descr="", $tags="", $link="")
+    Component(Dentify.Dentify.Мояклиника, "Моя клиника", $techn="Module", $descr="", $tags="", $link="")
+  }
+
+}
+
+Rel(Dentify.Dentify.Доступыиаккаунты, Dentify.Dentify.Мояклиника, "uses", $techn="", $tags="", $link="")
+Rel(Dentify.Dentify.Доступыиаккаунты, Dentify.Dentify.Платформа, "uses", $techn="", $tags="", $link="")
+Rel(Dentify.Dentify.Мояклиника, Dentify.Dentify.Платформа, "depends on", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml

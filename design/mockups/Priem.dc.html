@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Запись приёма</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;display:flex;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+
+<aside style="width:216px;flex-shrink:0;margin:16px;border-radius:24px;background:#0F3D4C;color:#FFFFFF;padding:24px 14px 18px;display:flex;flex-direction:column;gap:28px">
+<span style="font-family:Rubik,sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;padding:0 10px">dentify<span style="color:#FFCB47">.</span></span>
+<nav aria-label="Разделы" style="display:flex;flex-direction:column;gap:4px">
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Расписание</a>
+<a href="#" aria-current="page" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;background:#FFCB47;color:#0E2230;font-weight:700;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg>Пациенты</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v5a5 5 0 0 0 10 0V3"></path><path d="M10 13v2a5 5 0 0 0 10 0v-2"></path><circle cx="20" cy="10.5" r="2"></circle></svg>Врачи</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"></path><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"></path></svg>Склад</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 21v-4h6v4M8.5 7.5h1M14.5 7.5h1M8.5 11.5h1M14.5 11.5h1"></path></svg>Клиника</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>Доступы</a>
+</nav>
+<div style="flex-grow:1"></div>
+<a href="#" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.08);color:#FFFFFF;text-decoration:none">
+<span style="width:38px;height:38px;border-radius:50%;background:#1B8A8F;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px">СА</span>
+<span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-size:14px;font-weight:700">Сауле</span><span style="font-size:12px;color:#C5D6DB">Врач-терапевт</span></span>
+</a>
+</aside>
+
+<main style="flex-grow:1;min-width:0;padding:24px 24px 104px 8px;display:flex;flex-direction:column;gap:16px">
+<header style="display:flex;align-items:center;gap:14px">
+<a href="#" aria-label="К карточке пациента" style="width:48px;height:48px;border-radius:50%;background:#FFFFFF;color:#0E2230;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+<nav aria-label="Путь" style="min-width:0">
+<ol style="margin:0;padding:0;list-style:none;display:flex;align-items:baseline;gap:10px;white-space:nowrap">
+<li><a href="#" style="font-family:Rubik,sans-serif;font-weight:600;font-size:22px;letter-spacing:-0.01em;color:#4F5B66;text-decoration:none">Айгерим Сейтқазы</a></li>
+<li aria-hidden="true" style="font-family:Rubik,sans-serif;font-weight:500;font-size:22px;color:#9AA4AE">/</li>
+<li><h1 aria-current="page" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:30px;letter-spacing:-0.02em">Запись приёма · 24.09.2026</h1></li>
+</ol>
+</nav>
+<span style="height:30px;padding:0 10px;border-radius:999px;background:#F6EACB;color:#6B4A0B;font-size:13.5px;font-weight:800;display:inline-flex;align-items:center;white-space:nowrap;flex-shrink:0">Черновик</span>
+<div style="flex-grow:1"></div>
+<div role="note" style="height:48px;display:flex;align-items:center;gap:9px;padding:0 18px 0 14px;border-radius:999px;background:#FDE2E0;color:#8A1F17;white-space:nowrap;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M12 4 2.8 19.5h18.4z"></path><path d="M12 10v4.5M12 17.2v.3"></path></svg><span style="font-size:14.5px;font-weight:800">Аллергия на лидокаин</span></div>
+</header>
+
+<div style="flex-grow:1;display:flex;gap:16px;min-height:0">
+<section aria-label="Протокол приёма" style="flex-grow:1;min-width:0;background:#FFFFFF;border-radius:24px;padding:22px 24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:18px 20px">
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0"><label for="r-compl" style="font-size:13.5px;font-weight:800;color:#4F5B66">Жалобы</label><textarea id="r-compl" style="flex-grow:1;min-height:0;padding:12px 18px;border:2px solid #E1E6EC;border-radius:20px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:600;line-height:1.45;color:#0E2230;resize:none">Боль от холодного в зубе 36, проходит сразу после устранения раздражителя. Беспокоит около двух недель.</textarea><div role="group" aria-label="Шаблоны жалоб" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" style="height:44px;padding:0 16px 0 12px;display:flex;align-items:center;gap:6px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Боль от холодного</button><button type="button" style="height:44px;padding:0 16px 0 12px;display:flex;align-items:center;gap:6px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Кровоточивость</button></div></div>
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0"><label for="r-anam" style="font-size:13.5px;font-weight:800;color:#4F5B66">Анамнез</label><textarea id="r-anam" style="flex-grow:1;min-height:0;padding:12px 18px;border:2px solid #E1E6EC;border-radius:20px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:600;line-height:1.45;color:#0E2230;resize:none">Хронических заболеваний нет, постоянно лекарств не принимает. Аллергия на лидокаин, проба 12.03.2026. Зуб 36 ранее не лечён.</textarea></div>
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0"><label for="r-obj" style="font-size:13.5px;font-weight:800;color:#4F5B66">Объективно</label><textarea id="r-obj" style="flex-grow:1;min-height:0;padding:12px 18px;border:2px solid #E1E6EC;border-radius:20px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:600;line-height:1.45;color:#0E2230;resize:none">На жевательной поверхности 36 кариозная полость в пределах дентина. Зондирование болезненно по эмалево-дентинной границе, перкуссия безболезненна. Слизистая без изменений.</textarea></div>
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0"><label for="r-dx" style="font-size:13.5px;font-weight:800;color:#4F5B66">Диагноз</label><span style="height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><input id="r-dx" role="combobox" aria-expanded="false" placeholder="МКБ-10: код или название" style="flex-grow:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:15px;font-weight:600;color:#0E2230"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="m6 9.5 6 6 6-6"></path></svg></span><div role="list" aria-label="Выбранные диагнозы" style="display:flex;gap:8px;flex-wrap:wrap"><span role="listitem" style="height:44px;display:inline-flex;align-items:center;gap:2px;padding:0 0 0 16px;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:700;white-space:nowrap"><span><span style="font-family:Rubik,sans-serif;font-weight:600">K02.1</span> Кариес дентина · 36</span><button type="button" aria-label="Убрать диагноз K02.1" style="width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"></path></svg></button></span></div><div style="flex-grow:1"></div><div style="display:flex;gap:10px;padding:12px 14px;border-radius:18px;background:#F5F7F9;font-size:13.5px;font-weight:600;color:#4F5B66;line-height:1.45"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 7.6v.3"></path></svg><span>Диагноз попадёт в выписку и акт выполненных работ.</span></div></div>
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0"><label for="r-treat" style="font-size:13.5px;font-weight:800;color:#4F5B66">Лечение</label><textarea id="r-treat" style="flex-grow:1;min-height:0;padding:12px 18px;border:2px solid #0E2230;border-radius:20px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:600;line-height:1.45;color:#0E2230;resize:none">Артикаин 4% 1,7 мл, инфильтрационно. Препарирование, медикаментозная обработка, изоляция коффердамом. Пломба светоотверждаемая Estelite A2.</textarea><div role="group" aria-label="Шаблоны лечения" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" style="height:44px;padding:0 16px 0 12px;display:flex;align-items:center;gap:6px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700;white-space:nowrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Пломба светоотверждаемая</button></div></div>
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0"><label for="r-rec" style="font-size:13.5px;font-weight:800;color:#4F5B66">Рекомендации</label><textarea id="r-rec" style="flex-grow:1;min-height:0;padding:12px 18px;border:2px solid #E1E6EC;border-radius:20px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:600;line-height:1.45;color:#0E2230;resize:none">Не принимать пищу 2 часа. Чистка зубов дважды в день, флосс. Контрольный осмотр через 6 месяцев.</textarea></div>
+</section>
+
+<div style="width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:16px;min-height:0">
+<section aria-label="Зубы" style="background:#FFFFFF;border-radius:24px;padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+<h2 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Зубы</h2>
+<button type="button" style="height:44px;padding:0 16px 0 12px;display:flex;align-items:center;gap:6px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Добавить</button>
+</div>
+<div style="display:flex;align-items:center;gap:12px">
+<span style="min-width:56px;height:44px;padding:0 14px;border-radius:999px;background:#F6EACB;color:#6B4A0B;display:inline-flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;flex-shrink:0">36</span>
+<span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:14.5px;font-weight:700">Первый моляр, нижний левый</span><span style="font-size:13px;font-weight:600;color:#5A6772">Кариес · жевательная поверхность</span></span>
+</div>
+</section>
+
+<section aria-label="Услуги приёма" style="background:#FFFFFF;border-radius:24px;padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Услуги приёма</h2>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 0;border-top:2px solid #F0F2F5"><span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:14.5px;font-weight:700">Лечение кариеса</span><span style="font-size:13px;font-weight:600;color:#5A6772">Зуб 36</span></span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;font-variant-numeric:tabular-nums;white-space:nowrap">25 000 ₸</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 0;border-top:2px solid #F0F2F5"><span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:14.5px;font-weight:700">Анестезия артикаином</span><span style="font-size:13px;font-weight:600;color:#5A6772">Без лидокаина — аллергия</span></span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:15.5px;font-variant-numeric:tabular-nums;white-space:nowrap">3 000 ₸</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:10px 0 0;border-top:2px solid #F0F2F5"><span style="font-size:15px;font-weight:800">Итого</span><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:18px;font-variant-numeric:tabular-nums">28 000 ₸</span></div>
+</div>
+<label for="r-svc" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0">Добавить услугу</label>
+<span style="height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></svg><input id="r-svc" role="combobox" aria-expanded="false" placeholder="Добавить услугу из прайса" style="flex-grow:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:15px;font-weight:600;color:#0E2230"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6772" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="m6 9.5 6 6 6-6"></path></svg></span>
+</section>
+
+<section aria-label="Версии" style="flex-grow:1;min-height:0;background:#FFFFFF;border-radius:24px;padding:18px 20px 20px;display:flex;flex-direction:column;gap:8px">
+<h2 style="margin:0 0 4px;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Версии</h2>
+<ol style="margin:0 -12px;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px">
+<li><a href="#" aria-current="true" style="display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 12px;border-radius:14px;background:#FFF4D1;color:#0E2230;text-decoration:none"><span style="width:10px;height:10px;margin-top:6px;border-radius:50%;background:#0E2230;flex-shrink:0"></span><span style="font-size:14px;font-weight:600;line-height:1.45"><span style="font-family:Rubik,sans-serif;font-weight:600;font-variant-numeric:tabular-nums">11:52</span> · Ахметова изменила «Лечение»</span></a></li>
+<li><a href="#"  style="display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 12px;border-radius:14px;color:#0E2230;text-decoration:none"><span style="width:10px;height:10px;margin-top:6px;border-radius:50%;background:#B8C2CC;flex-shrink:0"></span><span style="font-size:14px;font-weight:600;line-height:1.45"><span style="font-family:Rubik,sans-serif;font-weight:600;font-variant-numeric:tabular-nums">11:40</span> · Ахметова создала запись</span></a></li>
+</ol>
+</section>
+</div>
+</div>
+</main>
+
+<div role="status" style="position:absolute;left:836px;bottom:28px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;height:60px;padding:0 8px 0 22px;border-radius:999px;background:#0E2230;color:#FFFFFF;box-shadow:0 14px 34px rgba(14,34,48,0.30);white-space:nowrap">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D5E3E7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8 12.3 2.7 2.7L16 9.6"></path></svg>
+<span style="font-size:15px;font-weight:700;margin-right:8px">Черновик сохранён в 11:52</span>
+<button type="button" style="height:44px;padding:0 22px;border:0;border-radius:999px;background:#FFCB47;color:#0E2230;font-size:14.5px;font-weight:800">Подписать и закрыть</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

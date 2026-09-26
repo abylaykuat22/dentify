@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Восстановление пароля</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:1440px;height:900px;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden;display:flex">
+<aside aria-label="О сервисе" style="width:640px;flex-shrink:0;margin:16px;border-radius:24px;background:#0F3D4C;color:#FFFFFF;padding:44px 48px 36px;display:flex;flex-direction:column;gap:22px;overflow:hidden">
+<span style="font-family:Rubik,sans-serif;font-weight:700;font-size:48px;letter-spacing:-0.03em;line-height:1">dentify<span style="color:#FFCB47">.</span></span>
+<p style="margin:0;max-width:500px;font-family:Rubik,sans-serif;font-weight:500;font-size:32px;line-height:1.2;letter-spacing:-0.02em">Расписание, пациенты и склад клиники — в одном окне</p>
+<div style="flex-grow:1"></div>
+<div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px">
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;font-size:13px;font-weight:800;color:#C5D6DB"><span style="padding-left:12px">Кресло 1</span><span style="padding-left:12px">Кресло 2</span><span style="padding-left:12px">Кресло 3</span></div>
+<div style="position:relative;height:348px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div style="position:absolute;left:-10px;right:-10px;top:134px;height:2px;border-radius:2px;background:#FFCB47"></div>
+<div style="position:relative;border-radius:20px;background:rgba(255,255,255,0.05)"><div style="position:absolute;left:6px;right:6px;top:4px;height:79px;border-radius:14px;background:rgba(255,255,255,0.09);padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:13px;color:#C5D6DB">10:30–11:15</span><span style="width:78%;height:8px;border-radius:999px;background:#C5D6DB;opacity:0.5"></span><span style="width:50%;height:6px;border-radius:999px;background:#C5D6DB;opacity:0.25"></span></div><div style="position:absolute;left:6px;right:6px;top:149px;height:108px;border-radius:14px;background:#D3EEEE;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:13px;color:#0B4A4F">11:45–12:45</span><span style="width:78%;height:8px;border-radius:999px;background:#0B4A4F;opacity:0.5"></span><span style="width:50%;height:6px;border-radius:999px;background:#0B4A4F;opacity:0.25"></span><span style="align-self:flex-start;margin-top:auto;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;background:#FFFFFF;font-size:12.5px;font-weight:800;color:#7A4E07"><span style="width:8px;height:8px;border-radius:50%;background:#F2B51E"></span>Пришёл</span></div></div>
+<div style="position:relative;border-radius:20px;background:rgba(255,255,255,0.05)"><div style="position:absolute;left:6px;right:6px;top:62px;height:137px;border-radius:14px;background:#FCE0DA;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:13px;color:#7A2A1E">11:00–12:15</span><span style="width:78%;height:8px;border-radius:999px;background:#7A2A1E;opacity:0.5"></span><span style="width:50%;height:6px;border-radius:999px;background:#7A2A1E;opacity:0.25"></span><span style="align-self:flex-start;margin-top:auto;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;background:#FFFFFF;font-size:12.5px;font-weight:800;color:#0B5A3C"><span style="width:8px;height:8px;border-radius:50%;background:#16A064"></span>В кресле</span></div><div style="position:absolute;left:6px;right:6px;top:236px;height:108px;border-radius:14px;border:2px dashed rgba(255,255,255,0.28);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;color:#D5E3E7"><span style="width:26px;height:26px;border-radius:50%;background:#FFCB47;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0E2230" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>Свободно</div></div>
+<div style="position:relative;border-radius:20px;background:rgba(255,255,255,0.05)"><div style="position:absolute;left:6px;right:6px;top:4px;height:50px;border-radius:14px;background:rgba(255,255,255,0.09);padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:13px;color:#C5D6DB">10:30–11:00</span><span style="width:78%;height:8px;border-radius:999px;background:#C5D6DB;opacity:0.5"></span></div><div style="position:absolute;left:6px;right:6px;top:91px;height:79px;border-radius:14px;background:#E5E1FB;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:13px;color:#3D3394">11:15–12:00</span><span style="width:78%;height:8px;border-radius:999px;background:#3D3394;opacity:0.5"></span><span style="width:50%;height:6px;border-radius:999px;background:#3D3394;opacity:0.25"></span></div><div style="position:absolute;left:6px;right:6px;top:236px;height:108px;border-radius:14px;background:#F6EACB;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:hidden"><span style="font-family:Rubik,sans-serif;font-weight:600;font-size:13px;color:#6B4A0B">12:30–13:30</span><span style="width:78%;height:8px;border-radius:999px;background:#6B4A0B;opacity:0.5"></span><span style="width:50%;height:6px;border-radius:999px;background:#6B4A0B;opacity:0.25"></span><span style="align-self:flex-start;margin-top:auto;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;background:#FFFFFF;font-size:12.5px;font-weight:800;color:#264C9E"><span style="width:8px;height:8px;border-radius:50%;background:#3A6FD8"></span>Придёт</span></div></div>
+<span style="position:absolute;left:-20px;top:123px;z-index:3;height:24px;padding:0 9px;border-radius:999px;background:#FFCB47;color:#0E2230;font-family:Rubik,sans-serif;font-weight:600;font-size:12.5px;display:flex;align-items:center">11:40</span>
+</div>
+</div>
+<div style="flex-grow:1"></div>
+<span style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:#C5D6DB"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>Данные хранятся в Казахстане</span>
+</aside>
+<main style="flex-grow:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 32px">
+<div role="group" aria-label="Язык интерфейса" style="position:absolute;top:28px;right:32px;display:flex;gap:2px;padding:4px;border-radius:999px;background:#FFFFFF">
+<button type="button" aria-pressed="true" lang="ru" style="height:44px;padding:0 18px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14px;font-weight:800">Рус</button>
+<button type="button" aria-pressed="false" lang="kk" style="height:44px;padding:0 18px;border:0;border-radius:999px;background:transparent;color:#5A6772;font-size:14px;font-weight:700">Қаз</button>
+</div>
+<section aria-labelledby="pw-title" style="width:440px;background:#FFFFFF;border-radius:28px;padding:40px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+<span style="width:84px;height:84px;margin-bottom:6px;border-radius:50%;background:#F5F7F9;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F3D4C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"></rect><path d="m3.8 7.2 8.2 6 8.2-6"></path></svg></span>
+<h1 id="pw-title" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:30px;letter-spacing:-0.02em">Проверьте почту</h1>
+<p style="margin:0;font-size:16px;font-weight:600;line-height:1.5;color:#4F5B66">Ссылка для нового пароля отправлена на <b style="font-weight:800;color:#0E2230;white-space:nowrap">d•••@example.kz</b>. Она действует 30 минут.</p>
+<p style="margin:0;font-size:14px;font-weight:600;color:#5A6772">Письма нет? Загляните в папку «Спам».</p>
+<button type="button" disabled style="width:100%;margin-top:12px;height:52px;border:0;border-radius:999px;background:#F5F7F9;color:#8994A0;font-size:16px;font-weight:800;cursor:not-allowed">Отправить ещё раз · <span style="font-variant-numeric:tabular-nums">0:45</span></button>
+<a href="#" style="width:100%;height:52px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#FFCB47;color:#0E2230;text-decoration:none;font-size:16px;font-weight:800">Вернуться ко входу</a>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

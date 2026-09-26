@@ -1,0 +1,52 @@
+# Прод и стенд: всё из переменных окружения (секреты — GitHub Environments / сервер, не репозиторий).
+# Значений по умолчанию нет намеренно: без переменной приложение не стартует.
+# Требования к окружению, которые закрывает T-PLT-25 (docs/data-residency.md, «Стенд и прод»):
+#   - DENTIFY_DB_URL с sslmode=verify-full; managed Valkey — TLS и ACL-пользователь;
+#   - у роли приложения search_path = dentify, public (таблицы — в dentify, расширения pg_trgm/btree_gist —
+#     в public): ALTER ROLE dentify_app IN DATABASE dentify SET search_path = dentify, public.
+#     Локально то же задаёт ALTER DATABASE в deploy/postgres/init/01-roles.sh. Иначе приложение не стартует:
+#     это проверяет platform.database.ApplicationRoleCheck (docs/architecture.md, «Роли и права»);
+#   - порт управления 8081 не публикуется: Uptime Kuma и Prometheus ходят по внутренней сети;
+#   - Caddy отвечает 404 на /actuator*; адрес Caddy — в DENTIFY_TRUSTED_PROXIES (ниже);
+#   - миграции — отдельным разовым запуском с паролем владельца схемы, приложению — только
+#     DENTIFY_APP_PASSWORD (сейчас Flyway работает при старте приложения, как в dev).
+spring:
+  datasource:
+    url: ${DENTIFY_DB_URL}
+    password: ${DENTIFY_APP_PASSWORD}
+  flyway:
+    password: ${DENTIFY_OWNER_PASSWORD}
+  data:
+    redis:
+      host: ${VALKEY_HOST}
+      port: ${VALKEY_PORT:6379}
+      password: ${VALKEY_PASSWORD}
+  session:
+    data:
+      redis:
+        # В managed Valkey команда CONFIG обычно закрыта: уведомления о ключах для индекса сессий включаются в
+        # настройках кластера (notify-keyspace-events = Egx), а не приложением при старте (T-PLT-25).
+        configure-action: none
+# GeoIP-база города для списка сессий — файл на сервере, путь в DENTIFY_SECURITY_GEOIP_DATABASE (backend/README.md,
+# «GeoIP-база»); без переменной город пустой.
+
+# Заголовкам X-Forwarded-For/Proto Tomcat верит только от Caddy: точный адрес сетью CIDR, например
+# DENTIFY_TRUSTED_PROXIES=10.128.0.5/32 (T-PLT-25). Без переменной старт падает; пустое значение или сеть шире адреса
+# прокси (весь 10/8, все частные сети) роняет старт platform.security.TrustedProxiesCheck: иначе клиент из частной сети
+# подменял бы свой IP в лимитах входа и API, журнале входов и журнале действий.
+server:
+  tomcat:
+    remoteip:
+      internal-proxies: ${DENTIFY_TRUSTED_PROXIES}
+
+management:
+  endpoint:
+    health:
+      show-components: never
+      show-details: never
+
+logging:
+  structured:
+    ecs:
+      service:
+        environment: ${DENTIFY_ENVIRONMENT:prod}

@@ -1,0 +1,12 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Description
+|«Моя клиника»: организация, филиалы, кресла, настройки, прайс, справочники. 
++
+От clinic зависят iam, staff, schedule, inventory, medical — через `clinic :: api`.
+|Base package
+|`kz.dentify.clinic`
+|Spring components
+|* `k.d.c.api.DemoClinic` (via `k.d.c.internal.DemoClinicSeed` -- Dev-сид демо-клиники (только профиль `dev`): клиника «Dentify Demo» и филиал «Абая, 150» с постоянными id, данные вымышленные. Строки вставляются SQL, а не через сущности: сущностей клиники до T-CLN-02 нет, а id сущности создаёт Hibernate и задать его нельзя. Вставка — в контексте самой демо-клиники: без него политики RLS клиники и филиала запись не пропустят. Уже есть — ничего не меняется.)
+* `k.d.c.api.ClinicDirectory` (via `k.d.c.internal.JdbcClinicDirectory` -- Клиника контекста и её филиалы запросами SQL: сущностей клиники до T-CLN-02 нет. Условие по клинике контекста — в самом запросе (`current_clinic_id()`), вторым рубежом — политика RLS: другой клиники запрос не видит.)
+|===

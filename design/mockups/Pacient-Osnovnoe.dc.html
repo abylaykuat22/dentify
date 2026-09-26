@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Пациент — основное</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&amp;family=Nunito+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECEFF3;color:#0E2230;font-family:"Nunito Sans",system-ui,sans-serif}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#0F3D4C;text-decoration:underline;text-underline-offset:3px}a:hover{color:#082A35}
+:focus-visible{outline:3px solid #0F3D4C;outline-offset:2px}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;background:#ECEFF3;color:#0E2230;font-family:'Nunito Sans',system-ui,sans-serif;overflow:hidden">
+
+<aside style="width:216px;flex-shrink:0;margin:16px;border-radius:24px;background:#0F3D4C;color:#FFFFFF;padding:24px 14px 18px;display:flex;flex-direction:column;gap:28px">
+<span style="font-family:Rubik,sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;padding:0 10px">dentify<span style="color:#FFCB47">.</span></span>
+<nav aria-label="Разделы" style="display:flex;flex-direction:column;gap:4px">
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Расписание</a>
+<a href="#" aria-current="page" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;background:#FFCB47;color:#0E2230;font-weight:700;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"></path><path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg>Пациенты</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v5a5 5 0 0 0 10 0V3"></path><path d="M10 13v2a5 5 0 0 0 10 0v-2"></path><circle cx="20" cy="10.5" r="2"></circle></svg>Врачи</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"></path><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"></path></svg>Склад</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M9 21v-4h6v4M8.5 7.5h1M14.5 7.5h1M8.5 11.5h1M14.5 11.5h1"></path></svg>Клиника</a>
+<a href="#" style="display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:14px;color:#D5E3E7;font-weight:600;font-size:15px;text-decoration:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path><path d="m9 12 2.2 2.2L15.5 10"></path></svg>Доступы</a>
+</nav>
+<div style="flex-grow:1"></div>
+<a href="#" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.08);color:#FFFFFF;text-decoration:none">
+<span style="width:38px;height:38px;border-radius:50%;background:#FFCB47;color:#0E2230;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:14px">ДА</span>
+<span style="display:flex;flex-direction:column;line-height:1.3"><span style="font-size:14px;font-weight:700">Динара</span><span style="font-size:12.5px;color:#C5D6DB">Администратор</span></span>
+</a>
+</aside>
+
+<main style="flex-grow:1;min-width:0;padding:24px 24px 24px 8px;display:flex;flex-direction:column;gap:14px">
+<section style="background:#FFFFFF;border-radius:24px;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:16px">
+<a href="#" aria-label="К списку пациентов" style="width:44px;height:44px;border-radius:50%;background:#ECEFF3;color:#0E2230;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 6-6 6 6 6"></path></svg></a>
+<span style="width:64px;height:64px;border-radius:50%;background:#D3EEEE;color:#0B4A4F;display:flex;align-items:center;justify-content:center;font-family:Rubik,sans-serif;font-weight:600;font-size:22px;flex-shrink:0">АС</span>
+<div style="display:flex;flex-direction:column;gap:6px;flex-grow:1;min-width:0">
+<h1 style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:28px;letter-spacing:-0.02em">Айгерим Сейтқазы</h1>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:#5A6772">
+<span style="font-variant-numeric:tabular-nums">29 лет · медкарта № 1042 · ИИН •••• 4821</span>
+<span style="height:26px;padding:0 11px;border-radius:999px;background:#DDEBFB;color:#1E4F8F;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center">Первичный</span>
+<span style="height:26px;padding:0 11px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center">Instagram</span>
+</div>
+</div>
+<button type="button" style="height:48px;padding:0 20px 0 16px;display:flex;align-items:center;gap:8px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:15px;font-weight:700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 3.5h3.5l1.5 4-2 1.5a11 11 0 0 0 7 7l1.5-2 4 1.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5z"></path></svg>Позвонить</button>
+<button type="button" style="height:48px;padding:0 22px 0 16px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:#FFCB47;color:#0E2230;font-size:15px;font-weight:800"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Записать</button>
+<button type="button" aria-label="Ещё действия" style="width:48px;height:48px;border:0;border-radius:50%;background:#ECEFF3;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="12" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="18.5" cy="12" r="1.7"></circle></svg></button>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:16px;background:#FDE2E0;color:#8A1F17">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M12 4 2.8 19.5h18.4z"></path><path d="M12 10v4.5M12 17.2v.3"></path></svg>
+<span style="font-size:14.5px"><b style="font-weight:800">Аллергия на лидокаин.</b> Проба 12.03.2026 — анестезия только артикаином.</span>
+</div>
+</section>
+
+<div role="tablist" aria-label="Разделы карточки" style="align-self:flex-start;display:flex;gap:4px;padding:5px;border-radius:999px;background:#FFFFFF">
+<button type="button" role="tab" aria-selected="true" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:#0E2230;color:#FFFFFF;font-size:14.5px;font-weight:800">Основное</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Медкарта</button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 14px 0 18px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Визиты<span style="min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center">5</span></button>
+<button type="button" role="tab" aria-selected="false" style="height:40px;padding:0 14px 0 18px;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;background:transparent;font-size:14.5px;font-weight:700;color:#5A6772">Файлы<span style="min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center">6</span></button>
+</div>
+
+<div style="flex-grow:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto minmax(0,1fr);gap:16px">
+
+<section aria-labelledby="h-contacts" style="grid-column:span 2;min-width:0;background:#FFFFFF;border-radius:24px;padding:20px 24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:12px">
+<h2 id="h-contacts" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Контакты и документы</h2>
+<div style="flex-grow:1"></div>
+<button type="button" style="height:44px;padding:0 16px 0 12px;display:flex;align-items:center;gap:7px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg>Изменить</button>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px">
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<div style="display:flex;align-items:center;gap:14px;min-height:52px">
+<span style="width:40px;height:40px;border-radius:50%;background:#F5F7F9;color:#0F3D4C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 3.5h3.5l1.5 4-2 1.5a11 11 0 0 0 7 7l1.5-2 4 1.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5z"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:13px;font-weight:700;color:#5A6772">Основной телефон</span><span style="font-size:15.5px;font-weight:700;font-variant-numeric:tabular-nums">+7 707 ••• •• 45</span></span>
+<button type="button" aria-label="Показать основной телефон" style="height:44px;padding:0 10px;display:flex;align-items:center;gap:7px;flex-shrink:0;margin-left:6px;border:0;border-radius:999px;background:transparent;color:#0F3D4C;font-size:14px;font-weight:800"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Показать</button>
+</div>
+<div style="display:flex;align-items:center;gap:14px;min-height:52px">
+<span style="width:40px;height:40px;border-radius:50%;background:#F5F7F9;color:#0F3D4C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 3.5h3.5l1.5 4-2 1.5a11 11 0 0 0 7 7l1.5-2 4 1.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5z"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:13px;font-weight:700;color:#5A6772">Второй телефон</span><span style="font-size:15.5px;font-weight:700;font-variant-numeric:tabular-nums">+7 701 ••• •• 18</span></span>
+<button type="button" aria-label="Показать второй телефон" style="height:44px;padding:0 10px;display:flex;align-items:center;gap:7px;flex-shrink:0;margin-left:6px;border:0;border-radius:999px;background:transparent;color:#0F3D4C;font-size:14px;font-weight:800"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Показать</button>
+</div>
+<div style="display:flex;align-items:center;gap:14px;min-height:52px">
+<span style="width:40px;height:40px;border-radius:50%;background:#F5F7F9;color:#0F3D4C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="m4 7 8 6 8-6"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:1px;flex-grow:1;min-width:0"><span style="font-size:13px;font-weight:700;color:#5A6772">E-mail</span><span title="a.seitkazy@mail.kz" style="font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">a.seitkazy@mail.kz</span></span>
+</div>
+<div style="display:flex;align-items:center;gap:14px;min-height:52px">
+<span style="width:40px;height:40px;border-radius:50%;background:#F5F7F9;color:#0F3D4C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.3"></circle></svg></span>
+<span style="display:flex;flex-direction:column;gap:1px;flex-grow:1;min-width:0"><span style="font-size:13px;font-weight:700;color:#5A6772">Адрес</span><span title="Алматы, мкр. Самал-2, д. 58, кв. 14" style="font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Алматы, мкр. Самал-2, д. 58, кв. 14</span></span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<div style="display:flex;align-items:center;gap:14px;min-height:52px">
+<span style="width:40px;height:40px;border-radius:50%;background:#F5F7F9;color:#0F3D4C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:1px;flex-grow:1;min-width:0"><span style="font-size:13px;font-weight:700;color:#5A6772">Дата рождения</span><span style="font-size:15.5px;font-weight:700;font-variant-numeric:tabular-nums">14.05.1997 · 29 лет</span></span>
+</div>
+<div style="display:flex;align-items:center;gap:14px;min-height:52px">
+<span style="width:40px;height:40px;border-radius:50%;background:#F5F7F9;color:#0F3D4C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="8.5" cy="11" r="2"></circle><path d="M5.5 16c.5-1.6 1.6-2.4 3-2.4s2.5.8 3 2.4M14 10h4M14 13.5h3"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:1px;flex-grow:1;min-width:0"><span style="font-size:13px;font-weight:700;color:#5A6772">ИИН</span><span style="font-size:15.5px;font-weight:700;font-variant-numeric:tabular-nums">•••• •• 4821</span></span>
+</div>
+<div style="display:flex;align-items:center;gap:14px;min-height:52px">
+<span style="width:40px;height:40px;border-radius:50%;background:#F5F7F9;color:#0F3D4C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"></rect><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:1px;flex-grow:1;min-width:0"><span style="font-size:13px;font-weight:700;color:#5A6772">Место работы</span><span title="ТОО «Алатау Логистик», бухгалтер" style="font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ТОО «Алатау Логистик», бухгалтер</span></span>
+</div>
+</div>
+</div>
+</section>
+
+<section aria-labelledby="h-med" style="min-width:0;background:#FFFFFF;border-radius:24px;padding:20px 24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:12px">
+<h2 id="h-med" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Медицинское</h2>
+<div style="flex-grow:1"></div>
+<button type="button" style="height:44px;padding:0 16px 0 12px;display:flex;align-items:center;gap:7px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg>Изменить</button>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 16px 14px;border-radius:18px;background:#FDE2E0;color:#8A1F17">
+<span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M12 4 2.8 19.5h18.4z"></path><path d="M12 10v4.5M12 17.2v.3"></path></svg>Аллергия</span>
+<span style="font-family:Rubik,sans-serif;font-weight:600;font-size:17px">Лидокаин</span>
+<span style="font-size:14px;font-weight:600;line-height:1.4">Проба 12.03.2026 — положительная. Анестезия только артикаином.</span>
+</div>
+<div style="display:flex;flex-direction:column;padding:2px 16px;border-radius:20px;background:#F5F7F9">
+<div style="min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="font-size:14px;font-weight:600;color:#4F5B66">Хронические заболевания</span><span style="font-size:15px;font-weight:800">Нет</span></div>
+<div style="min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="font-size:14px;font-weight:600;color:#4F5B66">Постоянные препараты</span><span style="font-size:15px;font-weight:800">Нет</span></div>
+</div>
+</section>
+
+<section aria-labelledby="h-tags" style="min-width:0;min-height:0;background:#FFFFFF;border-radius:24px;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:12px">
+<h2 id="h-tags" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Метки и источник</h2>
+<div style="flex-grow:1"></div>
+<button type="button" style="height:44px;padding:0 16px 0 12px;display:flex;align-items:center;gap:7px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></svg>Изменить</button>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<span style="font-size:13px;font-weight:700;color:#5A6772">Метки</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<span style="height:30px;padding:0 12px;border-radius:999px;background:#FDE2E0;color:#8A1F17;font-size:13.5px;font-weight:800;display:inline-flex;align-items:center">Аллергия</span>
+<span style="height:30px;padding:0 12px;border-radius:999px;background:#DDEBFB;color:#1E4F8F;font-size:13.5px;font-weight:800;display:inline-flex;align-items:center">Первичный</span>
+<span style="height:30px;padding:0 12px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:13.5px;font-weight:800;display:inline-flex;align-items:center">Удобно утром</span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+<span style="font-size:13px;font-weight:700;color:#5A6772">Источник</span>
+<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+<span style="height:30px;padding:0 12px;border-radius:999px;background:#ECEFF3;color:#4F5B66;font-size:13.5px;font-weight:800;display:inline-flex;align-items:center">Instagram</span>
+<span style="font-size:14px;font-weight:600;color:#4F5B66">реклама в сторис</span>
+</div>
+</div>
+</section>
+
+<section aria-labelledby="h-consent" style="min-width:0;min-height:0;background:#FFFFFF;border-radius:24px;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;min-height:44px">
+<h2 id="h-consent" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Согласия</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:14px 16px 6px;border-radius:20px;background:#F5F7F9">
+<span style="font-size:15.5px;font-weight:800">Обработка персональных данных</span>
+<span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums"><span style="width:10px;height:10px;border-radius:50%;background:#16A064;flex-shrink:0"></span>Получено 24.09.2026</span>
+<a href="#" style="align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M20.5 11.5 12.4 19.6a5 5 0 0 1-7-7l8.3-8.3a3.4 3.4 0 0 1 4.8 4.8l-8.2 8.2a1.7 1.7 0 0 1-2.4-2.4l7.4-7.4"></path></svg>Скан приложен</a>
+</div>
+</section>
+
+<section aria-labelledby="h-reps" style="min-width:0;min-height:0;background:#FFFFFF;border-radius:24px;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;min-height:44px">
+<h2 id="h-reps" style="margin:0;font-family:Rubik,sans-serif;font-weight:600;font-size:20px">Представители</h2>
+</div>
+<div style="flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px 16px;border-radius:20px;background:#F5F7F9;text-align:center">
+<span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15.5px;font-weight:800">Не нужны — пациент взрослый</span><span style="font-size:13.5px;font-weight:600;color:#5A6772">Добавьте, если лечение оплачивает родственник</span></span>
+<button type="button" style="height:44px;padding:0 18px 0 14px;display:flex;align-items:center;gap:7px;border:2px solid #E1E6EC;border-radius:999px;background:#FFFFFF;font-size:14px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Добавить</button>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Description
+|«Приёмы»: записи, статусы, конфликты по креслу и врачу. 
++
+Зависит от clinic, staff, patient. От schedule зависят medical — через `schedule :: api` и inventory — через `schedule :: events` (подписка на события).
+|Base package
+|`kz.dentify.schedule`
+|===

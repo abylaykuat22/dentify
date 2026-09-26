@@ -1,0 +1,3 @@
+# Маскирование ПД (ИИН, телефон, e-mail) во всех структурированных логах — PLT-10.
+org.springframework.boot.logging.structured.StructuredLoggingJsonMembersCustomizer=\
+kz.dentify.platform.logging.PiiMaskingJsonMembersCustomizer

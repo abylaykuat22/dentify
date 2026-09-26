@@ -1,0 +1,9 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Description
+|Медкарта: зубная формула, записи приёма и их версии, диагнозы. 
++
+Зависит от patient, schedule, clinic (решение 2026-09-25); от medical не зависит никто.
+|Base package
+|`kz.dentify.medical`
+|===
