@@ -8,3 +8,5 @@ Caddyfile*  text eol=lf
 # Спецификация OpenAPI пишется тестом OpenApiContractTests с LF: иначе на Windows тест переписывал бы
 # файл после каждого checkout, а CI-проверка «спека совпадает с закоммиченной» видела бы разницу.
 api/openapi.json text eol=lf
+workflows/*.js text eol=lf
+workflows/*.md text eol=lf
