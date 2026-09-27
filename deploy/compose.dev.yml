@@ -1,11 +1,15 @@
 # Dentify — локальное окружение разработки (Docker Compose v2).
 #
-#   deploy/dev.ps1 up        (Windows)      deploy/dev.sh up       (bash)
+#   deploy/dev.ps1 up        (Windows)      deploy/dev.sh up       (bash)       — окружение: БД, Valkey, почта, S3
+#   deploy/dev.ps1 up -App   (Windows)      deploy/dev.sh up --app (bash)       — плюс всё приложение в контейнерах
+#   docker compose -f deploy/compose.dev.yml up --build                         — то же без скрипта (нужен deploy/.env)
 #
 # Все порты привязаны к 127.0.0.1: из сети машины разработчика ничего не видно.
 # Пароли — из deploy/.env (шаблон deploy/.env.example; dev.ps1/dev.sh создают .env при первом up).
-# Сервиса приложения (app) пока нет: backend и Vite запускаются на хосте. Его добавит T-PLT-15
-# (verify -e2e поднимает Compose целиком; PLT-26 «docker compose up поднимает рабочее приложение»).
+# Обычная разработка: бэкенд (./mvnw spring-boot:run) и Vite — на хосте поверх postgres/valkey/mailpit/minio; так же
+# ./verify.ps1 -E2E (jar и vite preview). Сервисы app и web (PLT-26 «docker compose up поднимает рабочее приложение»,
+# T-PLT-15) собирают бэкенд и фронт в образы и отдают приложение на http://localhost:8088 — на машине нужен только
+# Docker. dev.ps1 up их не запускает (перечисляет сервисы явно), down/logs/ps — видят.
 #
 # Образы закреплены тегом и digest: обновление — осознанное (новый тег + digest из
 # `docker buildx imagetools inspect <образ:тег>`), а не молчаливое при следующем pull.
@@ -123,6 +127,66 @@ services:
     volumes:
       - ./minio/init.sh:/init/init.sh:ro
     restart: "no"
+
+  # Бэкенд в контейнере (образ — backend/Dockerfile: jar собирается внутри, слои по документации Spring Boot).
+  # Профиль dev, как у ./mvnw spring-boot:run: Flyway, dev-сид (владелец owner@demo.dentify.kz, пароль
+  # DENTIFY_DEV_OWNER_PASSWORD), OpenAPI. Профиль dev рассчитан на хост (127.0.0.1:5433 и т. п.) — адреса сервисов и
+  # пароли переопределены переменными окружения ниже (они старше application-dev.yml). Порты наружу не публикуются: API —
+  # только через web (как в проде через Caddy), actuator 8081 — только healthcheck изнутри контейнера.
+  # Клиентский IP для лимитов и журнала входов — адрес web: X-Forwarded-For Tomcat верит только от loopback
+  # (server.tomcat.remoteip.internal-proxies); точный адрес прокси — в проде (T-PLT-25).
+  app:
+    <<: *common
+    build:
+      context: ../backend
+    image: dentify-app:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dentify
+      SPRING_DATA_REDIS_HOST: valkey
+      # dev-профиль слушает 127.0.0.1; в контейнере — все адреса сети compose (web ходит на app:8080)
+      SERVER_ADDRESS: 0.0.0.0
+      DENTIFY_APP_PASSWORD: ${DENTIFY_APP_PASSWORD}
+      DENTIFY_OWNER_PASSWORD: ${DENTIFY_OWNER_PASSWORD}
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD}
+      DENTIFY_DEV_OWNER_PASSWORD: ${DENTIFY_DEV_OWNER_PASSWORD:?set DENTIFY_DEV_OWNER_PASSWORD in deploy/.env}
+    volumes:
+      # GeoIP-база города для списка сессий (backend/README.md, «GeoIP-база»): путь dev-профиля ../deploy/geoip от
+      # рабочей папки /application. Нет файла — город пустой, приложение работает.
+      - ./geoip:/deploy/geoip:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8081/actuator/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+      start_interval: 2s
+
+  # Фронтенд в контейнере: production-сборка SPA (образ — frontend/Dockerfile) за Caddy, один origin с API.
+  web:
+    <<: *common
+    build:
+      context: ../frontend
+    image: dentify-web:dev
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${DENTIFY_WEB_PORT:-8088}:8080" # открывать http://localhost:8088 (не 127.0.0.1 — Secure-cookie)
+    volumes:
+      - ./caddy/Caddyfile.app:/etc/caddy/Caddyfile:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/login"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+      start_interval: 1s
 
   # Только профилем proxy (deploy/dev.ps1 up -Proxy): прод-схема «один origin по HTTPS».
   caddy:

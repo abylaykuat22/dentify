@@ -1,0 +1,20 @@
+# gitleaks: скан рабочей копии apps/dentify (gitleaks dir, ./verify.ps1 -Scan). Наследует .gitleaks.toml — правила по
+# умолчанию и его исключения — и добавляет пути, которых нет в git (.gitignore): их файлы есть только на этой машине.
+# История git сканируется строгим .gitleaks.toml без этих исключений: закоммиченный .env там будет найден.
+# Путь в [extend] gitleaks считает от текущей папки, а не от этого файла: запускать из apps/dentify (так делают скрипты).
+
+[extend]
+path = ".gitleaks.toml"
+
+[[allowlists]]
+description = "Только рабочая копия, в git не попадают: зависимости, сборки, отчёты тестов и проверок, база GeoIP, IDE и локальные пароли этой машины (.env, в том числе deploy/.env)"
+paths = [
+  '''(^|[\/])node_modules[\/]''',
+  '''(^|[\/])backend[\/]target[\/]''',
+  '''(^|[\/])frontend[\/](dist|test-results|playwright-report)[\/]''',
+  '''(^|[\/])frontend[\/]src[\/]shared[\/]api[\/]\.generated-check[\/]''',
+  '''(^|[\/])deploy[\/]test-results[\/]''',
+  '''(^|[\/])deploy[\/]geoip[\/]''',
+  '''(^|[\/])\.env$''',
+  '''(^|[\/])\.idea[\/]''',
+]

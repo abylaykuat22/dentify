@@ -261,6 +261,27 @@ test.describe('меню пользователя — своим чанком п�
     await page.keyboard.press('ArrowDown')
     await expect(page.getByRole('menuitem', { name: 'Выйти' })).toBeFocused()
   })
+
+  test('Enter на карточке, пока меню грузится, — меню открывается с фокусом на первом пункте', async ({ page }) => {
+    const release = await holdMenuChunk(page)
+    await page.goto('/inventory')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Склад')
+    await page.getByRole('navigation', { name: 'Разделы' }).getByRole('link', { name: 'Доступы' }).focus()
+    await page.keyboard.press('Tab')
+    const card = page.getByRole('button', { name: CARD })
+    await expect(card).toHaveAttribute('data-user-menu', 'placeholder')
+    // Нажатие с клавиатуры до прихода чанка доигрывается как клавиатурное, а не как клик мышью.
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('menu')).toHaveCount(0)
+
+    release()
+    await expect(page.getByRole('menuitem', { name: 'Мой профиль' })).toBeFocused()
+    await expect(card).toHaveAttribute('data-user-menu', 'menu')
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByRole('menuitem', { name: 'Выйти' })).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(card).toBeFocused()
+  })
 })
 
 test.describe('общий компонент пароля (IAM-05) — витрина /dev/ui', () => {

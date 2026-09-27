@@ -27,10 +27,11 @@ export interface UserCardProps {
 }
 
 /**
- * Что человек успел сделать с простой карточкой, пока грузилось меню: `open` — нажал (меню открыть),
+ * Что человек успел сделать с простой карточкой, пока грузилось меню: `open` — нажал мышью или пальцем
+ * (меню открыть), `openByKeyboard` — нажал Enter, пробел или стрелку (открыть с фокусом на первом пункте),
  * `focus` — фокус на карточке (оставить на кнопке меню), `none` — ничего.
  */
-export type UserMenuHandoff = 'open' | 'focus' | 'none'
+export type UserMenuHandoff = 'open' | 'openByKeyboard' | 'focus' | 'none'
 
 /**
  * Меню пользователя — отдельный чанк (см. `UserMenu`). Меню — Base UI (портал R022, стрелки, Escape, фокус
@@ -55,13 +56,25 @@ export function UserMenuDropdown({
   const trigger = useRef<HTMLButtonElement>(null)
   const replayed = useRef(false)
 
-  // Доиграть нажатие или фокус простой карточки — один раз (StrictMode повторяет эффекты). Нажатие
-  // повторяется кликом по кнопке меню: Base UI откроет меню так же, как от Enter, — фокус на первом пункте.
+  // Доиграть нажатие или фокус простой карточки — один раз. Нажатие повторяется кликом по кнопке меню. Как
+  // открывать, Base UI решает по клику: `detail` 0 — клавиатура (фокус на первом пункте, как от Enter), иначе
+  // указатель. Поэтому клавиатурное нажатие доигрывается кликом с `detail` 0, а не `click()` (у него `detail`
+  // 1 — меню открылось бы без фокуса на пункте). Доигрывается в следующем кадре, после монтирования целиком:
+  // в dev StrictMode тут же повторяет эффекты, и повтор эффекта списка Base UI при ещё закрытом меню стёр бы
+  // отметку «открыто с клавиатуры».
   useEffect(() => {
-    if (replayed.current) return
-    replayed.current = true
-    if (handoff === 'open') trigger.current?.click()
-    else if (handoff === 'focus') trigger.current?.focus()
+    if (replayed.current || handoff === 'none') return
+    const frame = requestAnimationFrame(() => {
+      replayed.current = true
+      const button = trigger.current
+      if (!button) return
+      if (handoff === 'open') button.click()
+      else if (handoff === 'openByKeyboard') {
+        button.focus()
+        button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }))
+      } else button.focus()
+    })
+    return () => cancelAnimationFrame(frame)
   }, [handoff])
 
   async function leave() {

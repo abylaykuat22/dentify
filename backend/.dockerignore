@@ -1,0 +1,10 @@
+# Контекст сборки образа (backend/Dockerfile): только исходники и обёртка Maven.
+target/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.factorypath
+.vscode/
+.mvn/wrapper/maven-wrapper.jar

@@ -29,6 +29,11 @@ export JAVA_HOME="$HOME/.jdks/openjdk-25.0.2"; export PATH="$JAVA_HOME/bin:$PATH
 Actuator есть только на порту 8081 (`management.server.port`). Caddy и прод-прокси ведут на 8080,
 поэтому снаружи метрик не видно.
 
+**Образ.** `Dockerfile` рядом собирает jar внутри контейнера (JDK 25, `./mvnw package` без тестов) и раскладывает его
+на слои по документации Spring Boot (`java -Djarmode=tools -jar … extract --layers`); среда выполнения — JRE 25 (Liberica,
+как в примерах Spring Boot), не root. Им пользуется сервис `app` в `../deploy/compose.dev.yml` (`../deploy/dev.ps1 up
+-App`, профиль dev, адреса БД и Valkey — переменными окружения); прод — T-PLT-25.
+
 **Демо-данные в dev.** При старте с профилем `dev` сид создаёт вымышленную клинику «Dentify Demo» с филиалом
 «Абая, 150» (Алматы) и её владельца: логин `owner@demo.dentify.kz`, пароль — `DENTIFY_DEV_OWNER_PASSWORD` из
 `../deploy/.env` (случайный для этой машины; в старый `.env` его дописывает любая команда `deploy/dev.ps1`). Сид

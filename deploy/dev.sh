@@ -2,9 +2,10 @@
 # Локальное окружение Dentify: PostgreSQL 18, Valkey, Mailpit, MinIO; Caddy — профилем proxy.
 # Bash-вариант deploy/dev.ps1 (Linux, macOS, Git Bash). Команды:
 #
-#   up [--proxy]                 поднять, дождаться healthy, создать приватный бакет MinIO;
+#   up [--proxy] [--app]         поднять, дождаться healthy, создать приватный бакет MinIO;
 #                                первый запуск создаёт deploy/.env из .env.example со случайными паролями;
-#                                новые ключи шаблона любая команда дописывает в существующий .env
+#                                новые ключи шаблона любая команда дописывает в существующий .env;
+#                                --app — плюс всё приложение в контейнерах (app и web), http://localhost:8088
 #   down                         остановить и удалить контейнеры; данные в томах сохраняются
 #   reset-db --force             удалить том БД dentify-pgdata и поднять чистую базу
 #   logs [service] [--follow]    журналы
@@ -31,7 +32,7 @@ yellow() { printf '\033[33m%s\033[0m\n' "$*"; }
 
 compose() { docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"; }
 
-usage() { sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 # Случайный пароль из [A-Za-z0-9]: такие значения одинаково читают Compose и бэкенд (.env как .properties).
 dev_secret() { head -c 48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | cut -c1-24; }
@@ -101,12 +102,17 @@ env_get() {
 }
 
 cmd_up() {
-  local proxy=0 services=("${LONG_RUNNING[@]}") profile=()
-  for a in "$@"; do [[ $a == --proxy ]] && proxy=1; done
+  local proxy=0 app=0 services=("${LONG_RUNNING[@]}") profile=() up=(up --detach --wait --wait-timeout 180)
+  for a in "$@"; do
+    case $a in --proxy) proxy=1 ;; --app) app=1 ;; esac
+  done
   if ((proxy)); then profile=(--profile proxy); services+=(caddy); fi
+  # --app: образы пересобираются из текущих исходников (слои с зависимостями — из кэша); ждём дольше — старт бэкенда
+  # с миграциями.
+  if ((app)); then services+=(app web); up=(up --build --detach --wait --wait-timeout 300); fi
   # minio-init — разовый сервис: --wait считает его выход (даже с кодом 0) ошибкой,
   # поэтому сначала ждём долгоживущие сервисы, затем прогоняем init отдельно.
-  compose "${profile[@]}" up --detach --wait --wait-timeout 180 "${services[@]}"
+  compose ${profile[@]+"${profile[@]}"} "${up[@]}" "${services[@]}"
   compose run --rm minio-init
   echo
   green "Окружение поднято:"
@@ -115,6 +121,7 @@ cmd_up() {
   echo "  Mailpit     http://127.0.0.1:8025   (SMTP 127.0.0.1:1025)"
   echo "  MinIO       http://127.0.0.1:9001   (S3 API 127.0.0.1:9000, бакет $(env_get S3_BUCKET))"
   ((proxy)) && echo "  Caddy       https://localhost:8443  (/api -> :8080, остальное -> :5173)"
+  ((app)) && echo "  Приложение  http://localhost:$(env_get DENTIFY_WEB_PORT | grep . || echo 8088)   (контейнеры app и web; вход owner@demo.dentify.kz, пароль — DENTIFY_DEV_OWNER_PASSWORD)"
   echo "Пароли и ключи — deploy/.env. Проверка: ./deploy/dev.sh check"
 }
 

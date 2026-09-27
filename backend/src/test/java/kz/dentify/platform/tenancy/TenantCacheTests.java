@@ -25,9 +25,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * Кэш в Valkey (PLT-01): ключи кэша данных клиники начинаются с clinic_id, клиники не видят записей друг друга,
  * очистка кэша затрагивает только свою клинику; глобальный кэш — без клиники; без контекста кэш клиники недоступен.
  * <p>
- * Spring Data Redis 4 с Lettuce пишет в кэш асинхронно: ключ появляется в Valkey не сразу после {@code put}, поэтому
- * ключи проверяются с ожиданием ({@link #keys(String, Consumer)}). Префикс при этом вычисляется синхронно, в потоке
- * вызова.
+ * Spring Data Redis 4 с Lettuce пишет в кэш асинхронно ({@code DefaultRedisCacheWriter.put} без ожидания отдаёт запись
+ * в {@code store}): ключ появляется в Valkey не сразу после {@code put}, поэтому ключи проверяются с ожиданием
+ * ({@link #keys(String, Consumer)}). Повторный вызов {@code @Cacheable}, который должен взять значение из кэша, идёт
+ * только после того, как запись первого дошла ({@link #awaitKey(String)}), иначе метод вычислится второй раз. Префикс
+ * при этом вычисляется синхронно, в потоке вызова.
  */
 class TenantCacheTests extends TenantIntegrationTest {
 
@@ -79,6 +81,7 @@ class TenantCacheTests extends TenantIntegrationTest {
 		int calls = this.probe.clinicCalls();
 
 		String first = TenantContext.call(Tenant.of(clinicA), () -> this.probe.label(key));
+		awaitKey(clinicA + "::" + TenantCacheProbe.CLINIC_CACHE + "::" + key);
 		String cached = TenantContext.call(Tenant.of(clinicA), () -> this.probe.label(key));
 		String other = TenantContext.call(Tenant.of(clinicB), () -> this.probe.label(key));
 
@@ -105,10 +108,16 @@ class TenantCacheTests extends TenantIntegrationTest {
 		int calls = this.probe.globalCalls();
 
 		this.probe.term(code);
+		awaitKey(TenantCacheProbe.GLOBAL_CACHE + "::" + code);
 		TenantContext.call(Tenant.of(newClinic()), () -> this.probe.term(code));
 
 		assertThat(this.probe.globalCalls() - calls).isEqualTo(1);
 		keys("*" + code, (keys) -> keys.containsExactly(TenantCacheProbe.GLOBAL_CACHE + "::" + code));
+	}
+
+	/** Ждёт, пока асинхронная запись кэша дойдёт до Valkey: только после этого повторный вызов возьмёт значение из кэша. */
+	private void awaitKey(String redisKey) {
+		keys("*" + redisKey, (keys) -> keys.as("запись кэша дошла до Valkey").contains(redisKey));
 	}
 
 	/** Ключи Valkey по шаблону проходят проверку — сразу или после того, как дойдёт асинхронная запись. */

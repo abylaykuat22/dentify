@@ -42,9 +42,15 @@ function fullyVisible(item: Locator): Promise<boolean> {
   })
 }
 
+/**
+ * Расписание открыто, шрифты загружены и пришёл чанк меню пользователя: до этого внизу сайдбара — простая
+ * карточка, которую затем сменяет кнопка меню (UserMenu.tsx). Смена посреди обхода пунктов открепляет
+ * найденный элемент, а `scrollIntoViewIfNeeded`, в отличие от `click`, его не переискивает.
+ */
 async function openSchedule(page: Page) {
   await page.goto('/schedule')
   await expect(page.getByRole('navigation', { name: 'Разделы' }).getByRole('link')).toHaveCount(SECTIONS.length)
+  await expect(page.getByRole('button', { name: PROFILE })).toHaveAttribute('data-user-menu', 'menu')
   await page.evaluate(() => document.fonts.ready)
 }
 
@@ -72,7 +78,9 @@ test.describe('сайдбар в низком окне', () => {
       for (const item of sidebarItems(page)) {
         await item.scrollIntoViewIfNeeded()
         await expect(item).toBeInViewport({ ratio: 1 })
-        expect(await fullyVisible(item), (await item.getAttribute('aria-label')) ?? '').toBe(true)
+        // Ожиданием, как в остальных проверках: прокрутка карточки сайдбара может ещё доигрываться.
+        const label = (await item.getAttribute('aria-label')) ?? ''
+        await expect.poll(() => fullyVisible(item), { message: label }).toBe(true)
       }
 
       // Последний пункт действительно нажимается: меню пользователя → «Мой профиль».

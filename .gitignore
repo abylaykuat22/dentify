@@ -13,6 +13,9 @@ frontend/dist/
 frontend/test-results/
 frontend/playwright-report/
 
+# Логи и артефакты ./verify.ps1 / verify.sh (T-PLT-15): шаги, живой стек, трейсы Playwright, отчёты сканеров
+deploy/test-results/
+
 # IDE
 .idea/
 *.iml

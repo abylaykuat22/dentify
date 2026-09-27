@@ -1,0 +1,12 @@
+# Контекст сборки образа (frontend/Dockerfile): исходники и манифесты. Зависимости ставятся в образе заново — локальные
+# node_modules (Windows) в Linux не годятся.
+node_modules/
+dist/
+.vite/
+.tanstack/
+test-results/
+playwright-report/
+src/shared/api/.generated-check/
+e2e/
+*.local
+*.log

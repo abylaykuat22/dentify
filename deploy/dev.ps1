@@ -1,11 +1,14 @@
 ﻿<#
 .SYNOPSIS
-  Локальное окружение Dentify: PostgreSQL 18, Valkey, Mailpit, MinIO; Caddy — профилем proxy.
+  Локальное окружение Dentify: PostgreSQL 18, Valkey, Mailpit, MinIO; Caddy — профилем proxy; с -App — всё приложение
+  в контейнерах.
 
 .DESCRIPTION
   up        поднять и дождаться healthy, создать приватный бакет MinIO. Первый запуск создаёт deploy/.env
             со случайными паролями; новые ключи шаблона любая команда дописывает в существующий .env.
             -Proxy — вместе с Caddy (https://localhost:8443).
+            -App — плюс всё приложение в контейнерах: собрать образы бэкенда и фронта (сервисы app и web) и открыть
+            http://localhost:8088 (порт — DENTIFY_WEB_PORT в deploy/.env). Первая сборка — несколько минут.
   down      остановить и удалить контейнеры; данные в томах сохраняются.
   reset-db  удалить том БД dentify-pgdata и поднять чистую базу. Только с -Force.
   logs      журналы всех сервисов или одного (logs postgres); -Follow — следить.
@@ -15,6 +18,8 @@
 
 .EXAMPLE
   ./deploy/dev.ps1 up
+.EXAMPLE
+  ./deploy/dev.ps1 up -App
 .EXAMPLE
   ./deploy/dev.ps1 check
 .EXAMPLE
@@ -37,6 +42,7 @@ param(
 
     [string]$Sql,
     [switch]$Proxy,
+    [switch]$App,
     [switch]$Follow,
     [switch]$Force
 )
@@ -143,6 +149,10 @@ function Show-Endpoints([hashtable]$EnvVars) {
     Write-Host '  Mailpit     http://127.0.0.1:8025   (SMTP 127.0.0.1:1025)'
     Write-Host "  MinIO       http://127.0.0.1:9001   (S3 API 127.0.0.1:9000, бакет $($EnvVars['S3_BUCKET']))"
     if ($Proxy) { Write-Host '  Caddy       https://localhost:8443  (/api -> :8080, остальное -> :5173)' }
+    if ($App) {
+        $port = if ($EnvVars['DENTIFY_WEB_PORT']) { $EnvVars['DENTIFY_WEB_PORT'] } else { '8088' }
+        Write-Host "  Приложение  http://localhost:$port   (контейнеры app и web; вход owner@demo.dentify.kz, пароль — DENTIFY_DEV_OWNER_PASSWORD)"
+    }
     Write-Host 'Пароли и ключи — deploy/.env. Проверка: ./deploy/dev.ps1 check'
 }
 
@@ -150,9 +160,13 @@ function Invoke-Up {
     $services = $LongRunning
     $profileArgs = @()
     if ($Proxy) { $profileArgs = @('--profile', 'proxy'); $services += 'caddy' }
+    $upArgs = @('up', '--detach', '--wait', '--wait-timeout', '180')
+    # -App: образы пересобираются из текущих исходников (слои с зависимостями — из кэша); ждём дольше — старт бэкенда
+    # с миграциями.
+    if ($App) { $services += @('app', 'web'); $upArgs = @('up', '--build', '--detach', '--wait', '--wait-timeout', '300') }
     # minio-init — разовый сервис: --wait считает его выход (даже с кодом 0) ошибкой,
     # поэтому сначала ждём долгоживущие сервисы, затем прогоняем init отдельно.
-    Invoke-Compose ($profileArgs + @('up', '--detach', '--wait', '--wait-timeout', '180') + $services)
+    Invoke-Compose ($profileArgs + $upArgs + $services)
     Invoke-Compose @('run', '--rm', 'minio-init')
     Show-Endpoints (Read-DotEnv)
 }

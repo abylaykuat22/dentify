@@ -30,6 +30,12 @@
 		<geoip2.version>5.2.0</geoip2.version>
 		<!-- Телефоны: разбор и нормализация в E.164 (platform.api.PhoneNumber), метаданные Google, без сети -->
 		<libphonenumber.version>9.0.40</libphonenumber.version>
+		<!-- Сканер уязвимостей зависимостей (PLT-06): ../verify.ps1 -Scan, см. плагин dependency-check-maven ниже -->
+		<dependency-check.version>13.0.0</dependency-check.version>
+		<!-- Tomcat поверх BOM Boot 4.1.1 (там 11.0.24): в 11.0.24 девять CVE с CVSS 7–9.8 (CVE-2026-65637, -65905, -65182,
+		     -68525, …; исправлены в 11.0.25) — нашёл ../verify.ps1 -Scan 2026-09-26 (T-PLT-15). Патч-версия той же ветки,
+		     официальный способ Boot — свойство tomcat.version. Убрать, когда Boot принесёт 11.0.25+ (4.1.2). -->
+		<tomcat.version>11.0.26</tomcat.version>
 		<!-- ./mvnw spring-boot:run запускает профиль dev; другой — -Dspring-boot.run.profiles=… -->
 		<spring-boot.run.profiles>dev</spring-boot.run.profiles>
 	</properties>
@@ -311,6 +317,37 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<!-- OWASP dependency-check (PLT-06, T-PLT-15): уязвимости зависимостей по NVD, CISA KEV и RetireJS. Только по
+				     команде (../verify.ps1 -Scan, в verify.sh — ключ scan): в фазы сборки не привязан, ./mvnw verify его не запускает.
+				     Скрипт делает dependency-check:update-only (сеть), затем dependency-check:check -DautoUpdate=false (по кэшу).
+				     Порог — CVSS 7 и выше; согласованные исключения (allowlist) — dependency-check-suppressions.xml, каждое с
+				     причиной и сроком. База — кэш ~/.m2/repository/org/owasp/dependency-check-data (другая папка —
+				     -DdataDirectory=…). Ключ NVD API — из переменной NVD_API_KEY; без ключа скрипт берёт официальные JSON-фиды
+				     NVD (-DnvdDatafeedUrl): у API без ключа жёсткий лимит частоты. Отчёт — target/dependency-check-report.html. -->
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>${dependency-check.version}</version>
+				<configuration>
+					<failBuildOnCVSS>7</failBuildOnCVSS>
+					<suppressionFiles>
+						<suppressionFile>${project.basedir}/dependency-check-suppressions.xml</suppressionFile>
+					</suppressionFiles>
+					<nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
+					<formats>
+						<format>HTML</format>
+						<format>JSON</format>
+					</formats>
+					<!-- OSS Index (Sonatype Guide) требует учётной записи — выключен. Зависимости фронта проверяет pnpm audit,
+					     анализаторы Node, pnpm и yarn здесь не нужны; .NET-сборок нет. -->
+					<ossIndexAnalyzerEnabled>false</ossIndexAnalyzerEnabled>
+					<nodeAnalyzerEnabled>false</nodeAnalyzerEnabled>
+					<nodeAuditAnalyzerEnabled>false</nodeAuditAnalyzerEnabled>
+					<pnpmAuditAnalyzerEnabled>false</pnpmAuditAnalyzerEnabled>
+					<yarnAuditAnalyzerEnabled>false</yarnAuditAnalyzerEnabled>
+					<assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

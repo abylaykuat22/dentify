@@ -41,7 +41,9 @@ SaaS для стоматологий Казахстана. Требования 
 - Порты: PostgreSQL 18 — **5433** (5432 занят локальным PG 15), Valkey 6379, Mailpit
   1025/8025, MinIO 9000/9001, backend 8080 (actuator — 8081), frontend 5173.
 - Разработка только локальная; облачного CI и стенда нет до T-PLT-25.
-- Dev-окружение: `deploy/dev.ps1 up | check | psql [-As app] | logs [svc] | reset-db -Force | down`
+- Dev-окружение: `deploy/dev.ps1 up | check | psql [-As app] | logs [svc] | reset-db -Force | down`; `up -App` — ещё и
+  всё приложение в контейнерах (сервисы `app` и `web` в `compose.dev.yml`, образы `backend/Dockerfile` и
+  `frontend/Dockerfile`, http://localhost:8088)
   (bash — `deploy/dev.sh`), пароли — `deploy/.env` (шаблон `.env.example`, `.env` не коммитится).
   БД `dentify`, схема `dentify`: Flyway ходит `dentify_owner` (владелец), приложение — `dentify_app`
   (NOBYPASSRLS, только DML, гранты по умолчанию). S3 — бакет `dentify-files`, ключ приложения
@@ -92,5 +94,7 @@ react-i18next · Playwright.
 ## Готово = 
 
 `./mvnw verify` зелёный (JDK 25, Docker запущен), новая логика покрыта тестами, критерии приёмки
-связанных требований проверены, фронт (если есть) прогнан в Playwright. Статусы задач в канбане
+связанных требований проверены, фронт (если есть) прогнан в Playwright. Всё сразу — `./verify.ps1` (bash — `verify.sh`):
+окружение, бэкенд, спека, `pnpm verify`; `-E2E` — живой стек, `-Scan` — уязвимости и секреты (README, «Проверка перед
+коммитом»). Статусы задач в канбане
 (https://claude.ai/artifact/TCRR3jmsp8ynpwimq8qRsG) двигает основная сессия.

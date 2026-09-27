@@ -24,8 +24,9 @@ const loadDropdown = () =>
  *
  * Пока чанк меню не пришёл, на месте карточки — та же карточка простой кнопкой (вид, подпись, подсказка
  * те же). Потянулись к ней — чанк грузится сразу; когда он придёт, карточка меняется на кнопку меню и
- * доигрывает то, что человек уже сделал: нажал (мышь, Enter, пробел, стрелка) — меню открывается, фокус
- * был на карточке — остаётся на ней. Под нажатым указателем кнопка не меняется: клик ушёл бы мимо обеих.
+ * доигрывает то, что человек уже сделал: нажал (мышь, Enter, пробел, стрелка) — меню открывается (с клавиатуры —
+ * с фокусом на первом пункте, как от Enter по кнопке меню), фокус был на карточке — остаётся на ней. Под нажатым
+ * указателем кнопка не меняется: клик ушёл бы мимо обеих.
  */
 export function UserMenu({ user, collapsed }: { user: CurrentUser; collapsed: boolean }) {
   const { t } = useTranslation()
@@ -33,12 +34,13 @@ export function UserMenu({ user, collapsed }: { user: CurrentUser; collapsed: bo
   const label = t('shell:nav.userMenu', { name: user.fullName })
   const [handoff, setHandoff] = useState<UserMenuHandoff | null>(() => (dropdown ? 'none' : null))
   const placeholder = useRef<HTMLButtonElement>(null)
-  const intent = useRef({ pressed: false, open: false })
+  const intent = useRef({ pressed: false, open: false, keyboard: false })
 
   const settle = useCallback(() => {
     if (!dropdown || intent.current.pressed) return
     const focused = placeholder.current !== null && placeholder.current === document.activeElement
-    const next: UserMenuHandoff = intent.current.open ? 'open' : focused ? 'focus' : 'none'
+    const opened: UserMenuHandoff = intent.current.keyboard ? 'openByKeyboard' : 'open'
+    const next: UserMenuHandoff = intent.current.open ? opened : focused ? 'focus' : 'none'
     setHandoff((current) => current ?? next)
   }, [])
   // Не загрузился (нет сети) — остаётся простая карточка, без ошибки в консоли.
@@ -99,9 +101,11 @@ export function UserMenu({ user, collapsed }: { user: CurrentUser; collapsed: bo
     document.addEventListener('pointercancel', () => release(0), options)
   }
 
-  function open() {
+  // keyboard — нажали Enter, пробел (клик с `detail` 0) или стрелку: меню откроется с фокусом на первом пункте.
+  function open(keyboard: boolean) {
     intent.current.pressed = false
     intent.current.open = true
+    intent.current.keyboard = keyboard
     load()
   }
 
@@ -117,11 +121,11 @@ export function UserMenu({ user, collapsed }: { user: CurrentUser; collapsed: bo
           onPointerEnter={load}
           onFocus={load}
           onPointerDown={press}
-          onClick={open}
+          onClick={(event) => open(event.detail === 0)}
           onKeyDown={(event) => {
             if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
             event.preventDefault()
-            open()
+            open(true)
           }}
           {...card}
         />
