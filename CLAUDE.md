@@ -58,38 +58,31 @@ springdoc-openapi 3.1 → orval · Testcontainers 2 (`@ServiceConnection`) · Ar
 React 19 · Vite 8 · TanStack Router/Query · shadcn/ui + Tailwind 4 · react-hook-form + zod ·
 react-i18next · Playwright.
 
-## Бэкенд: соглашения
+## Бэкенд — кратко (подробно — `docs/architecture.md`)
 
-- Как добавить модуль, таблицу, эндпоинт — чек-листы `docs/architecture.md` «Как добавить»; раскладка пакетов модуля
-  (`api`, `events`, `web`, `internal`, `package-info.java` с `@NullMarked` и `@NamedInterface`) — там же, «Модули и
-  события».
-- Модули `kz.dentify.<module>`: `platform`, `iam`, `clinic`, `staff`, `patient`, `schedule`, `medical`, `inventory`.
-  Направления: clinic ← iam, staff, schedule, inventory; staff, patient ← schedule; medical → patient, schedule,
-  clinic; все → `platform :: api` (platform — общий модуль, `sharedModules`); **только iam → `platform :: identity`**
-  (клиника в сессии, вход, сессии, лимиты входа, чтение журнала — инварианты изоляции клиник); `platform :: *` не писать.
-  Подписки на события: iam ← `staff :: events`, inventory ← `schedule :: events` (подписка — тоже зависимость,
-  `<издатель> :: events`). Циклы рвутся портами/SPI и событиями. Права — только через `platform.api` (от iam не зависит
-  никто; «Права»). `@ApplicationModuleListener` для критичных потоков — только после журнала публикаций (T-PLT-14).
-  `ApplicationModules.verify()` — в тестах. Контроллер тонкий, правила — в сервисе (ArchUnit).
-- Таблица арендатора: `id uuid default uuidv7()`, `clinic_id uuid not null`, `created_at/by`,
-  `updated_at/by`, `version`; RLS ENABLE + FORCE и политика по `app.clinic_id` — в той же
-  миграции (шаблон — `docs/architecture.md`). Время — `timestamptz`, деньги — `numeric` /
-  `BigDecimal`.
-- Ошибки — `ProblemDetail` с `code` (ключ в `messages.properties`), `errors[]` полей, 409 при конфликте
-  версии; объект чужой клиники — 404.
-- Каждый эндпоинт: путь `/api/v1/<ресурс>` (без входа — только `/api/v1/auth/**` и `/api/v1/public/**`),
-  `@PreAuthorize`, `@Operation` с явным `operationId`, интеграционный тест (Testcontainers) и попадание в общий тест
-  изоляции арендаторов.
-- Логи — JSON, без ПД: ФИО и прочие ПД не пишем, только id; ИИН, телефон, e-mail маскируются как
-  страховка; только SLF4J, без `System.out` (правила — `docs/architecture.md` «Логи»).
-- Миграции — `db/migration/<модуль>/V<yyyy>_<MM>_<dd>_<HHmm>__<модуль>_<что>.sql` (слитная метка из 12 цифр
-  запрещена: маска логов примет её за ИИН), одна история Flyway на схему
-  (модульные миграции Modulith не включать); перед мёржем метка новее последней в master; данные при
-  FORCE RLS — по рецепту (всё — `docs/architecture.md` «Миграции»). Интеграционный тест наследует
-  `AbstractIntegrationTest` (Postgres 18 + Valkey в Testcontainers, роли как в dev); эндпоинты — через
-  его `RestTestClient` (`http`); не добавлять наследникам `@Import`, `@MockitoBean` и свои свойства —
-  один кэшированный контекст, пробные бины — top-level классами в тестовых исходниках.
-  Модули: `allowedDependencies` в `package-info.java` и `ModularityTests.ALLOWED` меняются вместе.
+- Модули `kz.dentify.<модуль>`: `platform`, `iam`, `clinic`, `staff`, `patient`, `schedule`, `medical`, `inventory`.
+  Направления: clinic ← iam, staff, schedule, inventory; staff, patient ← schedule; medical → patient, schedule, clinic;
+  все → `platform :: api`; **только iam → `platform :: identity`** (клиника в сессии, вход, сессии); подписки на события —
+  iam ← `staff :: events`, inventory ← `schedule :: events`; `platform :: *` не писать. Циклы — портами/SPI и событиями.
+  Меняются только решением владельца, вместе: `package-info.java`, `ModularityTests.ALLOWED`, architecture.md «Модули и
+  события» (там же карта, `platform :: api`, порты, события).
+- Пошагово: модуль — «Раскладка пакетов модуля», таблица — «Новая таблица арендатора» (RLS в той же миграции), эндпоинт —
+  «Новый эндпоинт» (DTO-record, сервис с правилами, `@PreAuthorize`, коды ошибок, `operationId`, реестр
+  `TenantIsolationTests`, интеграционный тест, orval).
+- Права — только коды через `platform.api`, в сессии не хранятся («Права и контекст»). Логи без ПД, деньги `BigDecimal`,
+  время `timestamptz` и пояс клиники, тексты — коды i18n («Правила кода»). Решения с причинами — «ADR».
+- Ошибки — `ProblemDetail` с `code`; объект чужой клиники — 404. `@ApplicationModuleListener` для критичных потоков —
+  только после журнала публикаций (T-PLT-14).
+- Тест — наследник `AbstractIntegrationTest` без `@Import`, `@MockitoBean` и своих свойств («Тестовая инфраструктура»).
+
+## Фронтенд — кратко (подробно — `docs/frontend.md`)
+
+- Тонкий клиент (R002): показывает ответ API и шлёт намерения; ручных `fetch` нет — клиент orval из `api/openapi.json`
+  («API-клиент», «Добавить вызов API»).
+- Экран — «Маршруты» → «Добавить экран», состояние экрана — в URL; телефон и адаптив — «Телефон и адаптив».
+- Строки — только полные ключи i18n `пространство:путь` («i18n»); компоненты — shadcn/Base UI в токенах «Кресла»
+  («Дизайн-система»).
+- Проверки — «Тесты» (моки, живой стек); правка стартового маршрута — `pnpm verify:perf` («Производительность»).
 
 ## Готово = 
 

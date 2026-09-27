@@ -1,66 +1,703 @@
 # Dentify — архитектура и соглашения бэкенда
 
-Документ растёт по задачам. Сейчас в нём «Как добавить» (модуль, таблица, эндпоинт — чек-листы со ссылками на
-разделы), «Миграции», «Модули и события», «Логи», «Выключенная автоконфигурация» и «Код» (T-PLT-02), «Ошибки API»,
-«Соглашения API и OpenAPI» (T-PLT-07), «Сообщения и i18n» (T-PLT-11), «Тенант-контекст и изоляция клиник» (T-PLT-03),
-«Безопасность и сессии» (T-PLT-04), «Журнал действий» (T-PLT-13), «Аккаунты и членство» (T-IAM-01), «Вход, выход и
-/api/v1/me» (T-IAM-02) и «Права» (решение до T-IAM-06/07). ADR появятся в T-PLT-38. Граф модулей генерируется тестом
-`ModuleDocumentationTests` в [modules/](modules/) (`components.puml`, `all-docs.adoc`), руками его не правят.
+Как устроен бэкенд Dentify и как в него добавлять код. Фронтенд — [frontend.md](frontend.md). Документ в двух частях.
 
-## Как добавить
+**Как строить** — всё, что нужно, чтобы собрать модуль, таблицу и эндпоинт, по порядку:
 
-Чек-листы — порядок шагов; правила и причины — в разделах по ссылкам. Всё, что ниже, ловят тесты: пропущенный шаг
-роняет `./mvnw verify`, а не ревью.
+1. «Модули и события» — карта модулей, разрешённые направления зависимостей, named interfaces (`api`, `events`,
+   `identity`), что лежит в `platform :: api` и кто вправе вызывать примитивы сессии, порты и SPI вместо циклов, события,
+   журнал публикаций, документация модулей в [modules/](modules/);
+2. «Раскладка пакетов модуля» — `api`, `events`, `web`, `internal`, `package-info.java`; новый модуль по шагам;
+3. «Новая таблица арендатора» — шаблон миграции и шаги до теста каталога;
+4. «Новый эндпоинт» — от пути и DTO до реестра теста изоляции и клиента orval, в одном месте;
+5. «Права и контекст» — как права попадут в запрос на этапе 1, клиника запроса, завершение сессий по клинике, открытые
+   пути `/api/v1/public/**`;
+6. «Правила кода» — логи без ПД, деньги, время и пояс клиники, тексты и i18n;
+7. «ADR» — решения с контекстом и последствиями.
 
-### Модуль
+**Справочник** — как работают механизмы платформы и iam, почему так и что запрещено: «Миграции», «Тенант-контекст и
+изоляция клиник», «Безопасность и сессии», «Ошибки API», «Соглашения API и OpenAPI», «Сообщения и i18n», «Журнал
+действий», «Аккаунты и членство», «Вход, выход и /api/v1/me», «Выключенная автоконфигурация», «Тестовая инфраструктура».
+Шаги первой части ссылаются на него по имени раздела.
 
-1. Направление зависимостей — сначала решение (владелец) и строка в `CLAUDE.md`; раскладка пакетов и правила — «Модули и
-   события».
+Всё описанное сверено с кодом (2026-09-27). Чего ещё нет, помечено задачей бэклога («T-IAM-07», «T-PLT-14»). Шаги
+сторожат тесты: пропущенный шаг роняет `./mvnw verify`, а не ревью.
+
+## Модули и события
+
+Dentify — модульный монолит на Spring Modulith 2.1.1: `@Modulithic(systemName = "Dentify", sharedModules = "platform")` в
+`DentifyApplication`. Модуль — прямой подпакет `kz.dentify.<модуль>`, его отображаемое имя и разрешённые зависимости —
+`@ApplicationModule` в его `package-info.java`. Другим модулям открыты только named interfaces модуля: типы и сервисы
+(`api`) и события (`events`). Всё остальное в модуле закрыто, обращение туда роняет `ApplicationModules.verify()`.
+
+### Карта модулей
+
+| Модуль | `displayName` | За что отвечает | Открыто другим | Код сейчас |
+|---|---|---|---|---|
+| `platform` | Платформа | общее ядро: тенант-контекст, безопасность и сессии, аудит, ошибки, i18n, логи, OpenAPI | `api` — всем, `identity` — только iam | этап 0 |
+| `clinic` | Моя клиника | клиника, филиалы, кресла, настройки, прайс, справочники | `api` | `clinic.api.ClinicDirectory`, `DemoClinic`; таблицы `clinic`, `branch` — минимум (T-CLN-01) |
+| `iam` | Доступы и аккаунты | аккаунты, членство в клиниках, роли и права, приглашения, журналы, сессии | ничего: от iam не зависит никто | вход, `/api/v1/me`, сессии, REST журнала действий |
+| `staff` | Сотрудники | сотрудники, специализации, смены | `api`, `events` | только `package-info.java` |
+| `patient` | Пациенты | ПД пациента, представители, согласия, файлы | `api` | только `package-info.java` |
+| `schedule` | Расписание | записи, статусы, конфликты | `api`, `events` | только `package-info.java` |
+| `medical` | Медкарта | медблок, зубная формула, медзаписи с МКБ-10 | ничего: лист графа | только `package-info.java` |
+| `inventory` | Склад | номенклатура, склады, поставщики, документы, остатки | ничего | только `package-info.java` |
+
+### Направления зависимостей
+
+Кратко: clinic ← iam, staff, schedule, inventory; staff, patient ← schedule; medical → patient, schedule, clinic; все →
+`platform :: api`; **только iam → `platform :: identity`**; подписки на события — iam ← `staff :: events`, inventory ←
+`schedule :: events`. Platform не зависит ни от кого; от iam, medical и inventory не зависит никто.
+
+Полностью — как в коде (`allowedDependencies` в `package-info.java` каждого модуля и `ModularityTests.ALLOWED`):
+
+| Модуль | Может зависеть от |
+|---|---|
+| `platform` | ни от кого (`allowedDependencies = {}`) |
+| `clinic` | `platform :: api` |
+| `patient` | `platform :: api` |
+| `staff` | `platform :: api`, `clinic :: api` |
+| `schedule` | `platform :: api`, `clinic :: api`, `staff :: api`, `patient :: api` |
+| `medical` | `platform :: api`, `patient :: api`, `schedule :: api`, `clinic :: api` |
+| `inventory` | `platform :: api`, `clinic :: api`, `schedule :: events` |
+| `iam` | `platform :: api`, `platform :: identity`, `clinic :: api`, `staff :: events` |
+
+- Зависимость пишется на named interface (`clinic :: api`), а не на модуль целиком. `platform :: *` не пишет никто:
+  звёздочка открыла бы и `platform :: identity`.
+- Направления меняются только решением владельца и в трёх местах вместе: `package-info.java` модуля,
+  `ModularityTests.ALLOWED` и таблица выше (кратко — строка в `CLAUDE.md`).
+- Внешние ключи между таблицами разных модулей — только по этим направлениям («Таблица арендатора»).
+- Сгенерированный граф [modules/components.puml](modules/components.puml) показывает зависимости, которые **есть в коде**
+  (сейчас iam → clinic, iam → platform, clinic → platform), таблица — **разрешённые**. Граф всегда уже таблицы.
+
+Кто это держит:
+
+| Тест | Что ловит |
+|---|---|
+| `ModularityTests.verifiesModularStructure` | `ApplicationModules.verify()`: циклы, обращение во внутренние пакеты чужого модуля, зависимость вне `allowedDependencies`, в том числе на named interface, которого нет в списке |
+| `ModularityTests.detectsAllModules` | модуль без строки в `ALLOWED` |
+| `ModularityTests.declaresDependencyDirectionsFromClaudeMd` | `allowedDependencies` каждого `package-info.java` совпадает с `ALLOWED` |
+| `ModularityTests.identityPrimitivesAreOpenOnlyToIam` | `TenantSession`, `AccountSignIn`, `AccountSessions`, `RateLimits`, `AuditJournal` лежат в `platform :: identity`, `TenantSession` — не в `api`; `platform :: identity` в `ALLOWED` только у iam, `platform :: *` — ни у кого |
+| `ModularityTests.everyDependedOnNamedInterfaceExists` | каждый named interface из `ALLOWED` объявлен у модуля-издателя |
+| `TenancyRulesTests.sessionIsWrittenOnlyByPlatformAndIam` (ArchUnit) | запись в HTTP-сессию вне platform и iam (ниже, «`platform :: identity` — только iam») |
+
+### Named interfaces
+
+| Named interface | Пакет | Что в нём | Кто вправе зависеть |
+|---|---|---|---|
+| `api` | `kz.dentify.<модуль>.api` | типы и сервисы, которые вызывают другие модули; порты и SPI | модули с `<модуль> :: api` в `allowedDependencies` |
+| `events` | `kz.dentify.<модуль>.events` | события модуля-издателя | подписчики с `<издатель> :: events` в `allowedDependencies` |
+| `identity` | `kz.dentify.platform.identity` | примитивы входа, сессии и чтения журнала — есть только у платформы | только iam |
+
+#### `platform :: api` — всем модулям
+
+| Группа | Типы |
+|---|---|
+| Ошибки | `DentifyException` (sealed) и его классы по статусам: `InvalidRequestException` 400, `UnauthorizedException` 401, `ForbiddenException` 403, `NotFoundException` 404, `ConflictException` 409, `BusinessRuleException` 422, `TooManyRequestsException` 429; `FieldViolation`, `ErrorCodes`, `DataIntegrity`, `MissingTenantContextException` («Ошибки API») |
+| Списки | `PageQuery`, `PageResponse`, `SortBy` («Соглашения API и OpenAPI») |
+| Клиника и сущности | `TenantContext`, `Tenant`, `TenantEvent`, `TenantEntity`, `GlobalEntity`, `BaseEntity` («Тенант-контекст и изоляция клиник») |
+| Значения | `PhoneNumber`, `EmailAddress` («Аккаунты и членство»), `LocalizedText`, `Languages` («Сообщения и i18n»), `Hashes`, `IpAddresses` |
+| Журнал действий: запись | `AuditService`, `@Audited`, `AuditEvent`, `AuditSnapshots`, `@AuditSecret`, `AuditActions` («Журнал действий») |
+| Безопасность | `PasswordPolicy`, `CurrentPermissions`, `Permissions`; бин `PasswordEncoder` Spring Security («Безопасность и сессии») |
+| Точки расширения (SPI) | `CurrentAccountProvider`, `CurrentStaffProvider`, `AccountNameProvider`, `AccountLocaleProvider` — «Порты и SPI вместо циклов» |
+
+#### `platform :: identity` — только iam
+
+`TenantSession` — клиника и филиал в сессии; `AccountSignIn` — вход и выход в сессии; `AccountSessions` и `AccountSession` —
+активные сессии: список, завершить одну, все, все кроме текущей, все в одной клинике; `RateLimits` — лимиты входа и сброса
+пароля; `AuditJournal`, `AuditQuery`, `AuditEntry` — чтение журнала действий. Реализации — во внутренних пакетах
+`platform.security` и `platform.audit`.
+
+Почему не в `api`: здесь инварианты изоляции клиник. Модуль, который сам положит клинику в сессию, отдаст ей чужую
+клинику без проверки членства; модуль, который сам завершает сессии, обойдёт отметки отзыва, и запрос в полёте оживит
+сессию («Активные сессии»). Клинику в сессию кладёт только `iam.internal.AccountContexts` после проверки активного
+членства, входит и выходит только `iam.internal.SignIns`.
+
+Как обеспечено — двумя проверками:
+
+1. **Named interface Spring Modulith.** `platform :: identity` есть только в `allowedDependencies` iam. Обращение к его типу
+   из другого модуля роняет `ModularityTests.verifiesModularStructure`: «Module 'clinic' depends on named interface(s)
+   'platform :: identity' via kz.dentify.clinic.internal.… -> kz.dentify.platform.identity.TenantSession. Allowed
+   targets: platform :: api, platform» (проверено 2026-09-27 пробным классом в `clinic.internal` с вызовом
+   `TenantSession.read`). Состав `identity` и то, что он открыт только iam, фиксирует
+   `ModularityTests.identityPrimitivesAreOpenOnlyToIam`.
+2. **ArchUnit: запись в HTTP-сессию.** Modulith видит зависимости по байткоду, а имена атрибутов сессии
+   (`TenantSession.CLINIC_ID` = `dentify.tenant.clinicId`) — строковые константы, которые компилятор встраивает в
+   вызывающий класс: `session.setAttribute(TenantSession.CLINIC_ID, …)` ссылки на `TenantSession` в байткоде не оставляет,
+   и `verify()` такой обход не видит (проверено той же пробой). Поэтому
+   `TenancyRulesTests.sessionIsWrittenOnlyByPlatformAndIam`: `setAttribute`, `removeAttribute` и `invalidate` сессии
+   (`jakarta.servlet.http.HttpSession`, `org.springframework.session.Session`) вызывают только классы
+   `kz.dentify.platform..` и `kz.dentify.iam..`. Что правило ловит нарушение — на фикстуре
+   `archfixtures.tenancy.SessionWriter`.
+
+### Порты и SPI вместо циклов
+
+Зависимости идут в одну сторону. Если модулю нужно то, что знает модуль, от которого ему зависеть нельзя, обратную
+зависимость не заводят — цикл рвут одним из двух способов:
+
+- **порт (SPI)** — интерфейс в `api` спрашивающего модуля или в `platform :: api`, если спрашивают все; реализация — бин
+  в `internal` модуля, который знает ответ. Вызывающий зависит только от интерфейса. Реализаций может быть несколько
+  (цепочка по `@Order`, как `AccountNameProvider.resolve`) или ни одной (`ObjectProvider`, как у `CurrentStaffProvider`);
+- **событие** — издатель публикует record из своего `events`, подписчик реагирует («События» ниже). Годится для побочного
+  эффекта после коммита, а не для ответа на вопрос.
+
+| Порт (`platform.api`) | Кто спрашивает | Реализация | Почему порт |
+|---|---|---|---|
+| `AccountNameProvider` | платформа: автор в 409 `error.version-conflict`, имена в журнале действий | `iam.internal.AccountDisplayNames` | имя человека в клинике знает iam, а платформа от модулей не зависит |
+| `AccountLocaleProvider` | `platform.i18n.DentifyLocaleResolver` | `iam.internal.AccountLanguage` | язык аккаунта хранит iam |
+| `CurrentStaffProvider` | `platform.audit.JdbcAuditService` (`staff_id` события) | пока нет — без неё `staff_id` пуст (T-IAM-26) | сотрудник членства — iam |
+| `CurrentAccountProvider` | аудит сущностей (`created_by`), журнал, `iam.web.AccountSessionController` | `platform.security.SecurityCurrentAccountProvider` | модули не читают контекст Spring Security сами |
+| `CurrentPermissions` | маска журнала (`platform.audit.JdbcAuditJournal`, право `patient:phones`), дальше — сервисы модулей | сейчас `platform.security.SecurityCurrentPermissions`, с T-IAM-07 — SPI, который реализует iam | права считает iam, а от iam не зависит никто («Права») |
+
+Порт модуля — `clinic.api.ClinicDirectory` (реализация `clinic.internal.JdbcClinicDirectory`): iam показывает название
+клиники и филиалы через него, а не читает таблицы clinic. Так же устроят права (T-IAM-06/07): контракты
+`PermissionContributor`, `CurrentMember`, `ScopeFilter` и бин `perm` — в платформе, реализация — в iam («Права»).
+
+### События
+
+Событие убирает только обратную зависимость: издатель ничего не знает о подписчиках. Но слушатель
+`@ApplicationModuleListener void on(StaffDeactivated event)` ссылается на тип события, и Modulith считает это
+зависимостью подписчика от издателя. Поэтому события лежат в named interface `events` издателя (пакет
+`kz.dentify.<модуль>.events` с `@NamedInterface("events")`), а подписка — это разрешённая зависимость на
+`<издатель> :: events`, иначе `ApplicationModules.verify()` упадёт («Module 'iam' depends on named interface(s)
+'staff :: events'», проверено). Разрешены сейчас:
+
+| Подписчик | Событие | Зависимость |
+|---|---|---|
+| iam | `StaffDeactivated` → гасит сессии сотрудника (PLT-24) | `staff :: events` |
+| inventory | `AppointmentCompleted` → списание по нормам услуги | `schedule :: events` |
+
+Пакеты `staff.events` и `schedule.events` объявлены, самих событий ещё нет (T-STF, T-SCH). Циклов нет: staff и schedule
+не зависят ни от iam, ни от inventory. Новая подписка — сначала решение и направление, потом `package-info.java` и
+`ModularityTests.ALLOWED`.
+
+- Событие — неизменяемый `record` с идентификаторами (`clinicId`, `staffId`, …), без ПД: оно сериализуется в журнал
+  публикаций в БД. Событие о данных одной клиники реализует `TenantEvent` — обработчик выполняется в клинике события
+  («Контекст клиники»).
+- `@ApplicationModuleListener` для критичных потоков — только после журнала публикаций, до него синхронная работа в
+  той же транзакции — прямой вызов порта (ниже).
+
+### Журнал публикаций (PLT-24, T-PLT-14) — план, ещё не подключено
+
+**Сейчас журнала публикаций нет**: в `pom.xml` только `spring-modulith-events-api` (аннотации), без
+`spring-modulith-starter-jdbc` и таблицы `event_publication`. Асинхронный `@ApplicationModuleListener` без журнала при
+исключении обработчика или рестарте приложения **теряет событие молча**: клиника остаётся без ролей, владелец — без прав.
+Поэтому до T-PLT-14:
+
+- `@ApplicationModuleListener` и асинхронные обработчики для критичных потоков (сид ролей и справочников новой клиники,
+  сброс кэша прав, отключение доступа, списание склада) — **запрещены**. Задача с таким слушателем или событием зависит
+  от T-PLT-14 (`dependsOn` в `backlog.json`: T-IAM-06, T-IAM-07, T-IAM-26, T-CLN-02, T-STF-09, T-STF-19, T-SCH-04,
+  T-SCH-06, T-SCH-28, T-PAT-11, T-PAT-21, T-INV-06, T-MED-03 и всё, что после них);
+- синхронная работа в той же транзакции — прямым вызовом порта, а не событием.
+
+Решение для T-PLT-14 (при подключении `spring-modulith-starter-jdbc`):
+
+- `spring.modulith.events.jdbc.schema-initialization.enabled: false` — по умолчанию Modulith создаёт
+  таблицу сам, а у `dentify_app` нет прав на DDL, и приложение не стартует;
+- таблица `event_publication` в структуре Modulith 2 (не legacy, `use-legacy-structure` не включаем)
+  создаётся Flyway-миграцией модуля platform; `spring.modulith.events.jdbc.schema: dentify`;
+- таблица глобальная: без `clinic_id` и RLS (её пишет инфраструктура Modulith вне контекста клиники).
+  Клиника передаётся в самом событии, обработчик ставит контекст клиники из него;
+- незавершённые публикации переотправляет задача по расписанию через `IncompleteEventPublications` под
+  ShedLock (одним экземпляром), а не флагом `republish-outstanding-events-on-restart`: документация
+  Modulith не рекомендует его при нескольких экземплярах;
+- обработчики идемпотентны: повторная доставка не создаёт дублей.
+
+### Документация модулей
+
+`ModuleDocumentationTests` (часть `./mvnw verify`) на каждом прогоне пересоздаёт [modules/](modules/) через `Documenter`
+Spring Modulith: [components.puml](modules/components.puml) — C4-диаграмма всех модулей с их фактическими зависимостями,
+`module-<модуль>.puml` — модуль и его соседи, `module-<модуль>.adoc` — канва модуля (описание из Javadoc
+`package-info.java`, базовый пакет, бины других модулей, которыми он пользуется, с их Javadoc), [all-docs.adoc](modules/all-docs.adoc)
+— всё вместе. Руками там ничего не правят: изменился модуль — изменившиеся файлы коммитятся вместе с кодом.
+
+- Javadoc рабочих классов — без двойных кавычек и непарных скобок: Documenter 2.1.1 разбирает собранный Javadoc
+  (`target/generated-spring-modulith/javadoc.json`) простым JSON-парсером, и тест падает («No signature found in source
+  map»).
+- Тест проверяет, что на `components.puml` есть все модули по `displayName`: новый модуль — дописать в его список.
+
+## Раскладка пакетов модуля
+
+| Пакет | Что в нём | `package-info.java` | Кому виден |
+|---|---|---|---|
+| `kz.dentify.<модуль>` | только `package-info.java`; его Javadoc — описание модуля в канве («Документация модулей») | `@ApplicationModule(displayName = "…", allowedDependencies = { "platform :: api", … })`, `@NullMarked` | — |
+| `api` | типы и сервисы для других модулей, порты и SPI (`clinic.api.ClinicDirectory`) | `@NamedInterface("api")`, `@NullMarked` | модулям с `<модуль> :: api` |
+| `events` | события модуля: неизменяемые record с id, без ПД | `@NamedInterface("events")`, `@NullMarked` | подписчикам с `<модуль> :: events` |
+| `web` | контроллеры и DTO-records запросов и ответов | `@NullMarked` | только своему модулю |
+| `internal` | сервисы с правилами (`@Service`), сущности, репозитории, реализации своих портов и SPI платформы, dev-сиды | `@NullMarked` | только своему модулю |
+
+Живые образцы: iam — `iam/package-info.java`, `iam.web` (`AuthController`, `MeController`, `AccountSessionController`,
+`AuditEventController` и их DTO), `iam.internal` (`SignIns`, `AccountContexts`, `Memberships`, сущности и репозитории);
+clinic — порт `clinic.api.ClinicDirectory` и его реализация `clinic.internal.JdbcClinicDirectory`.
+
+- `@NullMarked` (JSpecify) — в `package-info.java` **каждого** пакета: аннотация пакета на подпакеты не распространяется,
+  поэтому новый пакет — сразу со своим `package-info.java`. `null` допустим только там, где явно стоит `@Nullable`; по
+  нему же springdoc отличает обязательные поля DTO («Соглашения API и OpenAPI»). Проверку при сборке (NullAway) можно
+  подключить позже.
+- `web` зовёт сервисы `internal` своего модуля (поэтому сервис — `public class` в `internal`), а не репозитории. Правила —
+  в сервисе, контроллер их не повторяет (dentify R002); ArchUnit `CodingRulesTests.webLayerIsThin` не даёт `web` ходить в
+  репозитории и сущности, открывать транзакции и отдавать не records.
+- В `api` — только то, что действительно вызывает другой модуль: сущности и репозитории туда не кладут, наружу — record
+  или интерфейс (`ClinicDirectory.ClinicInfo`).
+- Инфраструктурные `@Enable…` включает платформа, в модулях их не повторять («Выключенная автоконфигурация»).
+- Javadoc рабочих классов — без двойных кавычек и непарных скобок («Документация модулей»).
+
+### Новый модуль
+
+1. Решение владельца о направлениях — таблица «Направления зависимостей» и строка в `CLAUDE.md`.
 2. `kz.dentify.<модуль>/package-info.java`: `@ApplicationModule(displayName = …, allowedDependencies = { "platform :: api",
-   … })` и `@NullMarked`. `platform :: *` не писать: он открыл бы и `platform :: identity`, который только для iam.
-3. Та же строка — в `ModularityTests.ALLOWED` (тест сверяет их с `package-info`).
-4. Пакеты `api` и `events` — со своим `package-info.java`: `@NamedInterface("api")` / `@NamedInterface("events")` и
-   `@NullMarked`; `web`, `internal` — только `@NullMarked` («Код»).
-5. Каталог миграций `db/migration/<модуль>` («Миграции», «Файлы и версии»); `MigrationNamingTests` проверит, что модуль в
-   пути есть среди `kz.dentify.<модуль>`.
-6. Глобальная таблица в модуле (без `clinic_id`) — `RowLevelSecurityTests.GLOBAL_TABLES` и, если модуль новый для
+   … })` и `@NullMarked`. `platform :: *` не писать: он открыл бы и `platform :: identity`.
+3. Та же строка — в `ModularityTests.ALLOWED`: `declaresDependencyDirectionsFromClaudeMd` сверит их, `detectsAllModules` не
+   пропустит модуль без строки.
+4. Пакеты `api` и `events` (если модуль их открывает) — со своим `package-info.java`: `@NamedInterface("api")` /
+   `@NamedInterface("events")` и `@NullMarked`; `web`, `internal` — только `@NullMarked`.
+5. Каталог миграций `db/migration/<модуль>`: `MigrationNamingTests` проверит, что модуль в пути и в имени файла — это
+   `kz.dentify.<модуль>` («Файлы и версии»).
+6. Глобальная таблица в модуле (без `clinic_id`) — `RowLevelSecurityTests.GLOBAL_TABLES` и, если у модуля ещё нет
    глобальных сущностей, `TenancyRulesTests.GLOBAL_ENTITY_MODULES`, с причиной («Таблица арендатора»).
-7. Коды ошибок модуля — `<модуль>.<что>` в `messages.properties` («Ошибки API»), тексты журнала — `audit.*` («Журнал
-   действий», «Тексты»).
+7. Коды ошибок модуля — `<модуль>.<что>` в `messages.properties` под заголовком `# --- <модуль> ---` («Ошибки API»), тексты
+   журнала — `audit.*` («Журнал действий», «Тексты»).
+8. `displayName` модуля — в список `ModuleDocumentationTests`.
 
-### Таблица
+## Новая таблица арендатора
 
-1. Миграция `db/migration/<модуль>/V<yyyy>_<MM>_<dd>_<HHmm>__<модуль>_<что>.sql`, метка новее последней в master
-   («Файлы и версии»).
-2. Таблица клиники — по шаблону «Таблица арендатора»: колонки из «Колонки», `UNIQUE (clinic_id, id)`, составные FK,
-   индексы с `clinic_id` первой колонкой, RLS ENABLE + FORCE и политика `tenant_isolation` в той же миграции.
-3. Данные в миграции при FORCE RLS — по рецепту «Миграции с данными при FORCE RLS».
-4. Сущность — от `TenantEntity` (глобальная — от `GlobalEntity`), id — `@UuidGenerator(style = VERSION_7)`, `@Version`
-   («Сущности»); репозиторий Spring Data, нативный SQL — с `clinic_id` («Репозитории»).
-5. Глобальная таблица — в `RowLevelSecurityTests.GLOBAL_TABLES` с причиной; вторая политика — только `FOR SELECT` в
-   `READ_POLICIES` и в этом документе.
+Таблица арендатора — любая таблица с данными одной клиники. Шаги по порядку; правила и причины — «Миграции» и
+«Тенант-контекст и изоляция клиник».
 
-### Эндпоинт
+1. **Файл миграции** — `backend/src/main/resources/db/migration/<модуль>/V<yyyy>_<MM>_<dd>_<HHmm>__<модуль>_<что>.sql`:
+   модуль — владелец таблицы, метка — время UTC, части через подчёркивание, новее последней миграции в master. Например
+   `db/migration/clinic/V2026_10_01_1200__clinic_create_branch_chair.sql`. Слитная метка (`V202610011200`) запрещена:
+   12 цифр подряд маска логов примет за ИИН. Имя проверяют `spring.flyway.validate-migration-naming: true` (не по формату —
+   старт падает) и `MigrationNamingTests` («Файлы и версии»).
+2. **Колонки** — `id uuid NOT NULL DEFAULT uuidv7()`, `clinic_id uuid NOT NULL`, свои поля по таблице «Колонки»
+   (`timestamptz`, `date`, `numeric(12,2)`, `text` с `CHECK (length(…) BETWEEN …)`, перечисление — `text` с
+   `CHECK (… IN (…))`, двуязычное — `jsonb`), `archived_at timestamptz` вместо физического удаления и служебные
+   `created_at`, `created_by`, `updated_at`, `updated_by`, `version`. Имена — «Имена».
+3. **Ключи** — `pk_<таблица>`; `UNIQUE (clinic_id, id)`, если на таблицу будут ссылаться другие таблицы арендатора;
+   внешний ключ на таблицу клиники — составной `(clinic_id, x_id) → x (clinic_id, id)`, тогда БД не даст связать объекты
+   разных клиник. Ключ на таблицу другого модуля — только по разрешённым направлениям («Направления зависимостей»).
+4. **Индексы** — `clinic_id` первой колонкой: `ix_<таблица>_<колонки>` под списки, фильтры и сортировки `@SortBy`,
+   `ux_<таблица>_<колонки>` — уникальность внутри клиники (`(clinic_id, lower(code))`). Поиск по тексту — `pg_trgm`
+   (расширение уже в базе).
+5. **RLS — в той же миграции**: `ENABLE` + `FORCE` и ровно одна политика `tenant_isolation` с `clinic_id =
+   current_clinic_id()` в `USING` и `WITH CHECK`. Другое выражение или вторая разрешающая политика роняют тест каталога.
+6. **Данные** (заполнить новую колонку, сид по клиникам) — только по рецепту «Миграции с данными при FORCE RLS»: без него
+   `UPDATE` молча обработает 0 строк.
 
-1. Путь — `/api/v1/<ресурс>`; открытый без входа — только под `/api/v1/auth/**` (сессия и пароль) или
-   `/api/v1/public/**` (регистрация, города, приглашение) («Соглашения API и OpenAPI»).
-2. Контроллер в пакете `web` модуля — тонкий: параметры → сервис модуля → DTO-record. Репозитории, сущности JPA и
-   `@Transactional` в `web` запрещены, ответ — record, `PageResponse` записей, список записей, `ResponseEntity` или ничего
-   (ArchUnit `CodingRulesTests.webLayerIsThin`).
-3. DTO — `record` в `web`, поля без `@Nullable` обязательны и проверяются `@NotNull`/`@NotBlank`, `clinicId` в DTO
-   запрещён («Соглашения API и OpenAPI», «Тесты изоляции»); список — `PageQuery` + `PageResponse`, сортировка — `@SortBy`.
-4. `@PreAuthorize` на методе или классе: `isAuthenticated()`, право — `hasAuthority(…)` (с T-IAM-07 — `@perm.has(…)`,
-   «Права»), открытый — `permitAll()` («Безопасность и сессии»; ArchUnit `endpointsHavePreAuthorize`).
-5. OpenAPI: `@Operation(operationId = "<глагол><Ресурс>", summary, description)` — явный и уникальный operationId (имя хука
-   orval); свои ответы — `@ApiResponse`; ошибки 4xx/5xx и `Retry-After` у 429 дописывает платформа
-   (`OpenApiContractTests.operationIdsAreExplicitAndUnique`).
-6. Ошибки — исключения `platform.api` с кодами модуля, тексты кодов — в `messages.properties` и проверка ключей тестом
-   модуля («Ошибки API», «Сообщения и i18n»).
-7. Изоляция: ресурс клиники — строка в `TenantIsolationTests.RESOURCES`, эндпоинт без данных клиники — в `NOT_CLINIC_DATA`
-   путём целиком с причиной, открытый эндпоинт `/api/v1/public/…` — тоже по одному («Тесты изоляции»).
-8. Интеграционный тест модуля наследует `AbstractIntegrationTest` (без `@Import`, `@MockitoBean`, своих свойств),
-   запросы — через его `http`, вход — `signIn` или вход iam (`CLAUDE.md`, «Код»).
-9. Прогнать тесты и закоммитить изменившийся `api/openapi.json` вместе с кодом («Соглашения API и OpenAPI»).
+```sql
+-- db/migration/clinic/V2026_10_01_1200__clinic_create_branch_chair.sql (пример)
+CREATE TABLE chair (
+    id          uuid        NOT NULL DEFAULT uuidv7(),
+    clinic_id   uuid        NOT NULL,
+    branch_id   uuid        NOT NULL,
+    name        text        NOT NULL CHECK (length(name) BETWEEN 1 AND 100),
+    sort        integer     NOT NULL DEFAULT 0,
+    archived_at timestamptz,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    created_by  uuid,
+    updated_at  timestamptz NOT NULL DEFAULT now(),
+    updated_by  uuid,
+    version     bigint      NOT NULL DEFAULT 0,
+    CONSTRAINT pk_chair PRIMARY KEY (id),
+    CONSTRAINT ux_chair_clinic_id UNIQUE (clinic_id, id),
+    CONSTRAINT fk_chair_branch FOREIGN KEY (clinic_id, branch_id) REFERENCES branch (clinic_id, id)
+);
+CREATE INDEX ix_chair_clinic_branch ON chair (clinic_id, branch_id);
+
+ALTER TABLE chair ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chair FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation ON chair
+    USING      (clinic_id = current_clinic_id())
+    WITH CHECK (clinic_id = current_clinic_id());
+```
+
+Шаблон проверен на PostgreSQL 18.6: без контекста клиники строк не видно, чужая клиника строк не видит, вставка с
+чужим `clinic_id` отклоняется политикой. По нему создана тестовая таблица
+`backend/src/test/resources/db/test-migration/V9999_12_31_2358__platform_test_note.sql` (с рецептом данных при FORCE
+RLS), на ней это проверяют `RowLevelSecurityTests`, `TenantIsolationTests` и `VersionConflictTests`. Живой пример в
+коде — `branch` в `clinic/V2026_09_26_1000__clinic_create_clinic_branch.sql`.
+
+7. **Сущность** — `class Chair extends TenantEntity` в `internal`: `clinic_id` с `@TenantId` (без сеттера, `updatable =
+   false`), id UUIDv7 (`@UuidGenerator(style = VERSION_7)`), аудит `created/updated at/by` и `@Version` — уже в
+   `BaseEntity`, в сущности их не объявлять. Глобальная таблица — `GlobalEntity` («Сущности»).
+8. **Репозиторий** — Spring Data `JpaRepository<Chair, UUID>` в `internal`. Без контекста клиники он бросает
+   `MissingTenantContextException`; нативный SQL — только с условием по `clinic_id` (`TenancyRulesTests`, «Репозитории»).
+   Списки с коллекциями — без N+1 и без пагинации в памяти («Сущности»).
+9. **Тест каталога** дописывать не нужно: `RowLevelSecurityTests.everyTenantTableHasForcedRlsAndStandardPolicy` сам находит
+   таблицу по колонке `clinic_id` и падает без RLS, FORCE или стандартной политики. Таблица без `clinic_id` — только из
+   реестра `GLOBAL_TABLES` с причиной (`tablesWithoutClinicIdAreRegisteredAsGlobalOrTenantRoot`); политика сверх
+   стандартной — только `FOR SELECT`, в `READ_POLICIES` и в этом документе (`extraPoliciesAreRegisteredAndReadOnly`).
+   Сущность проверит `TenancyRulesTests.entitiesAreTenantOrExplicitlyGlobal`.
+10. **Изоляция через API** — ресурс таблицы попадает в `TenantIsolationTests` с эндпоинтом («Новый эндпоинт», шаг 8);
+    правила БД, которые API не покрывает, — интеграционным тестом модуля (образец — `clinic.ClinicTablesTests`: чужую
+    клинику и филиал не изменить и не вставить — 42501, филиал без клиники — 23503).
+11. Миграцию, ещё не влитую в master, правят свободно и пересоздают локальную базу `deploy/dev.ps1 reset-db -Force`;
+    влитую — только новой миграцией (Flyway сверяет контрольные суммы).
+
+## Новый эндпоинт
+
+Всё про эндпоинт — здесь, по порядку. Бэкенд делается первым и с тестами, фронт — по готовой спеке (dentify R002).
+Образцы в коде: `iam.web.AuditEventController` (список с фильтрами и объект по id под правом),
+`iam.web.AccountSessionController` (204 и сервис с правилами `iam.internal.AccountSessionCommands`), `iam.web.AuthController`
+(тело с Bean Validation, открытый эндпоинт).
+
+1. **Путь** — `/api/v1/<ресурс>`, объект — `/api/v1/<ресурс>/{id}`, вложенный — `/api/v1/patients/{patientId}/visits`. Путь без
+   `/v1` не попадёт в группу springdoc `v1`, а значит ни в `api/openapi.json`, ни в клиент orval. Без входа — только под
+   `/api/v1/auth/**` (сессия и пароль) или `/api/v1/public/**` (регистрация, города, приглашение; «Открытые пути
+   /api/v1/public/**»). Клиника в путь, параметры и тело не попадает — она из сессии.
+2. **DTO — `record` в пакете `web` модуля** («Соглашения API и OpenAPI»):
+   - запрос: поле без `@Nullable` обязательно и проверяется Bean Validation (`@NotNull`, `@NotBlank`, `@Size`, `@Pattern`);
+     обязательный флаг или число — обёрткой с `@NotNull` (`@NotNull Boolean rememberMe`), не примитивом; поля
+     `clinicId`/`clinic_id` нет (`TenancyRulesTests.webDtosHaveNoClinicId`, единственное исключение — выбор клиники
+     `iam.web.SelectContextRequest`); `toString` без паролей и ПД, если запрос может попасть в лог (`LoginRequest`);
+   - ответ: record с фабрикой `from(…)` из результата сервиса (`AuditEventResponse.from(AuditEntry)`), поле, которое
+     бывает null, — `@Nullable`, иначе схема скажет «всегда есть» и zod фронта отвергнет ответ;
+   - типы: id — `UUID`, момент — `Instant` или `OffsetDateTime`, дата — `LocalDate`, деньги — `BigDecimal` (в JSON —
+     строка `"12500.50"`), двуязычное — `LocalizedText`; описание — `@Schema(description, example)`, примеры вымышленные;
+   - список — параметр `PageQuery` с `@SortBy(value = { … }, defaultSort = …)` (только поля с индексом), ответ
+     `PageResponse<Row>`; растущий список — с серверным поиском `q` (dentify R001), фильтры — отдельные параметры.
+3. **Сервис с правилами** — `@Service public class …` в `internal`, транзакция на методе сервиса (`@Transactional`, чтение —
+   `readOnly = true`; просмотр с `recordView` пишет в журнал — без `readOnly`). Здесь все правила, проверки, переходы
+   статусов, расчёты, фильтры и сортировки (R002); контроллер их не повторяет, фронт не считает.
+   - Объект чужой клиники и несуществующий — одинаково `NotFoundException` (404, не 403): репозиторий с `@TenantId`
+     чужого не найдёт.
+   - Версия, которую видел клиент, — `entity.checkVersion(version)` до изменения: 409 `error.version-conflict` с автором.
+   - Уникальность и пересечения — своей проверкой со своим кодом и полем; ограничение БД — страховка на гонку,
+     `DataIntegrity.isViolation(ex, "ux_…")` переводит его в тот же ответ.
+   - Значимое изменение — в журнал в той же транзакции: `@Audited` или `AuditService.record` («Журнал действий»).
+   - Хэш пароля и ожидание Valkey — вне транзакции: она держит соединение пула («Пароли»).
+4. **Контроллер — тонкий**: `@RestController`, класс и методы без `public`, `@RequestMapping(PATH)` с константой пути.
+   Параметры → сервис → DTO; без репозиториев, сущностей JPA и `@Transactional`; ответ — record, `PageResponse` записей,
+   список записей, `ResponseEntity` или ничего (`CodingRulesTests.webLayerIsThin`). Тело — `@Valid @RequestBody`, 204 —
+   `@ResponseStatus(HttpStatus.NO_CONTENT)`. Вошедший аккаунт — `CurrentAccountProvider`, клиника — `TenantContext`.
+5. **`@PreAuthorize`** на методе или классе: вошедший — `isAuthenticated()`; право — сейчас `hasAuthority('<код>')` с
+   константой из `Permissions`, с T-IAM-07 — `@perm.has('<код>')` («Права»); открытый — `permitAll()`. Без аннотации
+   сборка падает (`CodingRulesTests.endpointsHavePreAuthorize`). Отказ — 403 `error.forbidden` с входом, 401 без входа.
+6. **Ошибки** — исключения `platform.api` с кодом модуля, никакого текста в коде: `new BusinessRuleException(
+   "schedule.backdated-edit", days)` (422), `new InvalidRequestException(FieldViolation.of("iin", "patient.iin.checksum"))`
+   (400 с полем), `ConflictException.ofFields("iam.account.phone-taken", List.of(FieldViolation.of("phone", …)), cause)`
+   (409 с полем). Текст каждого кода — в `messages.properties` под `# --- <модуль> ---` (аргументы `{0}`, апостроф —
+   двумя), тест модуля проверяет, что у кодов есть русский текст (`MessageSource`, как `iam.SignInTests` и
+   `iam.internal.AccountsTests`). ProblemDetail с `code`, `errors[]` и `traceId` собирает платформа («Ошибки API»).
+7. **OpenAPI** — на контроллере `@Tag(name = "<тег>", description = …)`: тег — папка клиента orval
+   (`endpoints/<тег>/<тег>.ts`); на каждом методе `@Operation(operationId = "<глагол><Ресурс>", summary, description)` —
+   явный и уникальный `operationId`, это имя функции и хука в клиенте (`listAuditEvents`, `terminateAccountSession`;
+   `OpenApiContractTests.operationIdsAreExplicitAndUnique`); `@Parameter` у параметров; свои ответы — `@ApiResponse`
+   (`204`, 4xx с кодом ошибки в описании). Ответы 400, 401, 403, 404, 409, 422, 429, 500 со схемой ProblemDetail и
+   `Retry-After` у 429 дописывает `platform.openapi.OpenApiConfiguration`. Тест
+   `OpenApiContractTests.exportsOpenApi31SpecToRepository` при прогоне переписывает [../api/openapi.json](../api/openapi.json):
+   файл коммитится вместе с кодом, шаг `api` в `../verify.ps1` красный, если сборка его изменила.
+8. **Строка в реестре теста изоляции** — `platform.tenancy.TenantIsolationTests`, иначе
+   `everyEndpointIsCheckedOrExplicitlyNotClinicData` падает на новом эндпоинте:
+   - ресурс клиники — `RESOURCES`: `new TenantResource("/api/v1/<ресурс>", "id", (test, session) -> Map.of("id", <id
+     объекта, созданного через API в клинике session>), Map.of())` — путь коллекции (у вложенного — с переменными
+     родителя), переменная id, как создать объект и всё, что нужно его путям; массовые действия без переменных пути — в
+     `notById` с местом проверки; право ресурса — в `member(…)` того же теста. Харнесс сам проверит, что клиника A на
+     любой метод по id объекта клиники B получает 404, объект не изменился, в списке чужих нет, `clinicId` в теле
+     игнорируется;
+   - эндпоинт без данных клиники — `NOT_CLINIC_DATA`: путь целиком и причина; открытый `/api/v1/public/…` — тоже по
+     одному пути, не `/**`.
+
+   **Ограничение харнесса сейчас:** запросы клиники A он шлёт без CSRF-токена (`TenantIsolationTests.request`), а его
+   ресурсы — пробный `/test/notes` (цепочка проб без CSRF) и `GET /api/v1/audit-events`. Первый ресурс `/api/v1` с
+   `PUT`/`PATCH`/`DELETE` получит на них 403 `error.csrf` вместо 404, и тест упадёт: эта задача добавляет харнессу
+   (запросы и `create` ресурса) пару cookie `XSRF-TOKEN` и заголовок `X-XSRF-TOKEN` (`csrfToken()`).
+9. **Интеграционный тест модуля** — наследник `AbstractIntegrationTest` («Тестовая инфраструктура»): запросы — `this.http`,
+   вход — `signIn(accountId)` (сессия с CSRF-токеном, без клиники) или `enterClinic(clinicId, accountId, права…)` (сессия
+   в клинике с правами; CSRF-токена у неё нет — изменению настоящего эндпоинта нужны cookie `XSRF-TOKEN` и заголовок
+   `X-XSRF-TOKEN` из `csrfToken()`), ошибка — `expectProblem(response, status, code)`, клиники — `clinic.TestClinics`. Проверить: правила
+   сервиса и их коды, 400 с `errors[]`, 401 без входа, 403 без права, 404 на ссылку на объект другой клиники **в теле**
+   (её харнесс изоляции не подставляет), 409 устаревшей версии, событие журнала.
+10. **Фронт** — после зелёного бэкенда: `cd frontend && pnpm api:generate` (функции, хуки TanStack Query, типы и zod-схемы
+    в `src/shared/api/generated/`, коммитятся), `pnpm typecheck`; какие запросы устаревают после изменения — правило
+    `mutationInvalidates` в `orval.config.ts`; мок — `src/shared/api/mocks/handlers.ts` по схеме спеки. Порядок —
+    [frontend.md](frontend.md), «Добавить вызов API»; отставший от спеки клиент роняет `pnpm api:check`.
+11. **Готово** — `./mvnw -B verify` и `pnpm verify` зелёные (или всё сразу — `../verify.ps1`), `api/openapi.json` и клиент
+    orval — в том же коммите.
+
+## Права и контекст
+
+### Права
+
+**Сейчас (этап 0).** В `platform.api` есть `CurrentPermissions` (есть ли право в текущей работе) и `Permissions`
+(`audit:read`, `patient:phones`). Реализация — `platform.security.SecurityCurrentPermissions`: authorities контекста Spring
+Security, их выдают только тесты (`TestAuthorities` через `enterClinic(…, права)`). Вход (`SessionAccountSignIn`) кладёт в
+сессию аккаунт без прав, ролей ещё нет — поэтому `GET /api/v1/audit-events` с `hasAuthority('audit:read')` в живом
+приложении не открыт никому.
+
+**Как права попадут в запрос на этапе 1** (решение 2026-09-26 по финальному ревью этапа 0; делают T-IAM-06 и T-IAM-07):
+
+- **Не «замораживать» в сессии.** Права не хранятся ни в `Authentication`, ни в атрибутах сессии: сессия живёт до 30
+  дней, и права в ней пережили бы смену роли администратором до нового входа, а при смене клиники остались бы правами
+  прежней клиники.
+- **Вычислять на запрос.** Эффективные права (роль ∩ филиалы членства) считаются по клинике контекста (`TenantContext`)
+  и членству аккаунта в ней — с кэшем в Valkey: ключ — `clinicId`, `membershipId` и версия роли, префикс клиники — как у
+  всего кэша клиники («Кэш»). Сброс — по событиям `RolePermissionsChanged` и `MembershipChanged` после коммита, через
+  журнал публикаций (T-PLT-14): смена роли действует со следующего запроса, без повторного входа.
+- **Перепроверка членства на каждом запросе** — тем же кэшем: нет активного членства в клинике сессии (отключено,
+  удалено) — 401 `error.clinic-not-selected`, интерфейс показывает выбор клиники.
+- **Контракты — в `platform.api`, реализация — iam.** От iam не зависит ни один модуль (`ModularityTests.ALLOWED`),
+  поэтому модули видят права только через платформу: `CurrentPermissions.has(код)` (есть), `CurrentMember` — членство и
+  сотрудник текущей работы, `ScopeFilter` — скоуп «свои / все», филиалы, склады для запросов списков. Реализации — бины
+  iam, SPI платформы; модуль импортирует только `platform.api`.
+- **На эндпоинте — бин платформы для SpEL**: `@PreAuthorize("@perm.has('patient:view')")`. Бин `perm` объявляет
+  платформа и делегирует SPI прав, который реализует iam. Ссылка `@perm` в SpEL — зависимость на этапе выполнения,
+  Modulith её не видит, поэтому бин и должен быть в платформе, а не в iam. `hasAuthority(…)` на эндпоинтах T-IAM-07
+  заменяет на `@perm`, отказ — 403 ProblemDetail с кодом права.
+- **Коды прав модуль объявляет сам** — бином SPI платформы (`PermissionContributor`: коды, подписи i18n, типы скоупа), а
+  iam собирает каталог из всех бинов (T-IAM-06). Импорт iam или «регистрация в реестре iam» из модуля — зависимость
+  модуль → iam, она запрещена (T-CLN-02 и следующие).
+- **Тесты других модулей** получают права через платформу (тестовая реализация SPI прав, как сейчас `TestAuthorities`), а
+  не аннотацией iam: тесты модулей не зависят от тестовых исходников iam.
+
+Запрещено: права в `Authentication` сессии и в любых атрибутах сессии; бин прав для SpEL в модуле iam; импорт iam из
+других модулей ради прав; `hasRole` и роли в коде — только коды прав.
+
+### Клиника запроса
+
+Клиника и филиал запроса — только из сессии: `TenantContextFilter` ставит `TenantContext` на весь запрос по атрибутам,
+которые записал `TenantSession.select` («Контекст клиники»). Пишет их только iam: вход, если у аккаунта одно активное
+членство и один доступный филиал (`AccountContexts.autoSelect`), и выбор клиники `POST /api/v1/me/context`
+(`AccountContexts.select`) — клиника ищется в своих активных членствах, чужая — 404 («Выбор клиники»). Клиники нет —
+обращение к данным клиники даёт 401 `error.clinic-not-selected`. Модуль клинику не выбирает и не читает из запроса: только
+`TenantContext.clinicId()`. Переключатель филиала в шапке и «сегодня» в поясе клиники — T-PLT-17.
+
+### Завершение сессий по клинике
+
+`AccountSessions.terminateInClinic(accountId, clinicId)` (`platform :: identity`) гасит сессии аккаунта, в которых выбрана
+эта клиника, — каждую отметкой отзыва и удалением, как `terminate`; работа того же человека в других клиниках и сессии без
+клиники остаются (`AccountSessionsTests.serviceTerminatesOnlySessionsOfOneClinic`). Вызывает iam при отключении членства
+(T-IAM-11) **после коммита**, как `terminateAll`/`terminateOthers` при деактивации и смене пароля. Сессия, в которой клинику
+выбирают одновременно с отключением, этим вызовом не гаснет — окно закрывает перепроверка членства на каждом запросе
+(T-IAM-07, выше). Прямой `FindByIndexNameSessionRepository` и `deleteById` в iam запрещены: без отметки отзыва запрос в полёте
+оживит сессию («Активные сессии»). Запись в сессию и `invalidate()` вне platform и iam ловит
+`TenancyRulesTests.sessionIsWrittenOnlyByPlatformAndIam`.
+
+### Открытые пути /api/v1/public/**
+
+- Без входа открыты только два префикса (`SecurityConfiguration.publicPaths`): `/api/v1/auth/**` — механика сессии
+  (вход, выход, CSRF-токен, сброс пароля) и `/api/v1/public/**` — открытые ресурсы до входа: регистрация клиники
+  (`POST /api/v1/public/registrations`, T-CLN-05), города её формы (`GET /api/v1/public/cities`), приглашение по ссылке
+  (`GET /api/v1/public/invitations/{token}`, `POST …/accept`, T-IAM-13). Плюс `/error` и, где springdoc включён (dev,
+  test), `/v3/api-docs/**` и Swagger UI. Эндпоинтов под `/api/v1/public` пока нет. Других открытых префиксов не заводить.
+- Открытый эндпоинт всё равно с `@PreAuthorize("permitAll()")`, CSRF (изменяющий запрос без `X-XSRF-TOKEN` — 403
+  `error.csrf`) и общим лимитом API по IP. Неизвестный путь под открытыми префиксами — 404 и без входа (а не 401).
+- В `TenantIsolationTests.NOT_CLINIC_DATA` открытый эндпоинт записывается **путём целиком, по одному, с причиной**: данные
+  клиники под `/api/v1/public` бывают (приглашение по токену), поэтому `/**` там не годится; изоляцию по токену проверяет
+  тест модуля.
+- Клиника открытому эндпоинту неизвестна (сессии нет): если он пишет данные клиники (регистрация), клинику ставит сам
+  сервис — `TenantContext.run(Tenant.of(id), …)` с id, известным до вставки («Таблица арендатора»: корень арендатора).
+
+## Правила кода
+
+### Логи
+
+Правила для кода (PLT-10):
+
+- В логи не пишем ПД: ни ФИО, ни ИИН, ни телефон, ни e-mail, ни адрес. Только идентификаторы
+  (`clinicId`, `accountId`, `patientId`) и коды. Тела запросов и сущности или DTO пациента целиком
+  (`log.info("{}", patient)`) не логируем; у record с паролем или ПД — свой `toString` без значений (`LoginRequest`,
+  `NewAccount`).
+- Маскирование — защитная сетка, а не разрешение. `platform.logging.PiiMaskingJsonMembersCustomizer`
+  прогоняет каждое значение JSON-лога (сообщение, исключение, MDC, key-value любого типа) через
+  `PiiMasker`: ИИН (12 цифр и 4-4-4), e-mail (включая кириллические), телефоны — `+7`/`7`/`8` и 10 цифр
+  или местный номер из 10 цифр на 7 с любой группировкой (`+77071234567`, `8 707 123 45 67`,
+  `8 (7172) 55-66-77`, `7071234567`), в том числе URL-кодированные (`%2B7%20707…`, `8+707+123…`).
+  Точка и подчёркивание номер не разделяют, поэтому даты, суммы и версии миграций (`2026.10.01.1200`) целы.
+- **Маска по ключам**: ключ MDC или key-value, в имени которого есть `name`, `phone`, `iin`, `email`, `address`, `birth`,
+  `patronymic` или `fio` (`PiiMaskingJsonMembersCustomizer.PERSONAL_KEY_PARTS`; без учёта регистра, в любом месте:
+  `patientFullName`, `doctorLastName`, `patientBirthDate`, `contact_phone`, `ipAddress`), маскируется целиком, как бы ни
+  выглядело значение. Исключение — собственные поля форматов (`FORMAT_FIELDS`: `service.name`, `service.node.name`,
+  `process.thread.name`, `logger_name`, `thread_name`, `_process_thread_name`, `_level_name`). Поэтому технические значения
+  пишем под ключами без этих слов: `module`, `file`, `bucket`, а не `moduleName`, `fileName`, `bucketName`.
+- ФИО в свободном тексте регулярным выражением не найти, поэтому маски для него нет. ФИО в логах —
+  нарушение правила выше, а не пробел маски.
+- Ошибки PostgreSQL приходят без значений строки: у драйвера `logServerErrorDetail: false` (раздел «Ошибки API»).
+  Без этого Hibernate писал бы в лог WARN `Failing row contains (…)` со всеми полями строки, включая ФИО.
+- Писать только через SLF4J. `System.out`, `System.err` и `printStackTrace()` идут мимо маски — их
+  запрещает ArchUnit-тест `CodingRulesTests.logsOnlyThroughLogger`.
+- Маска работает только в структурированном формате. Он задан для консоли и для файла
+  (`logging.structured.format.console/file: ecs`), JSON всегда в UTF-8 (`logging.charset.console`). В каждой строке —
+  `traceId` (он же в ProblemDetail) и внутри контекста клиники — `clinicId` (MDC).
+- Пароль, токен ссылки, id сессии и CSRF-токен не пишутся никогда, даже маской («Безопасность и сессии»).
+
+Проверяют `platform.logging.PiiMaskerTests`, `StructuredLogMaskingTests` (настоящий энкодер ECS Spring Boot: сообщение,
+исключение, MDC, key-value и маска по ключам) и `platform.TraceIdLoggingTests` (лог запроса через пробный
+`platform.LogProbeController` — JSON с `traceId` и без ПД).
+
+### Деньги
+
+- В БД — `numeric(12,2)` в тенге, в Java — `BigDecimal`; `float`/`double` для денег не используются («Колонки»).
+- В JSON — десятичной строкой `"12500.50"` (`platform.web.JsonConventions`; в запросе принимается и число), в OpenAPI —
+  `type: string, format: decimal` (`OpenApiContractTests.decimalsAreDocumentedAsStrings`), на фронте — строка, которую
+  показывают, а не пересчитывают.
+- Суммы сравниваются по значению (`compareTo`, а не `equals`: `12500.50` и `12500.5` — одна сумма); так же их сравнивает
+  разница журнала (`AuditDiff`).
+- Итоги, скидки, остатки и цены считает сервис (R002), фронт выводит ответ.
+
+### Время и пояс клиники
+
+- **Момент времени** — `timestamptz` в БД (хранится в UTC), `Instant` в Java (или `OffsetDateTime`, где важен пояс в
+  ответе), ISO 8601 в JSON. `timestamp without time zone` и `LocalDateTime` для моментов не используются. Приложение
+  пишет моменты с точностью до микросекунд, как хранит PostgreSQL (аудит сущностей, `audit_log`).
+- **Календарная дата** (дата рождения, дата смены) — `date` / `LocalDate`; **время суток по расписанию** — `time` /
+  `LocalTime`. В момент их переводит пояс клиники.
+- **Пояс клиники** — свойство клиники: колонку `timezone` добавляет T-CLN-01 (сейчас в `clinic` только название и город).
+  «Сегодня», границы дня, смены и сетка расписания считаются на сервере в поясе клиники, а не в поясе JVM, сервера БД или
+  браузера (R002); «сегодня» и пояс для шапки каркаса — T-PLT-17 (в шапке фронта пока заглушка). `LocalDate.now()` и
+  `ZoneId.systemDefault()` для данных клиники не использовать; текущее время — через `Clock`, который можно подменить в
+  тесте (так сделаны `SessionLifetimeFilter` и `RedisAccountSessions`).
+- **Технические сроки** — в UTC: сроки сессий и лимитов, границы помесячных партиций `audit_log` (полночь UTC), задача
+  партиций (`@Scheduled(…, zone = "UTC")`).
+- Журнал действий показывает момент в тексте разницы в ISO 8601; пояс клиники в текстах журнала появится с модулем clinic
+  («Журнал действий», «Тексты»).
+
+### Тексты и i18n (dentify R003)
+
+- Пользовательских строк в Java-коде нет: ошибки — коды и `MessageSource` («Ошибки API»), тексты журнала — ключи
+  `audit.*` («Журнал действий», «Тексты»), письма (T-PLT-14) — шаблоны на языке получателя. Описания в `@Schema` и
+  `@Operation` — документация API, а не интерфейс.
+- Русский — базовый `messages.properties` (не `messages_ru`), казахский — `messages_kk.properties` с теми же ключами
+  позже; язык запроса выбирает `DentifyLocaleResolver`, казахский выключен флагом `dentify.i18n.kk: false` (фронт —
+  `VITE_I18N_KK`, переключатель «Қаз» скрыт).
+- Двуязычные значения справочников — `LocalizedText {ru, kk}` в одной колонке `jsonb`, а не `name_ru`/`name_kk`.
+- Проверяют `platform.MessagesTests` (тексты кодов платформы и ограничений Jakarta, лишних ключей в переводах нет), тесты
+  модулей (тексты своих кодов, `AuditFieldLabels.missing` для полей снимков) и `LocalizationTests` (казахский включается
+  словарём и флагом без правок кода). Подробно — «Сообщения и i18n», фронт — [frontend.md](frontend.md), «i18n».
+
+## ADR
+
+Архитектурные решения: контекст, решение, последствия. Решение меняет только владелец; новое — сюда же следующим
+номером, пересмотр — новой записью со ссылкой на прежнюю.
+
+### ADR-1. Сессия в cookie, а не JWT
+
+- **Контекст.** SPA и API на одном origin (Caddy: `/api` → бэкенд, остальное → SPA). Деактивация сотрудника и смена
+  пароля должны гасить доступ сразу, «завершить все сессии» — со следующего запроса с любого устройства (PLT-04), нужен
+  список активных сессий с принудительным выходом (IAM), «Запомнить устройство» на 30 дней. JWT в `localStorage`
+  доступен любому XSS и до истечения срока не отзывается без собственного списка отзыва, то есть всё равно без
+  серверного состояния не обойтись.
+- **Решение** (план MVP, 2026-09-24; PLT-04). Серверная сессия Spring Session в Valkey (индексированное хранилище, индекс
+  по id аккаунта), cookie `DENTIFY_SESSION` — `HttpOnly`, `Secure`, `SameSite=Lax`; CSRF — `csrf.spa()` Spring Security 7
+  (cookie `XSRF-TOKEN` → заголовок `X-XSRF-TOKEN`); вход и выход — только `AccountSignIn` (смена id сессии и CSRF-токена).
+  JWT и токенов в `localStorage`/`sessionStorage` нет, CORS выключен.
+- **Последствия.**
+  - Valkey — на пути каждого запроса: загрузка сессии и `MGET` отметок отзыва; Valkey недоступен — запрос падает (отказ
+    закрыт). Таймауты Valkey — 3 с.
+  - Отзыв мгновенный и необратимый — отметки отзыва (`SessionRevocations`; после завершения — 401 с любого устройства
+    быстрее 5 секунд, `AccountSessionsTests`), срок от входа держит `SessionLifetimeFilter`; завершение — только через
+    `AccountSessions` («Активные сессии»).
+  - Каждый изменяющий запрос несёт CSRF-токен — это делает мутатор фронта сам (frontend.md, «API-клиент»).
+  - В сессии только классы JDK и Spring: сессии переживают деплой. Права в сессии не хранятся (ADR-2).
+  - В managed Valkey `CONFIG` закрыт: `notify-keyspace-events Egx` задаётся в настройках кластера (T-PLT-25).
+  - В dev cookie тоже `Secure`: браузер шлёт её на `http://localhost`, но не на `127.0.0.1` — адреса стенда e2e и ручных
+    проверок — `localhost`.
+
+### ADR-2. Роли со скоупами, в коде — только коды прав
+
+- **Контекст.** В macdent права — поштучная матрица на человека. Клиникам нужны шаблоны ролей (Владелец, Администратор,
+  Врач, Ассистент, Кладовщик), свои роли и ограничения по области: врач видит только своих пациентов и записи, сотрудник —
+  только свои филиалы, кладовщик — свои склады; отдельные права вроде `patient:phones` (клиники прячут контакты от врачей)
+  и `medical:read|write`.
+- **Решение** (план MVP, §3.2; детали — 2026-09-26, «Права»). Право — код «раздел:действие» из дерева прав со **скоупом**
+  (свои / все, филиалы, склады); роль — набор прав со скоупами, шаблоны и свои, у исключения — персональная роль на
+  одного человека. Членство — аккаунт в клинике с ролью и филиалами. Эффективные права = роль ∩ филиалы членства,
+  считаются на запрос по клинике контекста, с кэшем и сбросом по событиям. В коде проверяются только коды прав
+  (`@perm.has(…)`, `CurrentPermissions`), никогда `hasRole` и названия ролей.
+- **Последствия.**
+  - Каталог прав собирается из модулей (`PermissionContributor`), контракты `CurrentMember` и `ScopeFilter` — в
+    `platform.api`, реализация — iam: ни один модуль не зависит от iam (T-IAM-06, T-IAM-07).
+  - Скоуп «свои» фильтрует запросы списков на сервере (`ScopeFilter`), а не прячет строки на фронте (R002).
+  - Смена роли действует со следующего запроса, без нового входа; членство проверяется на каждом запросе.
+  - На каждый эндпоинт — тест прав: без права 403, со скоупом «свои» — только свои (критерий фазы в плане MVP).
+  - До T-IAM-07 права выдают только тесты (`TestAuthorities`), и журнал действий в живом приложении закрыт для всех.
+
+### ADR-3. RLS в PostgreSQL с этапа 0
+
+- **Контекст.** Данные всех клиник — в одной базе (PLT-01). По плану RLS включали на пилоте (фаза 6), но промах в одном
+  запросе (нативный SQL, `JdbcTemplate`, забытый контекст в фоновой задаче) отдал бы чужие медданные, а включать RLS
+  поверх готовых модулей и данных дороже, чем заложить сразу.
+- **Решение** (2026-09-25; T-PLT-03, PLT-02). Три рубежа: `TenantContext` в приложении (без него репозиторий падает),
+  Hibernate `@TenantId` (`TenantEntity`), RLS — `ENABLE` + `FORCE` и политика `tenant_isolation` по
+  `current_clinic_id()` в той же миграции, что таблица. `app.clinic_id` ставится при каждой выдаче соединения из пула
+  (`ClinicConnectionDataSource`), а не в начале транзакции: к данным ходят и без транзакции. Приложение ходит ролью
+  `dentify_app` без `BYPASSRLS`, «корневого» арендатора нет.
+- **Последствия.**
+  - +1 запрос `set_config` на каждую выдачу соединения; замер p95 с RLS и без — T-PLT-24 (приёмка PLT-02 открыта).
+  - Миграции с данными — только по рецепту «Миграции с данными при FORCE RLS», иначе 0 строк молча.
+  - Чтение поверх границы клиник — только зарегистрированной политикой `FOR SELECT` (`own_memberships` для выбора
+    клиники), межклиничные задачи — отдельной ролью БД с обоснованием.
+  - Соединения — только через бин `DataSource` приложения (ArchUnit), старт проверяет роль (`ApplicationRoleCheck`),
+    тест каталога — каждую таблицу с `clinic_id` (`RowLevelSecurityTests`).
+
+### ADR-4. Медкарта — отдельный модуль medical
+
+- **Контекст.** Медданные (медблок, зубная формула, медзаписи с МКБ-10) — под врачебной тайной (Кодекс «О здоровье
+  народа…», ст. 273): доступ только в рамках обязанностей, отдельное право, аудит просмотров, хранение 10 лет у взрослых
+  и 15 у детей. Внутри patient они смешались бы с ПД и правами регистратуры, внутри schedule — с записями.
+- **Решение** (2026-09-25). Отдельный модуль `medical` → patient, schedule, clinic (`patient :: api`, `schedule :: api`,
+  `clinic :: api`); от medical не зависит никто.
+- **Последствия.**
+  - Свои права `medical:read|write` и граница модуля совпадают: доступ к медданным проверяется в одном месте.
+  - Просмотр медкарты пишется в журнал (`AuditService.recordView` с типом `medical.card` — не чаще одного события на
+    аккаунт и пациента за 15 минут), метод «открыть медкарту» — транзакционный без `readOnly` («Просмотры, выгрузка,
+    печать»).
+  - Справочник МКБ-10 — глобальная таблица модуля medical (`TenancyRulesTests.GLOBAL_ENTITY_MODULES`).
+  - patient и schedule медданных не видят; экран, которому нужны и пациент, и медкарта, берёт их из двух API.
+  - Медданные не удаляются физически — только архив (`archived_at`), журнал и его партиции хранятся не меньше их срока.
+
+### ADR-5. Интерфейс MVP только на русском, но готов к переводу
+
+- **Контекст.** Пилот — клиника владельца, русскоязычный интерфейс; справочники и печать нужны двуязычные, как в macdent;
+  казахский интерфейс — после MVP (PLT-34). Перевести готовый код, где строки зашиты в JSX и Java, дороже, чем сразу
+  писать ключи.
+- **Решение** (2026-09-25, dentify R003). Ни одной пользовательской строки в коде: UI — ключи i18n (RU-словарь), бэкенд —
+  коды ошибок и `MessageSource` (`messages.properties` — русский, базовый файл), двуязычные поля справочников —
+  `LocalizedText {ru, kk}`. Переключатель «Қаз» скрыт флагом (`dentify.i18n.kk`, `VITE_I18N_KK`).
+- **Последствия.**
+  - Проверки в сборке: `MessagesTests` и тесты модулей на бэкенде, ESLint `i18next/no-literal-string` и `pnpm i18n:check`
+    на фронте (в том числе кириллица мимо словаря где угодно в коде).
+  - Включить казахский = положить словари (`messages_kk.properties`, `locales/kk/*.json`) и включить флаг, без правок
+    кода (`LocalizationTests`, `i18n.test.tsx`).
+  - Даты, числа и склонения — по языку (date-fns, ICU); фразы из частей в коде не склеиваются.
+
+### ADR-6. Разработка локальная, без облачного CI до T-PLT-25
+
+- **Контекст.** Один разработчик и Claude Code, стенда и прода нет до развёртывания в РК (T-PLT-25); PLT-23 и PLT-26
+  требуют, чтобы конвейер ловил отставший клиент, ломающие изменения спеки, уязвимости и секреты.
+- **Решение** (2026-09-25). Всё, что проверял бы конвейер, запускается локально одной командой: `./verify.ps1`
+  (bash — `verify.sh`) — окружение, `./mvnw -B verify`, спека (`api/openapi.json` не изменился после сборки),
+  `pnpm verify`; `-E2E` — Playwright на живом стеке, `-Scan` — OWASP dependency-check, `pnpm audit`, gitleaks (README,
+  «Проверка перед коммитом»). Облачный CI, стенд и прод — T-PLT-25.
+- **Последствия.**
+  - «CI падает» из приёмки PLT-23 сейчас означает красный шаг `api` или `pnpm api:check` в `verify`; openapi-diff на
+    ломающие изменения спеки — ещё нет (T-PLT-25).
+  - Эталоны скриншотов Playwright — только Windows (ОС в имени файла); для Linux-CI понадобятся свои.
+  - Настройки managed-сервисов записаны заранее как требования к T-PLT-25: `notify-keyspace-events` Valkey («Сессия»),
+    точный адрес прокси `DENTIFY_TRUSTED_PROXIES` («Лимиты частоты»), `search_path` и атрибуты роли приложения («Роли и
+    права»), TLS и `sslmode=verify-full` ([data-residency.md](data-residency.md), «Стенд и прод»).
+  - Готовность задачи = зелёный локальный `verify` (или `./mvnw verify` и `pnpm verify` по отдельности).
+
+### Другие решения
+
+Записаны в разделах, где действуют:
+
+| Решение | Дата | Где |
+|---|---|---|
+| одна история Flyway на схему, модульные миграции Modulith не включать | 2026-09-25 | «Одна история миграций, а не модульные миграции Modulith» |
+| id — UUIDv7 от Hibernate (`@UuidGenerator(style = VERSION_7)`), `DEFAULT uuidv7()` — для SQL | 2026-09-25 | «Сущности» |
+| `set_config` при каждой выдаче соединения, а не на транзакцию | 2026-09-25 | «RLS и соединения» |
+| сессия без «Запомнить» — тоже не дольше 30 дней от входа | 2026-09-25 | «Сессия» |
+| период ленты журнала задаёт сервер; IP в журнале — маской для всех ролей | 2026-09-25 | «Журнал действий» |
+| журнал входов `auth_event` — глобальная таблица без RLS | 2026-09-26 | «Журнал входов `auth_event`» |
+| права не хранятся в сессии, вычисляются на запрос | 2026-09-26 | «Права» |
+| журнал публикаций событий — JDBC Modulith, переотправка задачей под ShedLock | план T-PLT-14 | «Журнал публикаций» |
+| живой стек e2e входит dev-сидом, а не своим профилем | 2026-09-27 | frontend.md, «Тесты» |
+
+## Справочник
+
+Разделы ниже — механизмы платформы и iam: как работают, почему так, какие тесты их держат и что запрещено. Шаги «Как
+строить» ссылаются сюда по имени раздела.
 
 ## Миграции
 
@@ -214,36 +851,8 @@
   CHECK`: клиника видит и пишет только саму себя, списка всех клиник у приложения нет. Новую клинику вставляют в
   контексте её же id (id известен до вставки). Реестр корней — `RowLevelSecurityTests.TENANT_ROOT_TABLES`.
 
-Шаблон (проверен на PostgreSQL 18.6: без контекста клиники строк не видно, чужая клиника строк не видит, вставка
-с чужим `clinic_id` отклоняется политикой; по нему создана тестовая таблица `test_note`, на которой это проверяют
-`RowLevelSecurityTests` и `TenantIsolationTests`):
-
-```sql
--- db/migration/clinic/V2026_10_01_1200__clinic_create_branch_chair.sql (пример)
-CREATE TABLE chair (
-    id          uuid        NOT NULL DEFAULT uuidv7(),
-    clinic_id   uuid        NOT NULL,
-    branch_id   uuid        NOT NULL,
-    name        text        NOT NULL CHECK (length(name) BETWEEN 1 AND 100),
-    sort        integer     NOT NULL DEFAULT 0,
-    archived_at timestamptz,
-    created_at  timestamptz NOT NULL DEFAULT now(),
-    created_by  uuid,
-    updated_at  timestamptz NOT NULL DEFAULT now(),
-    updated_by  uuid,
-    version     bigint      NOT NULL DEFAULT 0,
-    CONSTRAINT pk_chair PRIMARY KEY (id),
-    CONSTRAINT ux_chair_clinic_id UNIQUE (clinic_id, id),
-    CONSTRAINT fk_chair_branch FOREIGN KEY (clinic_id, branch_id) REFERENCES branch (clinic_id, id)
-);
-CREATE INDEX ix_chair_clinic_branch ON chair (clinic_id, branch_id);
-
-ALTER TABLE chair ENABLE ROW LEVEL SECURITY;
-ALTER TABLE chair FORCE ROW LEVEL SECURITY;
-CREATE POLICY tenant_isolation ON chair
-    USING      (clinic_id = current_clinic_id())
-    WITH CHECK (clinic_id = current_clinic_id());
-```
+Шаблон миграции и порядок шагов — «Новая таблица арендатора» (шаблон проверен на PostgreSQL 18.6 и тестовой таблицей
+`test_note`). Правила политики:
 
 - Политика — ровно такая: одна разрешающая политика на все команды для всех ролей, выражение
   `clinic_id = current_clinic_id()` в `USING` и в `WITH CHECK`. Другое выражение или вторая разрешающая политика
@@ -909,6 +1518,204 @@ T-PLT-25.
   скользящим окном `RedisRateLimiter`;
 - ослаблять `Secure`, `HttpOnly` или `SameSite=Lax` у cookie сессии.
 
+## Ошибки API
+
+Любая ошибка API — `ProblemDetail` по RFC 9457 с типом `application/problem+json` (PLT-07):
+
+```json
+{
+  "status": 400, "title": "Некорректный запрос", "detail": "Проверьте правильность заполнения полей.",
+  "instance": "/api/v1/patients", "code": "error.validation", "traceId": "6ab649e81eab0751a95cfa72057a10af",
+  "errors": [ { "field": "iin", "code": "patient.iin.checksum", "message": "Неверная контрольная сумма ИИН." } ]
+}
+```
+
+- `code` — машинный код и одновременно ключ текста в `messages.properties`. `detail`, `title` и
+  `errors[].message` — тексты из `MessageSource` на языке запроса, в коде их нет. `traceId` — тот же, что в
+  JSON-логах этого запроса: пользователь сообщает его поддержке. `errors[]` есть, только если ошибка про поля.
+  Поле `type` Spring не пишет, когда оно `about:blank`; по RFC 9457 отсутствие поля и означает `about:blank`.
+- Как устроено (`platform.web`): `ProblemDetailsExceptionHandler` (`@RestControllerAdvice`, наследник
+  `ResponseEntityExceptionHandler` Spring) ловит исключения контроллеров; `ProblemErrorController` заменяет
+  `BasicErrorController` Boot и так же отвечает на всё, что Boot пересылает на `/error` (исключение или
+  `sendError` в фильтре). Тело собирает `ProblemFactory`.
+- `instance` — путь запроса, и у ошибок из фильтров тоже: исходный путь, а не `/error`. `errors[].field` — путь поля
+  (`iin`, `tags[1]`, `title.ru`) или `null`, если ошибка про всю форму (ограничение класса).
+- ERROR в лог пишется только с исключением. `sendError` с 5xx без исключения — WARN. Прямой запрос на `/error` (без
+  пересылки ошибки) — 404 без записи в лог, иначе любой клиент засыпал бы лог и поднял алерты. Неизвестный путь — тоже
+  404 без записи: WARN Spring MVC `PageNotFound` «No mapping for …» выключен
+  (`logging.level.org.springframework.web.servlet.PageNotFound: error`, `ProblemDetailsTests.notFoundForUnknownPath`).
+
+| Статус | Откуда | `code` |
+|---|---|---|
+| 400 | Bean Validation тела (`@Valid`), параметров (`@RequestParam @Max(100)`) и методов сервисов (`@Validated`, поле — путь внутри объекта или имя параметра), нет параметра, неверный тип, нечитаемый JSON, `InvalidRequestException` | `error.validation` с `errors[]`; `error.malformed-body` |
+| 401 | нет входа (цепочка Spring Security, `@PreAuthorize` без входа, `UnauthorizedException`); cookie сессии есть, а сессии нет — истекла или завершена; обращение к данным клиники без клиники в сессии (`MissingTenantContextException`) | `error.unauthorized`, `error.session-expired`, `error.clinic-not-selected` |
+| 403 | `ForbiddenException`, отказ `@PreAuthorize` с входом; изменяющий запрос без CSRF-токена или с чужим | `error.forbidden`, `error.csrf` |
+| 404 | `NotFoundException`; `EntityNotFoundException` JPA и `ObjectRetrievalFailureException` Spring (ссылка на запись, которой нет или которую скрыла RLS); неизвестный путь; прямой запрос на `/error` | `error.not-found` |
+| 405, 406, 413, 415 | стандартные исключения Spring MVC; заголовки `Allow` и `Accept` сохраняются; тело — ProblemDetail, даже если клиент просил не JSON | `error.method-not-allowed` и т. д. |
+| 409 | `ConflictException`; конфликт `@Version` (Hibernate отклонил устаревшую версию или `checkVersion` в сервисе) — с полями `modifiedAt`, `modifiedBy`, `modifiedByName`; в БД — уникальность (SQLSTATE 23505), внешний ключ (23503), EXCLUDE (23P01) | `error.conflict`, `error.version-conflict`, `error.duplicate` (уникальность) |
+| 422 | `BusinessRuleException` | код правила модуля |
+| 429 | `TooManyRequestsException`, заголовок `Retry-After`: общий лимит API, лимиты входа и сброса пароля | `error.too-many-requests`, `error.too-many-login-attempts` |
+| 500 | всё остальное: в ответе только общий текст и `traceId`, исключение — в лог ERROR с тем же `traceId`. Сюда же NOT NULL, CHECK, длина значения и прочие ограничения БД: значит, сервис пропустил проверку входных данных, это дефект, а не конфликт | `error.internal` |
+
+Ошибки БД и ПД: в тексте ошибки PostgreSQL есть значения строки (`Key (iin)=(…) already exists`, `Failing row contains
+(…)`), а Hibernate пишет этот текст в лог WARN. Поэтому у драйвера выключены подробности сервера
+(`spring.datasource.hikari.data-source-properties.logServerErrorDetail: false`, настройка PgJDBC): в исключениях и логах
+остаются только сообщение, SQLSTATE и имя ограничения. Обработчик тоже пишет в лог только SQLSTATE и имя ограничения
+или колонки. Проверено на настоящих нарушениях через JPA (`DatabaseProblemsTests`).
+
+Как пользоваться в модуле:
+
+- Бросать исключения платформы из `platform.api` с кодом модуля:
+  `throw new BusinessRuleException("schedule.backdated-edit", days)`, `throw new NotFoundException()`. Код и
+  текст — в `messages.properties`, аргументы — `{0}`, `{1}`. Иерархия запечатана (`sealed`): статус задаёт класс,
+  свои исключения модуля наследуют один из них (`PatientNotFoundException extends NotFoundException`).
+- Ошибку поля, которую нашёл сервис, передавать нарушением:
+  `throw new InvalidRequestException(FieldViolation.of("iin", "patient.iin.checksum"))`. Конфликт, привязанный к полю
+  (телефон уже занят), — `ConflictException.ofFields("iam.account.phone-taken", List.of(FieldViolation.of("phone",
+  …)), cause)`: 409 с `errors[]`.
+- Код ошибки поля Bean Validation: своё сообщение-ключ (`@Pattern(message = "{patient.iin.format}")` или шаблон из
+  валидатора) — код равен ключу; стандартное ограничение — `validation.<аннотация-через-дефис>`
+  (`validation.not-blank`, `validation.size`), текст — по ключу Jakarta
+  `jakarta.validation.constraints.NotBlank.message` с плейсхолдерами Hibernate Validator `{min}`, `{max}`,
+  `{value}`. Текст подставляет Spring Boot из `MessageSource` на языке запроса.
+- Общие коды — `ErrorCodes`, коды модулей — `<модуль>.<что>`, например `patient.iin.checksum`.
+- Уникальность сервис проверяет сам и отвечает своим кодом с полем, ограничение БД — страховка на гонку. Сработавшее
+  ограничение переводится в тот же ответ по имени — `DataIntegrity.isViolation(ex, "ux_account_phone")`
+  (`platform.api`), а не своим разбором цепочки причин. Отпечатки SHA-256 (токены, ключи Valkey) — `Hashes`, IP —
+  `IpAddresses` (`platform.api`); свои копии не писать.
+
+Запрещено:
+
+- текст ошибки в коде: `ResponseStatusException(…, "Пациент не найден")`, `ResponseEntity.badRequest().body("…")`,
+  своё тело ошибки вместо ProblemDetail;
+- ловить исключение в контроллере, чтобы вернуть текст или 200 с ошибкой;
+- класть ПД в аргументы сообщений: сообщение исключения — только код, но текст с аргументами уходит пользователю;
+- отвечать 403 на объект чужой клиники — только 404, чтобы не выдать, что объект есть;
+- полагаться на NOT NULL и CHECK в БД вместо проверки входных данных: такое нарушение — 500 и ERROR. Проверять в DTO
+  (Bean Validation) или в сервисе (`InvalidRequestException`, `BusinessRuleException`). Уникальность и пересечения
+  сервис тоже проверяет сам со своим кодом, ограничение БД — страховка на гонку;
+- бросать исключения платформы из фильтров там, где можно ответить: Tomcat пишет их в лог ERROR. Фильтр отдаёт ошибку
+  через `HandlerExceptionResolver` (`resolver.resolveException(request, response, null, ex)`), тогда её обработает
+  тот же `@RestControllerAdvice`.
+
+Отказы Spring Security — тот же ProblemDetail: фильтры отдают их через `HandlerExceptionResolver`
+(`platform.security.ProblemSecurityHandler` — `AuthenticationEntryPoint` и `AccessDeniedHandler`), а отказ
+`@PreAuthorize` в методе ловит `ProblemDetailsExceptionHandler` (`AccessDeniedException` — 401 без входа, 403 с входом;
+`AuthenticationException` — 401). Язык ответов из фильтров ставит `LocaleContextFilter` в начале цепочки тем же
+`DentifyLocaleResolver`, что у DispatcherServlet (раздел «Безопасность и сессии»).
+
+## Соглашения API и OpenAPI
+
+Все модули работают через REST `/api/v1` (PLT-23):
+
+- **Путь — всегда `/api/v1/<ресурс>`**: `/api/v1/patients/{id}`, `/api/v1/clinic/settings`, `/api/v1/me`. Путь без
+  `/v1` не попадёт в группу springdoc `v1` (`pathsToMatch("/api/v1/**")`), а значит ни в `api/openapi.json`, ни в клиент
+  orval. Пути в `backlog.json` выровнены 2026-09-26.
+- **Открытые без входа пути — только два префикса**: `/api/v1/auth/**` (механика сессии) и `/api/v1/public/**`
+  (открытые ресурсы до входа), в `SecurityConfiguration.publicPaths`; CSRF, лимит API по IP, `permitAll()` и запись в
+  `NOT_CLINIC_DATA` путём целиком — «Открытые пути /api/v1/public/**». Другие открытые префиксы не заводить.
+- **operationId — явный** в `@Operation(operationId = "<глагол><Ресурс>")`: `listAuditEvents`, `getAuditEvent`,
+  `terminateAccountSession`. Это имя хука и функции в клиенте orval; без него springdoc берёт имя метода и при совпадении
+  дописывает `_1`, `_2` по порядку контроллеров — имена в клиенте менялись бы от нового контроллера
+  (`OpenApiContractTests.operationIdsAreExplicitAndUnique`: явный у каждого эндпоинта `/api/v1`, уникальный, без `_N`).
+
+- DTO запросов и ответов — `record` в пакете `web` модуля. Пакеты `@NullMarked`, и схему OpenAPI по `@Nullable`
+  уточняет `RecordRequiredPropertiesConverter`:
+  - компонент без `@Nullable` всегда есть в JSON и не null: в схеме он обязательный. Входящие поля без `@Nullable`
+    проверяются `@NotNull` или `@NotBlank`. Обязательный флаг или число запроса — обёрткой с `@NotNull` (`@NotNull Boolean
+    rememberMe`), а не примитивом: без поля Jackson 3 не заполнит примитив, и ответ был бы `validation.type-mismatch`
+    «Неверный формат значения» вместо `validation.not-null` «Заполните поле»;
+  - компонент с `@Nullable` Jackson пишет как `null` (`{"ru": "…", "kk": null}`, `"field": null`): в схеме он
+    необязательный и допускает null — в OpenAPI 3.1 `type: [string, "null"]`, у ссылки на схему
+    `oneOf: [{$ref}, {type: "null"}]`. orval даёт `kk?: string | null`, zod-схема принимает и null, и отсутствие поля.
+    Проверяет `OpenApiContractTests.nullableRecordComponentsAllowNull`.
+- id — UUIDv7 строкой; даты и время — ISO 8601 (`OffsetDateTime` с поясом, `Instant` в UTC, `LocalDate`); деньги и
+  все `BigDecimal` — десятичной строкой `"12500.50"` (`JsonConventions`, в запросе принимается и число). Двуязычные
+  поля — `LocalizedText {ru, kk}`.
+- Список — `PageResponse<T> {items, page, size, total}`, параметры — `PageQuery`:
+
+  ```java
+  @GetMapping
+  PageResponse<PatientRow> list(@SortBy(value = { "lastName", "createdAt" }, defaultSort = "lastName") PageQuery query) {
+      return PageResponse.of(this.patients.search(query.q(), query.pageable()), PatientRow::from);
+  }
+  ```
+
+  `page` — с 0, по умолчанию 0, смещение `page × size` не больше 2 147 483 647 (JPA принимает его как `int`, иначе
+  Spring Data бросил бы исключение и был бы 500) — дальше 400 по полю `page`; `size` — от 1, по умолчанию 25
+  (PLT-22), больше 100 — вернётся 100, это не ошибка; `sort=lastName,-createdAt` или повтором параметра, минус — по убыванию, только поля из `@SortBy` (у них
+  должен быть индекс); `q` — строка поиска без крайних пробелов, пустая — `null`, длиннее 100 символов — 400. Все
+  ошибки параметров — разом, одним 400 с `errors[]`. Разбирает `PageQueryArgumentResolver`. Фильтры — отдельные
+  параметры эндпоинта.
+
+Спецификация OpenAPI 3.1 (springdoc 3.1.1, собран против Boot 4.1):
+
+- группа `v1` — пути `/api/v1/**`, адрес `/v3/api-docs/v1`. Спецификация включена в dev и test, в prod выключена;
+- Swagger UI (`http://127.0.0.1:8080/swagger-ui.html`) — только локально. В основной зависимости только
+  `springdoc-openapi-starter-webmvc-api`, UI (`-webmvc-ui`) подключает Maven-профиль `dev`: запуск
+  `./mvnw -Pdev spring-boot:run`, в IDE — отметить профиль `dev` в Maven. Обычная сборка, тесты и jar для стенда и
+  прода UI не содержат. Страховка на случай UI на classpath: вне dev `springdoc.swagger-ui.enabled: false`, а
+  `spring.web.resources.add-mappings: false` выключает раздачу статики Boot (`/webjars/**`, `/**` из classpath) во
+  всех профилях — бэкенд отдаёт только API, SPA раздаёт Caddy. Swagger UI в dev отдаёт свой обработчик springdoc на
+  `/swagger-ui/**`;
+- `OpenApiConfiguration` дописывает соглашения: у каждой операции ответы 4xx/5xx — `application/problem+json` со
+  схемой `ProblemDetail` (всем — 400, 401, 403, 429, 500; с параметром пути — 404; POST, PUT, PATCH, DELETE — 409 и
+  422), у 429 — заголовок `Retry-After` (целые секунды, `OpenApiContractTests.tooManyRequestsDocumentsRetryAfter`), `PageQuery` раскрыт в `page`, `size`, `sort` (значения из `@SortBy`) и `q`, `BigDecimal` — строка `decimal`;
+- тест `OpenApiContractTests` выгружает спецификацию в [../api/openapi.json](../api/openapi.json) (коммитится, LF;
+  по ней orval генерирует клиент фронта) и проверяет, что все её ответы 4xx/5xx — ProblemDetail;
+  стандартные наборы ответов по видам операций — на пробной группе `probes` из тестовых исходников. Поменяли контроллер или DTO —
+  прогоните тесты и закоммитьте изменившийся `openapi.json` вместе с кодом. `../verify.ps1` (T-PLT-15) это сторожит: шаг
+  `api` красный, если сборка переписала спеку, а `pnpm api:check` — если клиент orval от неё отстал.
+
+Запрещено: пути API без `/v1`; открытые без входа пути вне `/api/v1/auth/**` и `/api/v1/public/**`; эндпоинт без явного
+`operationId`; `Map`, `JsonNode` и сущности JPA в ответах вместо record (ловит ArchUnit); свой формат страницы или параметры
+`pageNumber`/`limit`; сортировка по полю не из `@SortBy`; фильтрация, сортировка и пагинация на фронте (R002);
+глобальный `springdoc.paths-to-match` — в springdoc он перекрывает пути всех групп; `springdoc-openapi-starter-webmvc-ui`
+в основных зависимостях и включение `spring.web.resources.add-mappings`; поле, которое бывает null, без `@Nullable` —
+схема скажет «всегда есть», и zod отвергнет ответ.
+
+## Сообщения и i18n
+
+Интерфейс MVP — только русский, но бэкенд готов к казахскому без правок кода (PLT-11, dentify R003).
+
+- Тексты — `MessageSource` Spring Boot. Русский — базовый файл `messages.properties`, а не
+  `messages_ru.properties`: автоконфигурация `MessageSourceAutoConfiguration` включается, только если есть
+  `<basename>.properties` (проверено по Boot 4.1.1). Казахский — `messages_kk.properties` с теми же ключами (PLT-34);
+  нет ключа в kk — русский. `spring.messages.fallback-to-system-locale: false`: без перевода берётся базовый файл, а
+  не язык ОС сервера. Тексты с аргументами идут через `MessageFormat`: апостроф в них пишется двумя.
+- Язык запроса выбирает `platform.i18n.DentifyLocaleResolver` (бин `localeResolver`), первое поддерживаемое из
+  цепочки: язык аккаунта (`AccountLocaleProvider` из `platform.api`; реализация — `iam.internal.AccountLanguage`: вход
+  кладёт `account.language` в атрибут сессии `dentify.account.language`, и запрос не читает аккаунт из БД; смена языка в
+  профиле, T-IAM-24, пишет его через `AccountLanguage.remember` в текущую сессию, другие сессии аккаунта получат новый
+  язык при следующем входе) → cookie `dentify-lang` →
+  `Accept-Language` (`kk-KZ` даёт `kk`) → `ru`. Поддерживаемые языки задаёт флаг `dentify.i18n.kk`: при `false`
+  (сейчас) — только `ru`, звенья с казахским пропускаются. Язык запроса доступен через `LocaleContextHolder`: по нему
+  выбираются тексты ProblemDetail и сообщения Bean Validation.
+- Вне HTTP-запроса (фоновые задачи, письма, обработчики событий) `LocaleContextHolder` отдаёт язык по умолчанию. Его
+  при старте ставит `I18nConfiguration` — русский, а не язык ОС сервера: иначе на машине с казахской локалью
+  `LocalizedText.text()` отдал бы казахский и при `dentify.i18n.kk: false` (`I18nConfigurationTests`). Письмо на языке
+  получателя — `text(locale)` и `MessageSource` с явным языком аккаунта.
+- Включить казахский = положить `messages_kk.properties` в `src/main/resources` и поставить `dentify.i18n.kk: true`.
+  Это доказывает `LocalizationTests`: в профиле test лежит тестовый словарь kk и включён флаг, и тот же эндпоинт
+  отвечает на казахском по `Accept-Language: kk` или cookie.
+- Двуязычные значения справочников — `LocalizedText {ru, kk}` из `platform.api`: `ru` обязателен, пустой `kk`
+  хранится как `null`, `text(locale)` и `text()` отдают казахский, если он есть и язык казахский, иначе русский. В
+  сущности — одна колонка `jsonb` через JSON-агрегат Hibernate 7:
+
+  ```java
+  @Embedded
+  @JdbcTypeCode(SqlTypes.JSON)
+  private LocalizedText name;   // name jsonb NOT NULL; в JPQL: where s.name.ru = :ru
+  ```
+
+  В DTO — тот же тип, `{"ru": "…", "kk": null}`, проверяется через `@Valid`. JSON-колонки Hibernate пишет Jackson 3
+  (`hibernate.type.json_format_mapper: jackson3`): Jackson 2 на classpath только транзитивно, через springdoc.
+- `MessagesTests` проверяет, что у каждого кода `ErrorCodes`, каждого статуса и каждого стандартного ограничения
+  Jakarta есть русский текст, а в переводах нет ключей, которых нет в базовом файле.
+
+Запрещено: пользовательские строки в Java-коде (ответы, исключения, письма); `messages_ru.properties`; язык из
+`Locale.getDefault()`; отдельные колонки `name_ru`/`name_kk` вместо `LocalizedText`.
+
 ## Журнал действий
 
 Журнал значимых действий в клинике (PLT-09): кто, когда, с какого IP, с каким объектом что сделал и разница «было → стало».
@@ -1441,154 +2248,6 @@ curl -s -c $J -b $J -H "X-XSRF-TOKEN: $X" -X POST $B/api/v1/auth/logout
 - менять или удалять строки `auth_event`, давать `dentify_app` `UPDATE`/`DELETE`; хранить введённый логин или пароль в
   журнале и логах; добавлять в `auth_event` колонку `clinic_id` без RLS.
 
-## Права
-
-Решение до T-IAM-06/07 (2026-09-26, по финальному ревью этапа 0): как модули проверяют права по клинике, не завися от
-iam и не храня права в сессии. Сейчас из этого есть только `CurrentPermissions` и `Permissions` (`platform.api`) и
-`hasAuthority('audit:read')` на журнале; `CurrentPermissions` пока читает authorities контекста Spring Security, их
-выдают только тесты (`TestAuthorities`). Остальное делает T-IAM-07 по этому разделу.
-
-- **Контракты — в `platform.api`, реализация — iam.** От iam не зависит ни один модуль (`ModularityTests.ALLOWED`),
-  поэтому модули видят права только через платформу: `CurrentPermissions.has(код)` (есть), `CurrentMember` — членство
-  и сотрудник текущей работы, `ScopeFilter` — скоуп «свои/все», филиалы, склады для запросов списков. Реализации — бины
-  iam, SPI платформы; модуль импортирует только `platform.api`.
-- **На эндпоинте — бин платформы для SpEL**: `@PreAuthorize("@perm.has('patient:view')")`. Бин `perm` объявляет
-  платформа и делегирует SPI прав, который реализует iam. Ссылка `@perm` в SpEL — зависимость на этапе выполнения,
-  Modulith её не видит, поэтому бин и должен быть в платформе, а не в iam. `hasAuthority(…)` на эндпоинтах T-IAM-07
-  заменяет на `@perm`.
-- **Права не хранятся в `Authentication` сессии.** Вход кладёт в сессию аккаунт без прав
-  (`SessionAccountSignIn`): сессия живёт до 30 дней, и права в ней пережили бы смену роли администратором до нового
-  входа, а при смене клиники остались бы правами прежней клиники. Эффективные права (роль ∩ филиалы членства)
-  считаются **на запрос** по клинике контекста (`TenantContext`) и членству аккаунта в ней, с кэшем в Valkey: ключ —
-  `clinicId`, `membershipId` и версия роли; сброс — по событиям `RolePermissionsChanged` и `MembershipChanged` (после
-  коммита, через журнал публикаций T-PLT-14). Ключ кэша клиники — как у всего кэша клиники («Кэш»).
-- **Перепроверка членства на каждом запросе** — тем же кэшем: нет активного членства в клинике сессии (отключено,
-  удалено) — 401 `error.clinic-not-selected`, интерфейс показывает выбор клиники. Это закрывает окно, которое оставляет
-  `AccountSessions.terminateInClinic` при выборе клиники одновременно с отключением членства («Активные сессии»).
-- **Коды прав модуль объявляет сам** — бином SPI платформы (`PermissionContributor`: коды, подписи i18n, типы скоупа),
-  а iam собирает каталог из всех бинов (T-IAM-06). Импорт iam или «регистрация в реестре iam» из модуля — зависимость
-  модуль → iam, она запрещена (T-CLN-02 и следующие).
-- **Тесты других модулей** получают права через платформу (тестовая реализация SPI прав, как сейчас `TestAuthorities`), а
-  не аннотацией iam: тесты модулей не зависят от тестовых исходников iam.
-
-Запрещено: права в `Authentication` сессии и в любых атрибутах сессии; бин прав для SpEL в модуле iam; импорт iam из
-других модулей ради прав; `hasRole` и роли в коде — только коды прав.
-
-## Модули и события
-
-Модуль — прямой подпакет `kz.dentify.<модуль>`: `platform`, `iam`, `clinic`, `staff`, `patient`, `schedule`, `medical`,
-`inventory`. Границы проверяет Spring Modulith: `ApplicationModules.verify()` в `ModularityTests` — нет циклов и обращений
-во внутренние пакеты чужих модулей.
-
-### Раскладка пакетов модуля
-
-| Пакет | Что в нём | `package-info.java` |
-|---|---|---|
-| `kz.dentify.<модуль>` | только `package-info.java`: `@ApplicationModule(displayName, allowedDependencies)` | `@ApplicationModule`, `@NullMarked` |
-| `api` | типы и сервисы, которые вызывают другие модули (`clinic.api.ClinicDirectory`); порты и SPI | `@NamedInterface("api")`, `@NullMarked` |
-| `events` | события модуля для подписчиков: неизменяемые record с id, без ПД | `@NamedInterface("events")`, `@NullMarked` |
-| `web` | контроллеры и DTO-records запросов и ответов; контроллер тонкий — параметры в сервис, ответ — record | `@NullMarked` |
-| `internal` | сущности, репозитории, сервисы с правилами (`@Service`), dev-сиды | `@NullMarked` |
-
-В каждом пакете — свой `package-info.java` с `@NullMarked`: аннотация пакета на подпакеты не распространяется («Код»).
-`web` и `internal` другим модулям закрыты. Правила — в сервисе `internal`, контроллер их не повторяет (dentify R002):
-ArchUnit `CodingRulesTests.webLayerIsThin` не даёт `web` ходить в репозитории и сущности, открывать транзакции и отдавать
-не records.
-
-### Направления зависимостей
-
-Направления — здесь, в `package-info.java` каждого модуля (`allowedDependencies`) и в `ModularityTests.ALLOWED`; меняются
-вместе, сначала решение владельца:
-
-- clinic ← iam, staff, schedule, inventory; staff, patient ← schedule; medical → patient, schedule, clinic;
-- все → platform: `platform :: api` — общий API платформы (исключения, `TenantContext`, `PageQuery`, `AuditService`,
-  `PasswordPolicy`, `CurrentPermissions` и т. д.); platform — общий модуль (`sharedModules`);
-- **только iam → `platform :: identity`**: клиника в сессии (`TenantSession`), вход и выход (`AccountSignIn`), активные
-  сессии (`AccountSessions`), лимиты входа (`RateLimits`) и чтение журнала действий (`AuditJournal`, `AuditQuery`,
-  `AuditEntry`). Это инварианты изоляции клиник: модуль, который сам положит клинику в сессию, отдаст ей чужую клинику
-  без проверки членства. Поэтому они не в `api`, а в отдельном named interface, и `platform :: *` не пишется ни у кого:
-  звёздочка открыла бы и его. Обращение из другого модуля роняет `verify()` («Module 'clinic' depends on named
-  interface(s) 'platform :: identity'», проверено), список модулей с `identity` фиксирует
-  `ModularityTests.identityPrimitivesAreOpenOnlyToIam`;
-- циклы рвутся портами (SPI в `api` модуля или платформы, реализация — в модуле-потребителе) и событиями.
-
-Другим модулям открыты только named interfaces:
-
-- `api` — типы и сервисы, которые модуль-потребитель вызывает (`clinic :: api`, `patient :: api`, …);
-- `events` — события модуля-издателя (`staff :: events`, `schedule :: events`), пакет
-  `kz.dentify.<модуль>.events` с `@NamedInterface("events")`.
-
-Событие убирает только обратную зависимость: издатель ничего не знает о подписчиках. Но слушатель
-`@ApplicationModuleListener void on(StaffDeactivated event)` ссылается на тип события, и Modulith считает
-это зависимостью подписчика от издателя. Поэтому подписка — это разрешённая зависимость на
-`<издатель> :: events`, иначе `ApplicationModules.verify()` упадёт («Module 'iam' depends on named
-interface(s) 'staff :: events'», проверено). Сейчас разрешены:
-
-| Подписчик | Событие | Зависимость |
-|---|---|---|
-| iam | `StaffDeactivated` → гасит сессии сотрудника (PLT-24) | `staff :: events` |
-| inventory | `AppointmentCompleted` → списание по нормам услуги | `schedule :: events` |
-
-Циклов нет: staff и schedule не зависят ни от iam, ни от inventory. Новая подписка — сначала решение и
-направление в `CLAUDE.md`, потом `package-info.java` и `ModularityTests.ALLOWED`.
-
-Событие — неизменяемый `record` с идентификаторами (`clinicId`, `staffId`, …) без ПД: оно сериализуется
-в журнал публикаций в БД.
-
-### Журнал публикаций (PLT-24, T-PLT-14) — план, ещё не подключено
-
-**Сейчас журнала публикаций нет**: в `pom.xml` только `spring-modulith-events-api` (аннотации), без
-`spring-modulith-starter-jdbc` и таблицы `event_publication`. Асинхронный `@ApplicationModuleListener` без журнала при
-исключении обработчика или рестарте приложения **теряет событие молча**: клиника остаётся без ролей, владелец — без прав.
-Поэтому до T-PLT-14:
-
-- `@ApplicationModuleListener` и асинхронные обработчики для критичных потоков (сид ролей и справочников новой клиники,
-  сброс кэша прав, отключение доступа, списание склада) — **запрещены**. Задача с таким слушателем или событием зависит
-  от T-PLT-14 (`dependsOn` в `backlog.json`: T-IAM-06, T-IAM-07, T-IAM-26, T-CLN-02, T-STF-09, T-STF-19, T-SCH-04,
-  T-SCH-06, T-SCH-28, T-PAT-11, T-PAT-21, T-INV-06, T-MED-03 и всё, что после них);
-- синхронная работа в той же транзакции — прямым вызовом порта, а не событием.
-
-Решение для T-PLT-14 (при подключении `spring-modulith-starter-jdbc`):
-
-- `spring.modulith.events.jdbc.schema-initialization.enabled: false` — по умолчанию Modulith создаёт
-  таблицу сам, а у `dentify_app` нет прав на DDL, и приложение не стартует;
-- таблица `event_publication` в структуре Modulith 2 (не legacy, `use-legacy-structure` не включаем)
-  создаётся Flyway-миграцией модуля platform; `spring.modulith.events.jdbc.schema: dentify`;
-- таблица глобальная: без `clinic_id` и RLS (её пишет инфраструктура Modulith вне контекста клиники).
-  Клиника передаётся в самом событии, обработчик ставит контекст клиники из него;
-- незавершённые публикации переотправляет задача по расписанию через `IncompleteEventPublications` под
-  ShedLock (одним экземпляром), а не флагом `republish-outstanding-events-on-restart`: документация
-  Modulith не рекомендует его при нескольких экземплярах;
-- обработчики идемпотентны: повторная доставка не создаёт дублей.
-
-## Логи
-
-Правила для кода (PLT-10):
-
-- В логи не пишем ПД: ни ФИО, ни ИИН, ни телефон, ни e-mail, ни адрес. Только идентификаторы
-  (`clinicId`, `accountId`, `patientId`) и коды. Тела запросов и сущности или DTO пациента целиком
-  (`log.info("{}", patient)`) не логируем.
-- Маскирование — защитная сетка, а не разрешение. `platform.logging.PiiMaskingJsonMembersCustomizer`
-  прогоняет каждое значение JSON-лога (сообщение, исключение, MDC, key-value любого типа) через
-  `PiiMasker`: ИИН (12 цифр и 4-4-4), e-mail (включая кириллические), телефоны — `+7`/`7`/`8` и 10 цифр
-  или местный номер из 10 цифр на 7 с любой группировкой (`+77071234567`, `8 707 123 45 67`,
-  `8 (7172) 55-66-77`, `7071234567`), в том числе URL-кодированные (`%2B7%20707…`, `8+707+123…`).
-  Точка и подчёркивание номер не разделяют, поэтому даты, суммы и версии миграций (`2026.10.01.1200`) целы.
-- Ключ MDC или key-value, в имени которого есть `name`, `phone`, `iin`, `email`, `address`, `birth`,
-  `patronymic` или `fio` (без учёта регистра, в любом месте: `patientFullName`, `doctorLastName`,
-  `patientBirthDate`, `contact_phone`, `ipAddress`), маскируется целиком, как бы ни выглядело значение.
-  Исключение — собственные поля форматов (`service.name`, `process.thread.name`, `logger_name`,
-  `thread_name`, `_process_thread_name`, `_level_name`). Поэтому технические значения пишем под ключами
-  без этих слов: `module`, `file`, `bucket`, а не `moduleName`, `fileName`, `bucketName`.
-- ФИО в свободном тексте регулярным выражением не найти, поэтому маски для него нет. ФИО в логах —
-  нарушение правила выше, а не пробел маски.
-- Ошибки PostgreSQL приходят без значений строки: у драйвера `logServerErrorDetail: false` (раздел «Ошибки API»).
-  Без этого Hibernate писал бы в лог WARN `Failing row contains (…)` со всеми полями строки, включая ФИО.
-- Писать только через SLF4J. `System.out`, `System.err` и `printStackTrace()` идут мимо маски — их
-  запрещает ArchUnit-тест `CodingRulesTests`.
-- Маска работает только в структурированном формате. Он задан для консоли и для файла
-  (`logging.structured.format.console/file: ecs`), JSON всегда в UTF-8 (`logging.charset.console`).
-
 ## Выключенная автоконфигурация
 
 Инфраструктурные `@Enable…` включает платформа, каждый — рядом с тем, кому он нужен; в модулях их не повторять:
@@ -1616,228 +2275,37 @@ interface(s) 'staff :: events'», проверено). Сейчас разреш
   сгенерированным паролем и не пишет этот пароль в лог WARN. Аккаунты — в БД (iam), вход — `AccountSignIn` (раздел
   «Безопасность и сессии»).
 
-## Ошибки API
+## Тестовая инфраструктура
 
-Любая ошибка API — `ProblemDetail` по RFC 9457 с типом `application/problem+json` (PLT-07):
-
-```json
-{
-  "status": 400, "title": "Некорректный запрос", "detail": "Проверьте правильность заполнения полей.",
-  "instance": "/api/v1/patients", "code": "error.validation", "traceId": "6ab649e81eab0751a95cfa72057a10af",
-  "errors": [ { "field": "iin", "code": "patient.iin.checksum", "message": "Неверная контрольная сумма ИИН." } ]
-}
-```
-
-- `code` — машинный код и одновременно ключ текста в `messages.properties`. `detail`, `title` и
-  `errors[].message` — тексты из `MessageSource` на языке запроса, в коде их нет. `traceId` — тот же, что в
-  JSON-логах этого запроса: пользователь сообщает его поддержке. `errors[]` есть, только если ошибка про поля.
-  Поле `type` Spring не пишет, когда оно `about:blank`; по RFC 9457 отсутствие поля и означает `about:blank`.
-- Как устроено (`platform.web`): `ProblemDetailsExceptionHandler` (`@RestControllerAdvice`, наследник
-  `ResponseEntityExceptionHandler` Spring) ловит исключения контроллеров; `ProblemErrorController` заменяет
-  `BasicErrorController` Boot и так же отвечает на всё, что Boot пересылает на `/error` (исключение или
-  `sendError` в фильтре). Тело собирает `ProblemFactory`.
-- `instance` — путь запроса, и у ошибок из фильтров тоже: исходный путь, а не `/error`. `errors[].field` — путь поля
-  (`iin`, `tags[1]`, `title.ru`) или `null`, если ошибка про всю форму (ограничение класса).
-- ERROR в лог пишется только с исключением. `sendError` с 5xx без исключения — WARN. Прямой запрос на `/error` (без
-  пересылки ошибки) — 404 без записи в лог, иначе любой клиент засыпал бы лог и поднял алерты. Неизвестный путь — тоже
-  404 без записи: WARN Spring MVC `PageNotFound` «No mapping for …» выключен
-  (`logging.level.org.springframework.web.servlet.PageNotFound: error`, `ProblemDetailsTests.notFoundForUnknownPath`).
-
-| Статус | Откуда | `code` |
-|---|---|---|
-| 400 | Bean Validation тела (`@Valid`), параметров (`@RequestParam @Max(100)`) и методов сервисов (`@Validated`, поле — путь внутри объекта или имя параметра), нет параметра, неверный тип, нечитаемый JSON, `InvalidRequestException` | `error.validation` с `errors[]`; `error.malformed-body` |
-| 401 | нет входа (цепочка Spring Security, `@PreAuthorize` без входа, `UnauthorizedException`); cookie сессии есть, а сессии нет — истекла или завершена; обращение к данным клиники без клиники в сессии (`MissingTenantContextException`) | `error.unauthorized`, `error.session-expired`, `error.clinic-not-selected` |
-| 403 | `ForbiddenException`, отказ `@PreAuthorize` с входом; изменяющий запрос без CSRF-токена или с чужим | `error.forbidden`, `error.csrf` |
-| 404 | `NotFoundException`; `EntityNotFoundException` JPA и `ObjectRetrievalFailureException` Spring (ссылка на запись, которой нет или которую скрыла RLS); неизвестный путь; прямой запрос на `/error` | `error.not-found` |
-| 405, 406, 413, 415 | стандартные исключения Spring MVC; заголовки `Allow` и `Accept` сохраняются; тело — ProblemDetail, даже если клиент просил не JSON | `error.method-not-allowed` и т. д. |
-| 409 | `ConflictException`; конфликт `@Version` (Hibernate отклонил устаревшую версию или `checkVersion` в сервисе) — с полями `modifiedAt`, `modifiedBy`, `modifiedByName`; в БД — уникальность (SQLSTATE 23505), внешний ключ (23503), EXCLUDE (23P01) | `error.conflict`, `error.version-conflict`, `error.duplicate` (уникальность) |
-| 422 | `BusinessRuleException` | код правила модуля |
-| 429 | `TooManyRequestsException`, заголовок `Retry-After`: общий лимит API, лимиты входа и сброса пароля | `error.too-many-requests`, `error.too-many-login-attempts` |
-| 500 | всё остальное: в ответе только общий текст и `traceId`, исключение — в лог ERROR с тем же `traceId`. Сюда же NOT NULL, CHECK, длина значения и прочие ограничения БД: значит, сервис пропустил проверку входных данных, это дефект, а не конфликт | `error.internal` |
-
-Ошибки БД и ПД: в тексте ошибки PostgreSQL есть значения строки (`Key (iin)=(…) already exists`, `Failing row contains
-(…)`), а Hibernate пишет этот текст в лог WARN. Поэтому у драйвера выключены подробности сервера
-(`spring.datasource.hikari.data-source-properties.logServerErrorDetail: false`, настройка PgJDBC): в исключениях и логах
-остаются только сообщение, SQLSTATE и имя ограничения. Обработчик тоже пишет в лог только SQLSTATE и имя ограничения
-или колонки. Проверено на настоящих нарушениях через JPA (`DatabaseProblemsTests`).
-
-Как пользоваться в модуле:
-
-- Бросать исключения платформы из `platform.api` с кодом модуля:
-  `throw new BusinessRuleException("schedule.backdated-edit", days)`, `throw new NotFoundException()`. Код и
-  текст — в `messages.properties`, аргументы — `{0}`, `{1}`. Иерархия запечатана (`sealed`): статус задаёт класс,
-  свои исключения модуля наследуют один из них (`PatientNotFoundException extends NotFoundException`).
-- Ошибку поля, которую нашёл сервис, передавать нарушением:
-  `throw new InvalidRequestException(FieldViolation.of("iin", "patient.iin.checksum"))`. Конфликт, привязанный к полю
-  (телефон уже занят), — `ConflictException.ofFields("iam.account.phone-taken", List.of(FieldViolation.of("phone",
-  …)), cause)`: 409 с `errors[]`.
-- Код ошибки поля Bean Validation: своё сообщение-ключ (`@Pattern(message = "{patient.iin.format}")` или шаблон из
-  валидатора) — код равен ключу; стандартное ограничение — `validation.<аннотация-через-дефис>`
-  (`validation.not-blank`, `validation.size`), текст — по ключу Jakarta
-  `jakarta.validation.constraints.NotBlank.message` с плейсхолдерами Hibernate Validator `{min}`, `{max}`,
-  `{value}`. Текст подставляет Spring Boot из `MessageSource` на языке запроса.
-- Общие коды — `ErrorCodes`, коды модулей — `<модуль>.<что>`, например `patient.iin.checksum`.
-- Уникальность сервис проверяет сам и отвечает своим кодом с полем, ограничение БД — страховка на гонку. Сработавшее
-  ограничение переводится в тот же ответ по имени — `DataIntegrity.isViolation(ex, "ux_account_phone")`
-  (`platform.api`), а не своим разбором цепочки причин. Отпечатки SHA-256 (токены, ключи Valkey) — `Hashes`, IP —
-  `IpAddresses` (`platform.api`); свои копии не писать.
-
-Запрещено:
-
-- текст ошибки в коде: `ResponseStatusException(…, "Пациент не найден")`, `ResponseEntity.badRequest().body("…")`,
-  своё тело ошибки вместо ProblemDetail;
-- ловить исключение в контроллере, чтобы вернуть текст или 200 с ошибкой;
-- класть ПД в аргументы сообщений: сообщение исключения — только код, но текст с аргументами уходит пользователю;
-- отвечать 403 на объект чужой клиники — только 404, чтобы не выдать, что объект есть;
-- полагаться на NOT NULL и CHECK в БД вместо проверки входных данных: такое нарушение — 500 и ERROR. Проверять в DTO
-  (Bean Validation) или в сервисе (`InvalidRequestException`, `BusinessRuleException`). Уникальность и пересечения
-  сервис тоже проверяет сам со своим кодом, ограничение БД — страховка на гонку;
-- бросать исключения платформы из фильтров там, где можно ответить: Tomcat пишет их в лог ERROR. Фильтр отдаёт ошибку
-  через `HandlerExceptionResolver` (`resolver.resolveException(request, response, null, ex)`), тогда её обработает
-  тот же `@RestControllerAdvice`.
-
-Отказы Spring Security — тот же ProblemDetail: фильтры отдают их через `HandlerExceptionResolver`
-(`platform.security.ProblemSecurityHandler` — `AuthenticationEntryPoint` и `AccessDeniedHandler`), а отказ
-`@PreAuthorize` в методе ловит `ProblemDetailsExceptionHandler` (`AccessDeniedException` — 401 без входа, 403 с входом;
-`AuthenticationException` — 401). Язык ответов из фильтров ставит `LocaleContextFilter` в начале цепочки тем же
-`DentifyLocaleResolver`, что у DispatcherServlet (раздел «Безопасность и сессии»).
-
-## Соглашения API и OpenAPI
-
-Все модули работают через REST `/api/v1` (PLT-23):
-
-- **Путь — всегда `/api/v1/<ресурс>`**: `/api/v1/patients/{id}`, `/api/v1/clinic/settings`, `/api/v1/me`. Путь без
-  `/v1` не попадёт в группу springdoc `v1` (`pathsToMatch("/api/v1/**")`), а значит ни в `api/openapi.json`, ни в клиент
-  orval. Пути в `backlog.json` выровнены 2026-09-26.
-- **Открытые без входа пути — только два префикса**: `/api/v1/auth/**` — механика сессии (вход, выход, CSRF-токен, сброс
-  пароля); `/api/v1/public/**` — открытые ресурсы до входа: регистрация клиники (`POST /api/v1/public/registrations`),
-  города её формы (`GET /api/v1/public/cities`), приглашение по ссылке (`GET /api/v1/public/invitations/{token}`,
-  `POST …/accept`). Оба — в `SecurityConfiguration.publicPaths`, с CSRF (изменяющий запрос без `X-XSRF-TOKEN` — 403) и
-  общим лимитом API по IP; эндпоинт — `@PreAuthorize("permitAll()")`. В `TenantIsolationTests.NOT_CLINIC_DATA` открытый
-  эндпоинт записывается **путём целиком, по одному, с причиной**: данные клиники под `/api/v1/public` бывают (приглашение
-  по токену), и `/**` там не годится; изоляцию по токену проверяет тест модуля. Другие открытые префиксы не заводить.
-- **operationId — явный** в `@Operation(operationId = "<глагол><Ресурс>")`: `listAuditEvents`, `getAuditEvent`,
-  `terminateAccountSession`. Это имя хука и функции в клиенте orval; без него springdoc берёт имя метода и при совпадении
-  дописывает `_1`, `_2` по порядку контроллеров — имена в клиенте менялись бы от нового контроллера
-  (`OpenApiContractTests.operationIdsAreExplicitAndUnique`: явный у каждого эндпоинта `/api/v1`, уникальный, без `_N`).
-
-- DTO запросов и ответов — `record` в пакете `web` модуля. Пакеты `@NullMarked`, и схему OpenAPI по `@Nullable`
-  уточняет `RecordRequiredPropertiesConverter`:
-  - компонент без `@Nullable` всегда есть в JSON и не null: в схеме он обязательный. Входящие поля без `@Nullable`
-    проверяются `@NotNull` или `@NotBlank`. Обязательный флаг или число запроса — обёрткой с `@NotNull` (`@NotNull Boolean
-    rememberMe`), а не примитивом: без поля Jackson 3 не заполнит примитив, и ответ был бы `validation.type-mismatch`
-    «Неверный формат значения» вместо `validation.not-null` «Заполните поле»;
-  - компонент с `@Nullable` Jackson пишет как `null` (`{"ru": "…", "kk": null}`, `"field": null`): в схеме он
-    необязательный и допускает null — в OpenAPI 3.1 `type: [string, "null"]`, у ссылки на схему
-    `oneOf: [{$ref}, {type: "null"}]`. orval даёт `kk?: string | null`, zod-схема принимает и null, и отсутствие поля.
-    Проверяет `OpenApiContractTests.nullableRecordComponentsAllowNull`.
-- id — UUIDv7 строкой; даты и время — ISO 8601 (`OffsetDateTime` с поясом, `Instant` в UTC, `LocalDate`); деньги и
-  все `BigDecimal` — десятичной строкой `"12500.50"` (`JsonConventions`, в запросе принимается и число). Двуязычные
-  поля — `LocalizedText {ru, kk}`.
-- Список — `PageResponse<T> {items, page, size, total}`, параметры — `PageQuery`:
-
-  ```java
-  @GetMapping
-  PageResponse<PatientRow> list(@SortBy(value = { "lastName", "createdAt" }, defaultSort = "lastName") PageQuery query) {
-      return PageResponse.of(this.patients.search(query.q(), query.pageable()), PatientRow::from);
-  }
-  ```
-
-  `page` — с 0, по умолчанию 0, смещение `page × size` не больше 2 147 483 647 (JPA принимает его как `int`, иначе
-  Spring Data бросил бы исключение и был бы 500) — дальше 400 по полю `page`; `size` — от 1, по умолчанию 25
-  (PLT-22), больше 100 — вернётся 100, это не ошибка; `sort=lastName,-createdAt` или повтором параметра, минус — по убыванию, только поля из `@SortBy` (у них
-  должен быть индекс); `q` — строка поиска без крайних пробелов, пустая — `null`, длиннее 100 символов — 400. Все
-  ошибки параметров — разом, одним 400 с `errors[]`. Разбирает `PageQueryArgumentResolver`. Фильтры — отдельные
-  параметры эндпоинта.
-
-Спецификация OpenAPI 3.1 (springdoc 3.1.1, собран против Boot 4.1):
-
-- группа `v1` — пути `/api/v1/**`, адрес `/v3/api-docs/v1`. Спецификация включена в dev и test, в prod выключена;
-- Swagger UI (`http://127.0.0.1:8080/swagger-ui.html`) — только локально. В основной зависимости только
-  `springdoc-openapi-starter-webmvc-api`, UI (`-webmvc-ui`) подключает Maven-профиль `dev`: запуск
-  `./mvnw -Pdev spring-boot:run`, в IDE — отметить профиль `dev` в Maven. Обычная сборка, тесты и jar для стенда и
-  прода UI не содержат. Страховка на случай UI на classpath: вне dev `springdoc.swagger-ui.enabled: false`, а
-  `spring.web.resources.add-mappings: false` выключает раздачу статики Boot (`/webjars/**`, `/**` из classpath) во
-  всех профилях — бэкенд отдаёт только API, SPA раздаёт Caddy. Swagger UI в dev отдаёт свой обработчик springdoc на
-  `/swagger-ui/**`;
-- `OpenApiConfiguration` дописывает соглашения: у каждой операции ответы 4xx/5xx — `application/problem+json` со
-  схемой `ProblemDetail` (всем — 400, 401, 403, 429, 500; с параметром пути — 404; POST, PUT, PATCH, DELETE — 409 и
-  422), у 429 — заголовок `Retry-After` (целые секунды, `OpenApiContractTests.tooManyRequestsDocumentsRetryAfter`), `PageQuery` раскрыт в `page`, `size`, `sort` (значения из `@SortBy`) и `q`, `BigDecimal` — строка `decimal`;
-- тест `OpenApiContractTests` выгружает спецификацию в [../api/openapi.json](../api/openapi.json) (коммитится, LF;
-  по ней orval генерирует клиент фронта) и проверяет, что все ответы 4xx/5xx — ProblemDetail. Пока настоящих
-  эндпоинтов нет, то же проверяется на пробной группе `probes` из тестовых исходников. Поменяли контроллер или DTO —
-  прогоните тесты и закоммитьте изменившийся `openapi.json` вместе с кодом. `../verify.ps1` (T-PLT-15) это сторожит: шаг
-  `api` красный, если сборка переписала спеку, а `pnpm api:check` — если клиент orval от неё отстал.
-
-Запрещено: пути API без `/v1`; открытые без входа пути вне `/api/v1/auth/**` и `/api/v1/public/**`; эндпоинт без явного
-`operationId`; `Map`, `JsonNode` и сущности JPA в ответах вместо record (ловит ArchUnit); свой формат страницы или параметры
-`pageNumber`/`limit`; сортировка по полю не из `@SortBy`; фильтрация, сортировка и пагинация на фронте (R002);
-глобальный `springdoc.paths-to-match` — в springdoc он перекрывает пути всех групп; `springdoc-openapi-starter-webmvc-ui`
-в основных зависимостях и включение `spring.web.resources.add-mappings`; поле, которое бывает null, без `@Nullable` —
-схема скажет «всегда есть», и zod отвергнет ответ.
-
-## Сообщения и i18n
-
-Интерфейс MVP — только русский, но бэкенд готов к казахскому без правок кода (PLT-11, dentify R003).
-
-- Тексты — `MessageSource` Spring Boot. Русский — базовый файл `messages.properties`, а не
-  `messages_ru.properties`: автоконфигурация `MessageSourceAutoConfiguration` включается, только если есть
-  `<basename>.properties` (проверено по Boot 4.1.1). Казахский — `messages_kk.properties` с теми же ключами (PLT-34);
-  нет ключа в kk — русский. `spring.messages.fallback-to-system-locale: false`: без перевода берётся базовый файл, а
-  не язык ОС сервера. Тексты с аргументами идут через `MessageFormat`: апостроф в них пишется двумя.
-- Язык запроса выбирает `platform.i18n.DentifyLocaleResolver` (бин `localeResolver`), первое поддерживаемое из
-  цепочки: язык аккаунта (`AccountLocaleProvider` из `platform.api`; реализация — `iam.internal.AccountLanguage`: вход
-  кладёт `account.language` в атрибут сессии `dentify.account.language`, и запрос не читает аккаунт из БД; смена языка в
-  профиле, T-IAM-24, пишет его через `AccountLanguage.remember` в текущую сессию, другие сессии аккаунта получат новый
-  язык при следующем входе) → cookie `dentify-lang` →
-  `Accept-Language` (`kk-KZ` даёт `kk`) → `ru`. Поддерживаемые языки задаёт флаг `dentify.i18n.kk`: при `false`
-  (сейчас) — только `ru`, звенья с казахским пропускаются. Язык запроса доступен через `LocaleContextHolder`: по нему
-  выбираются тексты ProblemDetail и сообщения Bean Validation.
-- Вне HTTP-запроса (фоновые задачи, письма, обработчики событий) `LocaleContextHolder` отдаёт язык по умолчанию. Его
-  при старте ставит `I18nConfiguration` — русский, а не язык ОС сервера: иначе на машине с казахской локалью
-  `LocalizedText.text()` отдал бы казахский и при `dentify.i18n.kk: false` (`I18nConfigurationTests`). Письмо на языке
-  получателя — `text(locale)` и `MessageSource` с явным языком аккаунта.
-- Включить казахский = положить `messages_kk.properties` в `src/main/resources` и поставить `dentify.i18n.kk: true`.
-  Это доказывает `LocalizationTests`: в профиле test лежит тестовый словарь kk и включён флаг, и тот же эндпоинт
-  отвечает на казахском по `Accept-Language: kk` или cookie.
-- Двуязычные значения справочников — `LocalizedText {ru, kk}` из `platform.api`: `ru` обязателен, пустой `kk`
-  хранится как `null`, `text(locale)` и `text()` отдают казахский, если он есть и язык казахский, иначе русский. В
-  сущности — одна колонка `jsonb` через JSON-агрегат Hibernate 7:
-
-  ```java
-  @Embedded
-  @JdbcTypeCode(SqlTypes.JSON)
-  private LocalizedText name;   // name jsonb NOT NULL; в JPQL: where s.name.ru = :ru
-  ```
-
-  В DTO — тот же тип, `{"ru": "…", "kk": null}`, проверяется через `@Valid`. JSON-колонки Hibernate пишет Jackson 3
-  (`hibernate.type.json_format_mapper: jackson3`): Jackson 2 на classpath только транзитивно, через springdoc.
-- `MessagesTests` проверяет, что у каждого кода `ErrorCodes`, каждого статуса и каждого стандартного ограничения
-  Jakarta есть русский текст, а в переводах нет ключей, которых нет в базовом файле.
-
-Запрещено: пользовательские строки в Java-коде (ответы, исключения, письма); `messages_ru.properties`; язык из
-`Locale.getDefault()`; отдельные колонки `name_ru`/`name_kk` вместо `LocalizedText`.
-
-## Код
-
-- `@NullMarked` (JSpecify) стоит в `package-info.java` каждого пакета: модуля, `api`, `events` и
-  внутренних. Аннотация пакета на подпакеты не распространяется, поэтому новый пакет — сразу со своим
-  `package-info.java`. `null` допустим только там, где явно стоит `@Nullable`. Проверку при сборке
-  (NullAway) можно подключить позже.
-- В Javadoc рабочих классов не использовать двойные кавычки и непарные скобки: Documenter Modulith
-  2.1.1 разбирает собранный Javadoc простым JSON-парсером, и `ModuleDocumentationTests` падает.
-- Пробные бины для тестов — top-level классами в тестовых исходниках (`platform.ProblemProbeController`,
-  `ProblemProbeFilter`, `DataProbeController` с сущностью `ConstraintProbe`, `ValidatedProbeService`, группа springdoc
-  `probes`; ресурс клиники `platform.tenancy.TestNoteController` с сущностью `TestNote`, пробный вход в клинику
-  `TenantSessionProbeController` (с аккаунтом и правами — `platform.security.TestAuthorities`), снимки аудита пробной
-  записи `TestNoteSnapshots`, имена вымышленных аккаунтов и счёт обращений за ними — `TestAccounts`; адрес клиента за прокси —
-  `platform.SchemeProbeController`; `platform.security.SecuredProbeController` и запрос в полёте `SessionHoldProbeController`; перенос записи для журнала
+- **Интеграционный тест** наследует `AbstractIntegrationTest`: всё приложение на случайном порту, профиль `test`,
+  PostgreSQL 18 (`DentifyPostgresContainer` выполняет тот же init-скрипт ролей, что dev) и Valkey в Testcontainers —
+  синглтоны на весь прогон, подключения через `@ServiceConnection`. Запросы — его `http` (`RestTestClient` Spring 7);
+  вошедшая сессия с CSRF-токеном — `signIn(accountId)` (пробный вход `/api/v1/auth/test-sign-in` через настоящий
+  `AccountSignIn`); сессия в клинике с правами — `enterClinic(clinicId, accountId, права…)`; ошибка —
+  `expectProblem(response, status, code)`; CSRF-токен — `csrfToken()`.
+- **Один кэшированный контекст на прогон.** Наследники не добавляют `@Import`, `@MockitoBean`, `@TestPropertySource` и свои
+  профили: любое из них меняет ключ кэша и поднимает второй контекст (Tomcat, пул, Flyway). Пробные бины — top-level
+  классами в тестовых исходниках пакета `kz.dentify` (их подхватывает компонент-скан во всех тестах); подмена поведения —
+  `BeanPostProcessor` в тестовых исходниках, как `iam.SignInInterlude` и `iam.PasswordChecks`.
+- **Срезов `@ApplicationModuleTest` нет**: интеграционные тесты идут на полном приложении («Одна история миграций, а не
+  модульные миграции Modulith»). Объявление `sharedModules = "platform"` оставлено, чтобы срез, если понадобится, получил
+  тенант-контекст, безопасность и ошибки платформы.
+- **Пробы.** Пробные бины: `platform.ProblemProbeController`, `ProblemProbeFilter`, `DataProbeController` с сущностью
+  `ConstraintProbe`, `ValidatedProbeService`, группа springdoc `probes`; ресурс клиники `platform.tenancy.TestNoteController`
+  с сущностью `TestNote`, пробный вход в клинику `TenantSessionProbeController` (с аккаунтом и правами —
+  `platform.security.TestAuthorities`), снимки аудита пробной записи `TestNoteSnapshots`, имена вымышленных аккаунтов и счёт
+  обращений за ними — `TestAccounts`; адрес клиента за прокси — `platform.SchemeProbeController`;
+  `platform.security.SecuredProbeController` и запрос в полёте `SessionHoldProbeController`; перенос записи для журнала
   `platform.audit.AuditProbeController` с `AuditProbeAppointments`, неверное применение `@Audited` — `AuditMisuseProbe`;
-  вымышленные клиники и филиалы в БД, пока у clinic нет API создания, — `clinic.TestClinics`),
-  пути — вне `/api/**`, чтобы не попасть
-  в `api/openapi.json`. Исключение — пробный вход `platform.security.SignInProbeController` на
-  `/api/v1/auth/test-sign-in`: он идёт через цепочку приложения с CSRF, как будущий вход, и скрыт `@Hidden`; клинику потока
-  сразу после входа он отдаёт заголовком `X-Test-Clinic-After-Sign-In`. Пути
-  `/test/**` в тестах обслуживает своя цепочка Spring Security без входа и CSRF (`ProbeSecurityConfiguration`). Тестовые таблицы — миграциями
-  `src/test/resources/db/test-migration` (подключены только в профиле test), тестовые тексты —
-  `test-messages.properties`.
+  маска логов — `platform.LogProbeController`; вымышленные клиники и филиалы в БД, пока у clinic нет API создания, —
+  `clinic.TestClinics`; люди и членства iam — `iam.IamFixtures`, шаги входа — `iam.LoginIntegrationTest`.
+- Пути проб — вне `/api/**`, чтобы не попасть в `api/openapi.json`. `/test/**` обслуживает своя цепочка Spring Security
+  без входа и CSRF (`ProbeSecurityConfiguration`), `/secured-probe/**` — цепочка приложения (проверки входа, CSRF и отказа
+  в праве). Исключение — пробный вход `platform.security.SignInProbeController`
+  на `/api/v1/auth/test-sign-in`: он идёт через цепочку приложения с CSRF, как настоящий вход, и скрыт `@Hidden`; клинику
+  потока сразу после входа он отдаёт заголовком `X-Test-Clinic-After-Sign-In`.
+- Тестовые таблицы — миграциями `src/test/resources/db/test-migration` (подключены только в профиле test:
+  `spring.flyway.locations` в `application-test.yml`), тестовые тексты — `test-messages.properties`.
+- ArchUnit-правила проверяют себя на фикстурах вне пакета `kz.dentify` (`archfixtures.web`, `archfixtures.tenancy`): их не
+  видят JPA и Spring, а правило, которое ничего не ловит, падает на своей фикстуре.
+- Данные в тестах, сидах и примерах — вымышленные.

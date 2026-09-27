@@ -570,7 +570,8 @@ const onSubmit = form.handleSubmit(async (data) => {
 
 ### Добавить вызов API
 
-1. Эндпоинт есть в `api/openapi.json` → `pnpm api:generate`, `pnpm typecheck`.
+1. Эндпоинт есть в `api/openapi.json` (бэкенд — первым, по шагам architecture.md «Новый эндпоинт») →
+   `pnpm api:generate`, `pnpm typecheck`.
 2. Чтение — `use<Operation>` (или `get<Operation>QueryOptions` в `loader` маршрута +
    `use<Operation>Suspense`); «живой» экран — `{ query: live }`.
 3. Изменение — `use<Operation>()` + `mutateAsync({ data })`; какие запросы устаревают — правило в

@@ -21,19 +21,21 @@ import org.springframework.modulith.core.NamedInterface;
 
 /**
  * Границы модулей (PLT-24): {@code ApplicationModules.verify()} — нет циклов и обращений во внутренние
- * пакеты чужих модулей; плюс фиксация разрешённых направлений из CLAUDE.md.
+ * пакеты чужих модулей; плюс фиксация разрешённых направлений из docs/architecture.md, Модули и события (кратко — в
+ * CLAUDE.md).
  */
 class ModularityTests {
 
 	static final ApplicationModules MODULES = ApplicationModules.of(DentifyApplication.class);
 
 	/**
-	 * Разрешённые зависимости модулей — те же направления, что в apps/dentify/CLAUDE.md: clinic ← iam, staff,
-	 * schedule, inventory; staff, patient ← schedule; medical → patient, schedule, clinic; все → {@code platform :: api},
-	 * и только iam → {@code platform :: identity} (клиника в сессии, вход, сессии, лимиты входа, чтение журнала).
+	 * Разрешённые зависимости модулей — те же направления, что в docs/architecture.md (Модули и события, Направления
+	 * зависимостей) и кратко в CLAUDE.md: clinic ← iam, staff, schedule, inventory; staff, patient ← schedule; medical →
+	 * patient, schedule, clinic; все → {@code platform :: api}, и только iam → {@code platform :: identity} (клиника в
+	 * сессии, вход, сессии, лимиты входа, чтение журнала).
 	 * Подписки на события — тоже зависимости (слушатель ссылается на тип события издателя): iam ←
 	 * {@code staff :: events}, inventory ← {@code schedule :: events}. Поменяли направления — сначала решение и
-	 * CLAUDE.md, потом package-info и этот тест.
+	 * таблица в docs/architecture.md и строка в CLAUDE.md, потом package-info и этот тест.
 	 */
 	static final Map<String, Set<String>> ALLOWED = new TreeMap<>(Map.of(
 			"platform", Set.of(),

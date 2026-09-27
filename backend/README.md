@@ -1,8 +1,9 @@
 # backend
 
 Spring Boot 4.1.1, модульный монолит на Spring Modulith 2.1.1, Java 25, Maven (`./mvnw`).
-Соглашения и правила — [../CLAUDE.md](../CLAUDE.md), миграции и колонки —
-[../docs/architecture.md](../docs/architecture.md), граф модулей — [../docs/modules/](../docs/modules/).
+Архитектура и соглашения — [../docs/architecture.md](../docs/architecture.md): карта модулей, раскладка пакетов, новая
+таблица и новый эндпоинт по шагам, права, правила кода, ADR и справочник механизмов; краткие правила —
+[../CLAUDE.md](../CLAUDE.md), документация модулей (генерирует тест) — [../docs/modules/](../docs/modules/).
 
 ## Запуск
 

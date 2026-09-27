@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
@@ -23,6 +24,8 @@ import archfixtures.tenancy.PlainEntity;
 import archfixtures.tenancy.PoolUnwrapper;
 import archfixtures.tenancy.PoolUser;
 import archfixtures.tenancy.ScopedNoteRepository;
+import archfixtures.tenancy.SessionReader;
+import archfixtures.tenancy.SessionWriter;
 import archfixtures.tenancy.TermRepository;
 import archfixtures.tenancy.web.AliasedNoteRequest;
 import archfixtures.tenancy.web.CleanNoteRequest;
@@ -42,12 +45,14 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import jakarta.persistence.Entity;
+import jakarta.servlet.http.HttpSession;
 import kz.dentify.platform.api.GlobalEntity;
 import kz.dentify.platform.api.TenantEntity;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.data.repository.Repository;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
+import org.springframework.session.Session;
 
 /**
  * ArchUnit-правила изоляции клиник (PLT-01) для рабочих классов {@code kz.dentify}:
@@ -59,7 +64,8 @@ import org.springframework.jdbc.datasource.DelegatingDataSource;
  * <li>нативный SQL в репозитории сущности клиники фильтрует по {@code clinic_id}: к нему фильтр Hibernate не
  * применяется;</li>
  * <li>соединения — только через бин {@code DataSource} приложения: пул Hikari в обход обёртки, которая ставит клинику,
- * отдал бы соединение с {@code app.clinic_id} его прошлого владельца (PLT-02).</li>
+ * отдал бы соединение с {@code app.clinic_id} его прошлого владельца (PLT-02);</li>
+ * <li>HTTP-сессию меняют только платформа и iam: клиника в сессии и её сроки — инварианты изоляции клиник.</li>
  * </ul>
  * Что правила действительно ловят нарушения, проверяется на фикстурах {@code archfixtures.tenancy} (вне пакета
  * {@code kz.dentify}: их не видят JPA и Spring).
@@ -137,9 +143,39 @@ class TenancyRulesTests {
 		.because("соединение пула в обход ClinicConnectionDataSource несёт клинику прошлого владельца (PLT-02)")
 		.allowEmptyShould(true);
 
+	/**
+	 * Пакеты, которым можно менять HTTP-сессию: платформа (вход и выход, клиника в сессии, сроки и отзыв сессий) и iam
+	 * (язык аккаунта; клинику — через {@code TenantSession} после проверки членства).
+	 */
+	static final String[] SESSION_WRITERS = { "kz.dentify.platform..", "kz.dentify.iam.." };
+
+	/** Методы, которые меняют сессию. */
+	static final Set<String> SESSION_WRITES = Set.of("setAttribute", "removeAttribute", "invalidate");
+
+	/**
+	 * Клинику в сессию кладёт только iam через {@code platform :: identity}, сессии гасит только платформа — с отметкой
+	 * отзыва. Modulith обход через саму сессию не видит: имя атрибута ({@code TenantSession.CLINIC_ID}) — строковая
+	 * константа, компилятор встраивает её в вызывающий класс, и зависимости на {@code platform :: identity} в байткоде нет.
+	 */
+	static final ArchRule SESSION_WRITTEN_ONLY_BY_PLATFORM_AND_IAM = noClasses().that()
+		.resideOutsideOfPackages(SESSION_WRITERS)
+		.should()
+		.callMethodWhere(DescribedPredicate.describe("HttpSession or Session setAttribute, removeAttribute, invalidate",
+				(JavaMethodCall call) -> (call.getTargetOwner().isAssignableTo(HttpSession.class)
+						|| call.getTargetOwner().isAssignableTo(Session.class))
+						&& SESSION_WRITES.contains(call.getName())))
+		.because("клиника в сессии и сроки сессии — инварианты изоляции клиник: их меняют только платформа и iam "
+				+ "(docs/architecture.md, Модули и события)")
+		.allowEmptyShould(true);
+
 	@Test
 	void connectionsOnlyThroughClinicWrapper() {
 		CONNECTIONS_ONLY_THROUGH_CLINIC_WRAPPER.check(CodingRulesTests.CLASSES);
+	}
+
+	@Test
+	void sessionIsWrittenOnlyByPlatformAndIam() {
+		SESSION_WRITTEN_ONLY_BY_PLATFORM_AND_IAM.check(CodingRulesTests.CLASSES);
 	}
 
 	@Test
@@ -189,6 +225,10 @@ class TenancyRulesTests {
 		assertViolation(CONNECTIONS_ONLY_THROUGH_CLINIC_WRAPPER, imported(PoolUnwrapper.class), "unwrap");
 		assertViolation(CONNECTIONS_ONLY_THROUGH_CLINIC_WRAPPER, imported(PoolUnwrapper.class), "com.zaxxer.hikari");
 		CONNECTIONS_ONLY_THROUGH_CLINIC_WRAPPER.check(imported(PoolUser.class));
+
+		assertViolation(SESSION_WRITTEN_ONLY_BY_PLATFORM_AND_IAM, imported(SessionWriter.class), "setAttribute");
+		assertViolation(SESSION_WRITTEN_ONLY_BY_PLATFORM_AND_IAM, imported(SessionWriter.class), "invalidate");
+		SESSION_WRITTEN_ONLY_BY_PLATFORM_AND_IAM.check(imported(SessionReader.class));
 	}
 
 	private static void assertViolation(ArchRule rule, JavaClasses classes, String expected) {
