@@ -1,7 +1,6 @@
-import AxeBuilder from '@axe-core/playwright'
 import { expect, type Locator, type Page, test } from '@playwright/test'
 
-import { isDesktop } from './helpers'
+import { comboRows, isDesktop, seriousA11yViolations } from './helpers'
 
 // Витрина дизайн-системы «Кресло» /dev/ui (T-PLT-06, PLT-20, PLT-21): эталонные скриншоты по
 // макету Sistema, шрифты с казахскими буквами, список в портале у края окна и в прокручиваемой
@@ -51,7 +50,7 @@ test.describe('витрина /dev/ui — эталон по макету Sistema
     const card = page.getByRole('region', { name: 'Поля и выбор' })
     const input = card.getByRole('combobox', { name: 'Специальность' })
     await input.pressSequentially('Тер')
-    const options = page.getByRole('option')
+    const options = await comboRows(page, card)
     await expect(options).toHaveCount(3)
     await expect(options.nth(2)).toHaveAttribute('title', 'Эстетическая терапия и реставрация зубов')
     await expect(options.first()).toHaveAttribute('data-highlighted', '')
@@ -283,14 +282,13 @@ test.describe('выпадающий список (R011, R022)', () => {
 
     await input.click()
     const popup = page.locator('[data-slot=combobox-content]')
-    await expect(popup).toBeVisible()
-    await expect(page.getByRole('option')).toHaveCount(4)
+    // Список — в портале, не внутри карточки витрины.
+    await expect(await comboRows(page, page.locator('[data-demo-card]'))).toHaveCount(4)
     await expect(popup).toHaveAttribute('data-side', 'top')
     const popupBox = await popup.boundingBox()
     expect((popupBox?.y ?? 0) + (popupBox?.height ?? 0)).toBeLessThanOrEqual((inputBox?.y ?? 0) + 1)
     await expectInViewport(page, popup)
     await expectNotClipped(popup)
-    expect(await popup.evaluate((element) => element.closest('[data-demo-card]') === null)).toBe(true)
   })
 
   test('в прокручиваемой панели список не обрезается и открывается вверх', async ({ page }) => {
@@ -309,15 +307,14 @@ test.describe('выпадающий список (R011, R022)', () => {
     const input = panel.getByRole('combobox', { name: 'Кресло для записи' })
     await input.click()
     const popup = page.locator('[data-slot=combobox-content]')
-    await expect(popup).toBeVisible()
-    await expect(page.getByRole('option')).toHaveCount(4)
+    // Список — в портале, не внутри прокручиваемого тела панели.
+    const rows = await comboRows(page, body)
+    await expect(rows).toHaveCount(4)
     await expect(popup).toHaveAttribute('data-side', 'top')
     await expectInViewport(page, popup)
     await expectNotClipped(popup)
-    // Список — в портале, не внутри прокручиваемого тела панели.
-    expect(await popup.evaluate((element) => element.closest('[data-slot=panel-body]') === null)).toBe(true)
 
-    await page.getByRole('option', { name: 'Кресло 3 · ортодонтия' }).click()
+    await rows.filter({ hasText: 'Кресло 3 · ортодонтия' }).click()
     await expect(input).toHaveValue('Кресло 3 · ортодонтия')
     await expect(panel).toBeVisible()
   })
@@ -445,12 +442,6 @@ test.describe('доступность (PLT-21)', () => {
   // инициалы врачей на насыщенных цветах.
   test('axe: на витрине нет нарушений уровня serious и critical', async ({ page }) => {
     await openDevUi(page)
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-      .analyze()
-    const serious = results.violations
-      .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
-      .map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(' | ')}`)
-    expect(serious).toEqual([])
+    expect(await seriousA11yViolations(page)).toEqual([])
   })
 })

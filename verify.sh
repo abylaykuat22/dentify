@@ -385,32 +385,27 @@ step_stack_start() {
   ok "фронт http://localhost:$WEB_PORT → API 127.0.0.1:$API_PORT (actuator $management); /api/v1/auth/csrf через прокси — 204"
 }
 
-# Проекты живого стека — по договору stack-<вьюпорт> (T-PLT-16: stack-desktop 1440×900, stack-mobile 390×844): берём все
-# по маске, чтобы оба вьюпорта шли одним прогоном и новое имя не выпало из него молча. В кавычках — не шаблон файлов bash.
+# Проекты живого стека — stack-* (T-PLT-16: stack-setup, stack-desktop 1440×900, stack-mobile 390×844, stack-teardown): берём
+# все по маске, чтобы оба вьюпорта шли одним прогоном и новое имя не выпало из него молча. В кавычках — не шаблон файлов bash.
 STACK_PROJECTS='--project=stack*'
 
 step_stack_playwright() {
   { [[ -n $WEB_PORT ]] && passed 'e2e: запуск стека'; } || { skip 'стек не поднят'; return; }
   local code
-  QUIET=1 run_logged "$FRONTEND" pnpm exec playwright test --list "$STACK_PROJECTS"
-  code=$?
-  if [[ $code -ne 0 ]]; then
-    # Маска без совпадений — «No projects matched»; точное имя без проекта — «Project(s) "…" not found».
-    if log_has 'No projects matched|Project\(s\) "stack[^"]*" not found'; then
-      skip 'в playwright.config.ts нет проектов stack-* (stack-desktop и stack-mobile добавит T-PLT-16) — живой стек поднят и проверен запросом, UI-сценарии пропущены'
-    else
-      fail "$code" 'playwright test --list упал — см. лог шага'
-    fi
-    return
-  fi
   local stack_dir="$RUN_DIR/stack"
-  # Договор с проектами stack-* (T-PLT-16): адрес фронта на живом бэкенде и прямой адрес API — из окружения.
+  # Договор с проектами stack-* (T-PLT-16): адрес фронта на живом бэкенде и прямой адрес API — из окружения. Без
+  # DENTIFY_STACK_URL playwright.config.ts работает на моках и проектов stack-* не объявляет.
   DENTIFY_STACK_URL="http://localhost:$WEB_PORT" DENTIFY_STACK_API_URL="http://127.0.0.1:$API_PORT" \
     PLAYWRIGHT_HTML_OUTPUT_DIR="$(native_path "$stack_dir/report")" PLAYWRIGHT_HTML_OPEN=never \
     run_logged "$FRONTEND" pnpm exec playwright test "$STACK_PROJECTS" --output "$(native_path "$stack_dir/artifacts")"
   code=$?
+  # Маска без совпадений — «No projects matched»: конфиг потерял проекты живого стека.
+  if [[ $code -ne 0 ]] && log_has 'No projects matched'; then
+    fail "$code" 'в playwright.config.ts нет проектов stack-* при заданном DENTIFY_STACK_URL (T-PLT-16)'
+    return
+  fi
   local summary
-  summary=$(grep -E '^[[:space:]]+[0-9]+ (passed|failed|flaky)' "$CURRENT_LOG" | sed 's/^ *//' | paste -sd ',' - | sed 's/,/, /g')
+  summary=$(grep -E '^[[:space:]]+[0-9]+ (passed|failed|flaky|skipped)' "$CURRENT_LOG" | sed 's/^ *//' | paste -sd ',' - | sed 's/,/, /g')
   if [[ $code -ne 0 ]]; then fail "$code" "$summary; трейсы и скриншоты — $(relative "$stack_dir")"; return; fi
   ok "$summary; трейсы и скриншоты — $(relative "$stack_dir")"
 }

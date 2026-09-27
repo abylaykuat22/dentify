@@ -1,6 +1,14 @@
 import { expect, type Page, test } from '@playwright/test'
 
-import { appPaths, hitArea, horizontalOverflow, isDesktop, type Persona, usePersona } from './helpers'
+import {
+  appPaths,
+  assertNoHorizontalScroll,
+  horizontalOverflow,
+  isDesktop,
+  type Persona,
+  smallTapTargets,
+  usePersona,
+} from './helpers'
 
 // Общая проверка телефона по ВСЕМ маршрутам (T-PLT-10, PLT-18, PLT-21): адреса берутся из
 // дерева маршрутов, поэтому новый экран попадает сюда сам. На 390 px (эталон) и 360 px
@@ -61,7 +69,7 @@ test.describe('телефон: все маршруты', () => {
       expect(await smallFields(page)).toEqual([])
 
       await page.setViewportSize({ width: 360, height: 780 })
-      await expect.poll(() => horizontalOverflow(page), { message: 'scrollWidth > clientWidth на 360 px' }).toBeLessThanOrEqual(0)
+      await assertNoHorizontalScroll(page)
     })
   }
 
@@ -70,20 +78,8 @@ test.describe('телефон: все маршруты', () => {
       await usePersona(context, persona)
       await openScreen(page, path)
 
-      const small: string[] = []
-      // Видимые интерактивные элементы, кроме ссылок внутри текста абзаца.
-      const targets = page.locator(
-        'a[href]:not(p a), button, input:not([type=hidden]):not([aria-hidden=true]), textarea, select, [role=tab]',
-      )
-      for (const target of await targets.all()) {
-        if (!(await target.isVisible())) continue
-        const area = await hitArea(target)
-        if (area.width < 44 || area.height < 44) {
-          const name = (await target.getAttribute('aria-label')) ?? (await target.innerText()).trim()
-          small.push(`${name}: ${Math.round(area.width)}×${Math.round(area.height)}`)
-        }
-      }
-      expect(small).toEqual([])
+      // Видимые кнопки, ссылки (кроме ссылок внутри абзаца), поля и вкладки.
+      expect(await smallTapTargets(page)).toEqual([])
     })
   }
 })

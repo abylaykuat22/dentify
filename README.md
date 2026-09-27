@@ -138,12 +138,14 @@ bash verify.sh               # Linux, macOS, Git Bash; ключи --e2e, --scan,
 **`-E2E` — живой стек.** Jar бэкенда (из шага backend или `mvnw -DskipTests package`) с профилем dev на свободном
 порту, поверх dev-окружения; `vite preview` сборки без моков с прокси `/api` на этот бэкенд (`DENTIFY_API_TARGET`);
 сквозной запрос `GET /api/v1/auth/csrf` через прокси (204 и cookie `XSRF-TOKEN`); затем Playwright-проекты живого стека
-(`--project=stack*`). Договор с T-PLT-16, которая их добавит: проекты называются **`stack-<вьюпорт>`** — `stack-desktop`
-(1440×900) и `stack-mobile` (390×844), оба вьюпорта идут одним прогоном (PLT-26: e2e на десктопе и телефоне); вспомогательный
-проект стека (например, вход и storageState) — тоже с приставкой `stack-`. Пока ни одного нет, шаг пропускается с
-сообщением. Адрес фронта — `DENTIFY_STACK_URL` (`http://localhost:<порт>`: браузер шлёт Secure-cookie на `localhost`, но
-не на `127.0.0.1`), прямой адрес API — `DENTIFY_STACK_API_URL`; трейсы и скриншоты —
-`deploy/test-results/verify-<время>/stack/artifacts` (`--output`), HTML-отчёт — `…/stack/report`. Бэкенд и фронт
+(`--project=stack*`, T-PLT-16): `stack-setup` входит dev-владельцем (`owner@demo.dentify.kz`, пароль из `deploy/.env`),
+`stack-desktop` (1440×900) и `stack-mobile` (390×844) одним прогоном гоняют демо этапа 0 (вход → пустой кабинет → «Сеанс
+истёк» → выход), пустой кабинет (axe, прокрутка вбок, цели касания) и безопасность сессии (HttpOnly, CSRF, свой origin,
+токенов в хранилищах нет), `stack-teardown` выходит сессией `stack-setup`. Спеки — `frontend/e2e/stack/`, подробности —
+`docs/frontend.md`, «Тесты». Адрес фронта — `DENTIFY_STACK_URL` (`http://localhost:<порт>`: браузер шлёт Secure-cookie на
+`localhost`, но не на `127.0.0.1`), прямой адрес API — `DENTIFY_STACK_API_URL`; трейсы и скриншоты шагов демо —
+`deploy/test-results/verify-<время>/stack/artifacts` (`--output`), HTML-отчёт — `…/stack/report`. В трейсах — запрос входа
+с паролем dev-владельца: артефакты локальные и не коммитятся, наружу их не отдавать. Бэкенд и фронт
 останавливаются всегда — и при красном шаге, и при Ctrl+C; журналы — `stack-backend.log`, `stack-frontend.log` там же.
 Образы `app`/`web` из `docker compose` в `-E2E` не участвуют: jar и `vite preview` быстрее пересборки образов на каждый
 прогон; сам `up -App` проверяется вручную (замер выше).

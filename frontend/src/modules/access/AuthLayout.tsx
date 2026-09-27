@@ -11,7 +11,8 @@ import { AuthIllustration } from './AuthIllustration'
  * Priglashenie): слева с 1024 px — панель «О сервисе» (плавающая карточка «лагуна»: логотип, слоган,
  * картинка расписания, «Данные хранятся в Казахстане»), справа — форма по центру и «Рус | Қаз» в
  * углу (только при флаге i18n.kk и словаре kk, dentify R003). На телефоне и планшете (IAM-34) —
- * одна колонка без панели, логотип над формой.
+ * одна колонка без панели, логотип над формой, а «Данные хранятся в Казахстане» — под формой: IAM-34
+ * убирает панель, но не отметку (PLT-27 — на Vhod, Parol и Priglashenie при любой ширине).
  */
 export function AuthLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
@@ -51,6 +52,11 @@ export function AuthLayout({ children }: { children: ReactNode }) {
           <span className="text-lamp-deep">.</span>
         </p>
         <div className="flex w-full flex-1 flex-col items-center justify-center lg:flex-none">{children}</div>
+        {/* Без панели — отметка о размещении данных внизу страницы (PLT-27). */}
+        <p className="mt-6 flex items-center gap-2 text-body-sm font-bold text-graphite lg:hidden">
+          <ShieldCheck className="size-4.5 shrink-0 text-lagoon" aria-hidden="true" />
+          {t('auth:about.dataResidency')}
+        </p>
       </main>
     </div>
   )

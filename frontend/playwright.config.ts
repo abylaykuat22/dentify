@@ -2,9 +2,15 @@ import { execFileSync } from 'node:child_process'
 import { readdirSync, rmSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { defineConfig, devices } from '@playwright/test'
+import { defineConfig, devices, type Project } from '@playwright/test'
 
-// e2e ходят в dev-сервер Vite в режиме моков (MSW), бэкенд не нужен.
+// Два режима, выбор — переменной DENTIFY_STACK_URL:
+// - моки (по умолчанию, `pnpm e2e`): свой dev-сервер Vite в режиме моков (MSW), бэкенд не нужен; проекты
+//   warmup, desktop, mobile, спеки e2e/*.spec.ts;
+// - живой стек (T-PLT-16, `../verify.ps1 -E2E`): уже поднятые бэкенд и `vite preview` сборки без моков, адрес
+//   фронта — DENTIFY_STACK_URL, прямой адрес API — DENTIFY_STACK_API_URL; проекты stack-* (вход владельцем в
+//   stack-setup → stack-desktop, stack-mobile → выход в stack-teardown), спеки e2e/stack/. Сервер моков не
+//   поднимается, проектов моков нет.
 //
 // Прогоны идут параллельно (несколько агентов, `pnpm e2e` рядом с `pnpm verify`), поэтому у
 // каждого прогона всё своё: dev-сервер, папка артефактов и HTML-отчёт. Конфиг читают и
@@ -12,6 +18,10 @@ import { defineConfig, devices } from '@playwright/test'
 // (DENTIFY_E2E_RUN, DENTIFY_E2E_PORT): исполнители наследуют его и ничего не выбирают заново.
 const RESULTS = 'test-results'
 const REPORT = 'playwright-report'
+const DESKTOP = { width: 1440, height: 900 }
+const PHONE = { width: 390, height: 844 }
+// Спеки живого стека — только в проектах stack-*.
+const STACK_SPECS = '**/stack/**'
 
 // Свой dev-сервер на каждый прогон. С общим портом и reuseExistingServer второй прогон
 // подхватывал сервер первого, а тот гасился вместе с первым прогоном — ERR_CONNECTION_REFUSED,
@@ -21,9 +31,11 @@ const REPORT = 'playwright-report'
 // переиспользовать уже запущенный — только по явной просьбе DENTIFY_E2E_REUSE=1 (порт —
 // DENTIFY_E2E_PORT, по умолчанию 5174; сам сервер: `pnpm dev:mock --port 5174`).
 const REUSE = process.env.DENTIFY_E2E_REUSE === '1'
-if (!process.env.DENTIFY_E2E_PORT) process.env.DENTIFY_E2E_PORT = REUSE ? '5174' : String(freePort())
+// Живой стек: `http://localhost:<порт>`, не 127.0.0.1 — туда браузер не шлёт Secure-cookie сессии.
+const STACK_URL = process.env.DENTIFY_STACK_URL
+if (!STACK_URL && !process.env.DENTIFY_E2E_PORT) process.env.DENTIFY_E2E_PORT = REUSE ? '5174' : String(freePort())
 const PORT = Number(process.env.DENTIFY_E2E_PORT)
-const BASE_URL = `http://127.0.0.1:${PORT}`
+const BASE_URL = STACK_URL ?? `http://127.0.0.1:${PORT}`
 
 if (!process.env.DENTIFY_E2E_RUN) {
   process.env.DENTIFY_E2E_RUN = `${Date.now()}-${process.pid}`
@@ -107,36 +119,69 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [
+  projects: STACK_URL ? stackProjects() : mockProjects(),
+  // Сервер моков — только в режиме моков: живой стек поднимает verify (или человек) заранее.
+  webServer: STACK_URL
+    ? undefined
+    : {
+        // --strictPort: порт занят — ошибка, а не молчаливый переезд Vite на соседний (тесты ходят в PORT).
+        command: `pnpm dev:mock --port ${PORT} --strictPort`,
+        url: BASE_URL,
+        // Без явной просьбы уже отвечающий на PORT сервер — ошибка Playwright «already used», а не
+        // чужой сервер, который погасят посреди нашего прогона.
+        reuseExistingServer: REUSE,
+        timeout: 60_000,
+      },
+})
+
+/** Проекты на моках (`pnpm e2e`): спеки e2e/*.spec.ts, живой стек (e2e/stack/) — мимо. */
+function mockProjects(): Project[] {
+  return [
     {
       // Прогрев dev-сервера (e2e/warmup.setup.ts): остальные проекты стартуют после него.
       name: 'warmup',
       testMatch: /warmup\.setup\.ts$/,
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      use: { ...devices['Desktop Chrome'], viewport: DESKTOP },
     },
     {
       name: 'desktop',
       dependencies: ['warmup'],
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      testIgnore: STACK_SPECS,
+      use: { ...devices['Desktop Chrome'], viewport: DESKTOP },
     },
     {
       // Телефон — эталон 390×844 (PLT-18): Pixel 7 (сенсорный ввод, мобильный UA) с шириной
       // 390. Общие проверки всех маршрутов — responsive.spec.ts, навигация — mobile.spec.ts.
       name: 'mobile',
       dependencies: ['warmup'],
-      use: {
-        ...devices['Pixel 7'],
-        viewport: { width: 390, height: 844 },
-      },
+      testIgnore: STACK_SPECS,
+      use: { ...devices['Pixel 7'], viewport: PHONE },
     },
-  ],
-  webServer: {
-    // --strictPort: порт занят — ошибка, а не молчаливый переезд Vite на соседний (тесты ходят в PORT).
-    command: `pnpm dev:mock --port ${PORT} --strictPort`,
-    url: BASE_URL,
-    // Без явной просьбы уже отвечающий на PORT сервер — ошибка Playwright «already used», а не
-    // чужой сервер, который погасят посреди нашего прогона.
-    reuseExistingServer: REUSE,
-    timeout: 60_000,
-  },
-})
+  ]
+}
+
+/**
+ * Проекты живого стека (T-PLT-16, PLT-04/17/18/21/27): имена — `stack-<…>`, verify берёт их маской
+ * `--project=stack*` (договор с T-PLT-15). stack-setup входит dev-владельцем через API и сохраняет
+ * storageState (cookie сессии и XSRF-TOKEN) в папку артефактов, stack-teardown после всех выходит этой
+ * сессией. Трейс и скриншот — у каждого теста, не только упавшего: это и есть демо этапа 0.
+ */
+function stackProjects(): Project[] {
+  const stackUse = { trace: 'on', screenshot: 'on' } as const
+  return [
+    { name: 'stack-setup', testDir: './e2e/stack', testMatch: /\.setup\.ts$/, teardown: 'stack-teardown' },
+    { name: 'stack-teardown', testDir: './e2e/stack', testMatch: /\.teardown\.ts$/ },
+    {
+      name: 'stack-desktop',
+      testDir: './e2e/stack',
+      dependencies: ['stack-setup'],
+      use: { ...devices['Desktop Chrome'], viewport: DESKTOP, ...stackUse },
+    },
+    {
+      name: 'stack-mobile',
+      testDir: './e2e/stack',
+      dependencies: ['stack-setup'],
+      use: { ...devices['Pixel 7'], viewport: PHONE, ...stackUse },
+    },
+  ]
+}

@@ -1,23 +1,13 @@
-import AxeBuilder from '@axe-core/playwright'
-import { expect, type Locator, type Page, test } from '@playwright/test'
+import { expect, type Locator, test } from '@playwright/test'
 
-import { usePersona } from './helpers'
+import { seriousA11yViolations as seriousViolations, usePersona } from './helpers'
 
 // PLT-21 на экранах каркаса и заглушках (витрина /dev/ui — в dev-ui.spec.ts): axe без
 // исключений — color-contrast меряет настоящие пары текст/фон, которых нет в ручном списке
 // src/styles/contrast.test.ts; и общий контур фокуса 3 px «лагуна» у полей и карточек, которые
 // раньше гасили его своим `outline-none`.
 
-const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const FOCUS_LAGOON = 'solid 3px rgb(15, 61, 76) 2px'
-
-async function seriousViolations(page: Page) {
-  await page.evaluate(() => document.fonts.ready)
-  const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
-  return results.violations
-    .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
-    .map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(' | ')}`)
-}
 
 function outline(locator: Locator) {
   return locator.evaluate((element) => {

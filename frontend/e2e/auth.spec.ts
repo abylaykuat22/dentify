@@ -6,6 +6,14 @@ import { horizontalOverflow, isDesktop, usePersona } from './helpers'
 // десктоп 1440×900 и телефон 390×844. Моки MSW отвечают как сервер (src/shared/api/mocks: CSRF —
 // без X-XSRF-TOKEN 403, `wrong` — 401, `limit` — 429 с Retry-After, `multi` — две клиники).
 
+// PLT-27: отметка о размещении данных — на экранах без входа при любой ширине: с 1024 px на панели «О сервисе»,
+// уже (IAM-34, панели нет) — под формой. Видимая — ровно одна.
+const DATA_RESIDENCY = 'Данные хранятся в Казахстане'
+
+function dataResidency(page: Page) {
+  return page.getByText(DATA_RESIDENCY).filter({ visible: true })
+}
+
 async function signIn(page: Page, login: string, password = 'secret-1') {
   await page.getByLabel('Телефон или e-mail').fill(login)
   await page.getByLabel('Пароль', { exact: true }).fill(password)
@@ -117,6 +125,7 @@ test.describe('вход', () => {
     await page.getByRole('link', { name: 'Забыли пароль?' }).click()
     await expect(page).toHaveURL(/\/forgot-password$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Восстановление пароля')
+    await expect(dataResidency(page)).toHaveCount(1)
     await page.getByRole('link', { name: 'Вернуться ко входу' }).click()
 
     await page.getByRole('link', { name: 'Зарегистрировать' }).click()
@@ -126,18 +135,20 @@ test.describe('вход', () => {
     await expect(page).toHaveURL(/\/login$/)
   })
 
-  test('раскладка Vhod: панель «О сервисе» — только с 1024 px, «Рус | Қаз» скрыт флагом, без прокрутки вбок', async ({
+  test('раскладка Vhod: панель «О сервисе» — только с 1024 px, «Данные хранятся в Казахстане» — при любой ширине, «Рус | Қаз» скрыт флагом, без прокрутки вбок', async ({
     page,
   }) => {
     await page.goto('/login')
     await expect(page.getByRole('heading', { level: 1, name: 'Вход' })).toBeVisible()
 
     const about = page.getByRole('complementary', { name: 'О сервисе' })
+    await expect(dataResidency(page)).toHaveCount(1)
     if (isDesktop()) {
       await expect(about).toBeVisible()
-      await expect(about).toContainText('Данные хранятся в Казахстане')
+      await expect(about.getByText(DATA_RESIDENCY)).toBeVisible()
     } else {
       await expect(about).toBeHidden()
+      await expect(page.getByRole('main').getByText(DATA_RESIDENCY)).toBeVisible()
     }
     await expect(page.locator('[data-language-switch]')).toHaveCount(0)
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0)

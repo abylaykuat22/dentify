@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-import { type BrowserContext, type Locator, type Page, test } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
+import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
 
 export type Persona = 'owner' | 'assistant' | 'multi' | 'plain' | 'none'
 
@@ -13,8 +14,9 @@ export async function usePersona(context: BrowserContext, persona: Persona) {
   await context.addCookies([{ name: 'dentify_mock_user', value: persona, url: baseURL }])
 }
 
+/** Проект десктопа 1440×900: `desktop` (моки) или `stack-desktop` (живой стек). */
 export function isDesktop() {
-  return test.info().project.name === 'desktop'
+  return test.info().project.name.endsWith('desktop')
 }
 
 /**
@@ -33,6 +35,69 @@ export function appPaths(): string[] {
 /** Горизонтальная прокрутка страницы: > 0 — что-то вылезло за ширину окна (PLT-18). */
 export function horizontalOverflow(page: Page): Promise<number> {
   return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+}
+
+/**
+ * Страница не прокручивается вбок: `scrollWidth ≤ clientWidth` (PLT-18). С ожиданием — шрифт или
+ * ленивый чанк могут дорисоваться после проверки.
+ */
+export async function assertNoHorizontalScroll(page: Page, where = '') {
+  const width = page.viewportSize()?.width ?? 0
+  await expect
+    .poll(() => horizontalOverflow(page), { message: `scrollWidth > clientWidth на ${width} px ${where}`.trim() })
+    .toBeLessThanOrEqual(0)
+}
+
+/** Теги axe: WCAG 2.2 AA (PLT-21). */
+const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+
+/**
+ * Нарушения axe-core уровня serious и critical на странице (PLT-21: их должно быть 0) — строкой
+ * «правило: элементы», чтобы в отчёте было видно, что чинить. Без исключений: color-contrast меряет
+ * настоящие пары текст/фон. Ждёт шрифты — контраст считается по отрисованному тексту.
+ */
+export async function seriousA11yViolations(page: Page): Promise<string[]> {
+  await page.evaluate(() => document.fonts.ready)
+  const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
+  return results.violations
+    .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
+    .map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(' | ')}`)
+}
+
+/**
+ * Видимые цели касания меньше 44×44 (PLT-18, PLT-21) — «подпись: Ш×В». Кнопки, ссылки (кроме
+ * ссылок внутри абзаца), поля и вкладки; площадь — с расширением `::after` (`hitArea`).
+ */
+export async function smallTapTargets(scope: Page | Locator, min = 44): Promise<string[]> {
+  const small: string[] = []
+  const targets = scope.locator(
+    'a[href]:not(p a), button, input:not([type=hidden]):not([aria-hidden=true]), textarea, select, [role=tab]',
+  )
+  for (const target of await targets.all()) {
+    if (!(await target.isVisible())) continue
+    const area = await hitArea(target)
+    if (area.width < min || area.height < min) {
+      const name = (await target.getAttribute('aria-label')) ?? (await target.innerText()).trim()
+      small.push(`${name}: ${Math.round(area.width)}×${Math.round(area.height)}`)
+    }
+  }
+  return small
+}
+
+/**
+ * Строки открытого выпадающего списка поля с поиском (`Combo`, R011): список рисуется в портале
+ * (R022), а не внутри карточки или панели поля, поэтому ищется по всей странице — `within`
+ * (карточка, прокручиваемое тело панели) не должен его содержать. Открыть список — забота теста
+ * (набор текста или клик по полю).
+ */
+export async function comboRows(page: Page, within?: Locator): Promise<Locator> {
+  const popup = page.locator('[data-slot=combobox-content]')
+  await expect(popup).toBeVisible()
+  if (within) {
+    // Портал: список — потомок body, а не карточки поля (иначе его обрезал бы overflow контейнера).
+    await expect(within.locator('[data-slot=combobox-content]')).toHaveCount(0)
+  }
+  return popup.getByRole('option')
 }
 
 /**

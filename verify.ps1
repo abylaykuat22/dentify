@@ -13,8 +13,8 @@
     frontend  pnpm install --frozen-lockfile, затем шаги pnpm verify по одному (список — из package.json): typecheck,
               lint, i18n:check, api:check, test, build, size (бюджет), e2e на моках.
   -E2E     плюс e2e на живом стеке: jar бэкенда с профилем dev на свободном порту, vite preview с прокси /api на него,
-           Playwright-проекты stack-<вьюпорт> (--project=stack*: stack-desktop 1440×900 и stack-mobile 390×844 добавит
-           T-PLT-16; нет ни одного — шаг пропускается с сообщением). Трейсы, скриншоты и отчёт —
+           Playwright-проекты stack-* (--project=stack*, T-PLT-16): вход dev-владельцем, stack-desktop 1440×900 и
+           stack-mobile 390×844 — демо этапа 0, пустой кабинет, безопасность сессии; выход. Трейсы, скриншоты и отчёт —
            deploy/test-results/verify-<время>/stack/. Бэкенд и фронт останавливаются всегда, даже при ошибке или Ctrl+C.
   -Scan    только сканеры — отдельная команда, нужен интернет: OWASP dependency-check (CVSS 7 и выше), pnpm audit --prod
            (high и выше), gitleaks по apps/dentify (рабочая копия и история git). Вместе с -E2E — всё сразу.
@@ -479,22 +479,15 @@ function Step-StackStart {
     Ok "фронт http://localhost:$($script:WebPort) → API 127.0.0.1:$($script:ApiPort) (actuator $managementPort); /api/v1/auth/csrf через прокси — 204"
 }
 
-# Проекты живого стека — по договору stack-<вьюпорт> (T-PLT-16: stack-desktop 1440×900, stack-mobile 390×844): берём все
-# по маске, чтобы оба вьюпорта шли одним прогоном и новое имя не выпало из него молча.
+# Проекты живого стека — stack-* (T-PLT-16: stack-setup, stack-desktop 1440×900, stack-mobile 390×844, stack-teardown): берём
+# все по маске, чтобы оба вьюпорта шли одним прогоном и новое имя не выпало из него молча.
 $StackProjects = '--project=stack*'
 
 function Step-StackPlaywright {
     if (-not $script:WebPort -or -not (Test-StepPassed 'e2e: запуск стека')) { return Skipped 'стек не поднят' }
-    $code = Invoke-Logged $Frontend 'pnpm' @('exec', 'playwright', 'test', '--list', $StackProjects) -Quiet
-    if ($code -ne 0) {
-        # Маска без совпадений — «No projects matched»; точное имя без проекта — «Project(s) "…" not found».
-        if (Read-Log | Where-Object { $_ -match 'No projects matched|Project\(s\) "stack[^"]*" not found' }) {
-            return Skipped 'в playwright.config.ts нет проектов stack-* (stack-desktop и stack-mobile добавит T-PLT-16) — живой стек поднят и проверен запросом, UI-сценарии пропущены'
-        }
-        return Fail $code 'playwright test --list упал — см. лог шага'
-    }
     $stackDir = Join-Path $RunDir 'stack'
-    # Договор с проектами stack-* (T-PLT-16): адрес фронта на живом бэкенде и прямой адрес API — из окружения.
+    # Договор с проектами stack-* (T-PLT-16): адрес фронта на живом бэкенде и прямой адрес API — из окружения. Без
+    # DENTIFY_STACK_URL playwright.config.ts работает на моках и проектов stack-* не объявляет.
     $vars = @{
         DENTIFY_STACK_URL          = "http://localhost:$($script:WebPort)"
         DENTIFY_STACK_API_URL      = "http://127.0.0.1:$($script:ApiPort)"
@@ -504,7 +497,11 @@ function Step-StackPlaywright {
     $code = Invoke-WithEnv $vars {
         Invoke-Logged $Frontend 'pnpm' @('exec', 'playwright', 'test', $StackProjects, '--output', (Join-Path $stackDir 'artifacts'))
     }
-    $summary = (Read-Log | Where-Object { $_ -match '^\s+\d+ (passed|failed|flaky)' } | ForEach-Object { $_.Trim() }) -join ', '
+    # Маска без совпадений — «No projects matched»: конфиг потерял проекты живого стека.
+    if ($code -ne 0 -and (Read-Log | Where-Object { $_ -match 'No projects matched' })) {
+        return Fail $code 'в playwright.config.ts нет проектов stack-* при заданном DENTIFY_STACK_URL (T-PLT-16)'
+    }
+    $summary = (Read-Log | Where-Object { $_ -match '^\s+\d+ (passed|failed|flaky|skipped)' } | ForEach-Object { $_.Trim() }) -join ', '
     $where = "трейсы и скриншоты — $(Get-Relative $stackDir)"
     if ($code -ne 0) { return Fail $code "$summary; $where" }
     Ok "$summary; $where"
