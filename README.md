@@ -177,6 +177,20 @@ bash verify.sh               # Linux, macOS, Git Bash; ключи --e2e, --scan,
 группы, например `./verify.ps1 -E2E -Skip backend,frontend` — только живой стек. `-E2E -Scan` — всё сразу.
 Справка — `Get-Help ./verify.ps1 -Detailed`, `bash verify.sh --help`.
 
+## Репозитории
+
+Разработка ведётся в монорепозитории `abylaykuat22/code` (каталог `apps/dentify/`, там же вики и
+скрипты воркфлоу). Этот каталог зеркалится в отдельный репозиторий
+**git@github.com:abylaykuat22/dentify.git** с историей только своих коммитов (`git subtree split`).
+Синхронизация зеркала из монорепозитория (после партии задач или вехи):
+
+```bash
+git subtree push --prefix=apps/dentify dentify master
+```
+
+(remote `dentify` → `git@github.com:abylaykuat22/dentify.git`). В зеркало не входят `bin/git-sync-push.sh`
+и вики монорепозитория — они нужны только рабочему процессу.
+
 ## Дизайн
 
 - **Макеты всех экранов MVP** (стиль «Кресло», 55 артбордов по разделам):
